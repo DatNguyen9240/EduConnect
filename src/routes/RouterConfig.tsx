@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 import MainLayout from "@/components/layout/MainLayout";
+import AuthLayout from "@/components/layout/AuthLayout";
 import Error from "@/pages/Error/Error";
 import {
   HomeIcon,
@@ -59,6 +60,18 @@ export const navbarItems: NavbarItemConfig[] = [
   },
 ];
 
+// Settings menu configuration
+export const settingsMenu = {
+  profile: {
+    label: "Thông tin cá nhân",
+    path: "/profile",
+  },
+  signOut: {
+    label: "Đăng xuất",
+    path: "/login",
+  },
+};
+
 // Lazy load components - chỉ tải khi cần thiết
 const Home = lazy(() => import("@/pages/Home"));
 const Login = lazy(() => import("@/pages/Auth/Login"));
@@ -81,14 +94,6 @@ export const RouterConfig = () => {
           element: <Home />,
         },
         {
-          path: "login",
-          element: <Login />,
-        },
-        {
-          path: "register",
-          element: <Register />,
-        },
-        {
           path: "so-dau-bai",
           element: <SoDauBai />,
         },
@@ -107,6 +112,20 @@ export const RouterConfig = () => {
         {
           path: "quan-tri-thong-tin",
           element: <QuanTriThongTin />,
+        },
+      ],
+    },
+    {
+      path: "/",
+      element: <AuthLayout />,
+      children: [
+        {
+          path: "login",
+          element: <Login />,
+        },
+        {
+          path: "register",
+          element: <Register />,
         },
       ],
     },
