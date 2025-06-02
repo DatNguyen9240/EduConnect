@@ -1,35 +1,35 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
-const Login = () => {
+export default function Login() {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
       setShowForm(true);
-    }, 100); // Delay để tạo animation
+    }, 100);
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#f0f4ff] transition-all duration-700">
-      {/* Left Panel */}
-      <div className="w-1/2 flex items-center justify-center p-10 bg-[#2962FF] rounded-r-[50px] transition-all duration-500">
-        <div className="bg-white p-10 rounded-[30px] shadow-xl w-full max-w-md text-center animate-fade-in">
+    <div className="flex min-h-screen bg-[#f0f4ff]">
+      {/* Left Panel with Banner */}
+      <div className="w-1/2 flex items-center justify-center bg-[#2962FF] rounded-r-[50px] p-10">
+        <div className="max-w-md w-full bg-white rounded-[30px] p-6 shadow-xl text-center">
           <img
-            src="/assets/banner/bannerLogin.png"
-            alt="Student"
-            className="w-full object-contain rounded-[24px] mb-6 shadow-md transition-all duration-500"
+            src="/assets/banner/bannerLogin.png" // Ensure this image is available in public/assets/banner/
+            alt="Login Banner"
+            className="w-full object-contain rounded-[24px] mb-6 shadow-lg"
           />
-          <h2 className="text-3xl font-extrabold text-[#2962FF] mb-3 leading-tight drop-shadow-sm">
-            Unleash Your Potential with Edufactory
+          <h2 className="text-2xl font-extrabold text-[#2962FF] mb-2">
+            Welcome back to Edufactory!
           </h2>
           <p className="text-sm text-gray-600">
-            Turn your passions into skills, your ideas into action, and your
-            future into something extraordinary.
+            Log in to explore personalized learning, expert instructors, and career-boosting content.
           </p>
         </div>
       </div>
 
-      {/* Right Panel */}
+      {/* Right Panel with Login Form */}
       <div className="w-1/2 flex items-center justify-center bg-white">
         <div
           className={`bg-white p-10 rounded-[30px] shadow-xl w-full max-w-sm transition-all duration-500 transform ${
@@ -51,26 +51,38 @@ const Login = () => {
 
           <form>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email Address
               </label>
               <input
+                id="email"
+                name="email"
                 type="email"
-                className="w-full px-4 py-2 border border-gray-300 rounded-[16px] focus:outline-none focus:ring-2 focus:ring-[#2962FF] bg-gray-50 transition duration-300"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-[16px] focus:ring-2 focus:ring-[#2962FF] bg-gray-50 text-sm"
                 placeholder="example@edufactory.com"
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
               <input
+                id="password"
+                name="password"
                 type="password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-[16px] focus:outline-none focus:ring-2 focus:ring-[#2962FF] bg-gray-50 transition duration-300"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-[16px] focus:ring-2 focus:ring-[#2962FF] bg-gray-50 text-sm"
                 placeholder="********"
               />
-              <div className="text-right mt-1 text-sm text-[#2962FF] hover:underline cursor-pointer transition">
+              <div className="text-right mt-1 text-sm text-[#2962FF] hover:underline cursor-pointer">
                 Forgot Password?
               </div>
             </div>
@@ -90,10 +102,18 @@ const Login = () => {
               Sign In
             </button>
           </form>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Chưa có tài khoản?{" "}
+            <Link
+              to="/register"
+              className="text-blue-600 hover:underline font-medium"
+            >
+              Đăng ký ngay
+            </Link>
+          </p>
         </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}
