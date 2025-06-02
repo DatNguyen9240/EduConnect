@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import Error from "@/pages/Error/Error";
-import SoDauBai from "@/pages/SoDauBai";
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -64,11 +63,11 @@ export const navbarItems: NavbarItemConfig[] = [
 const Home = lazy(() => import("@/pages/Home"));
 const Login = lazy(() => import("@/pages/Auth/Login"));
 const Register = lazy(() => import("@/pages/Auth/Register"));
-// Placeholder components for new routes
-const ThongKeBaoCao = lazy(() => import("@/pages/ThongKeBaoCao")); // You need to create this file
-const QuanLyHocTap = lazy(() => import("@/pages/QuanLyHocTap")); // You need to create this file
-const HocSinh = lazy(() => import("@/pages/HocSinh")); // You need to create this file
-const QuanTriThongTin = lazy(() => import("@/pages/QuanTriThongTin")); // You need to create this file
+const SoDauBai = lazy(() => import("@/pages/SoDauBai"));
+const ThongKeBaoCao = lazy(() => import("@/pages/ThongKeBaoCao"));
+const QuanLyHocTap = lazy(() => import("@/pages/QuanLyHocTap"));
+const HocSinh = lazy(() => import("@/pages/HocSinh"));
+const QuanTriThongTin = lazy(() => import("@/pages/QuanTriThongTin"));
 
 export const RouterConfig = () => {
   return createBrowserRouter([

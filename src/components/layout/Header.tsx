@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
+
 export default function Header() {
   return (
     <header className="flex items-center justify-between p-4 bg-white">
       <div className="flex items-center justify-between max-w-screen-xl w-full mx-auto px-6">
         {/* Logo */}
-        <div className="flex items-center">
+        <Link to="/" className="flex items-center">
           <img
             src="/assets/logo/logo.png"
             alt="Edu Connect Logo"
@@ -13,7 +15,7 @@ export default function Header() {
           <span className="text-blue-600 text-xl font-baloo font-bold">
             Edu Connect
           </span>
-        </div>
+        </Link>
 
         {/* Search Bar */}
         <div className="flex items-center border rounded-full px-4 py-2 flex-grow mx-4 max-w-md">
@@ -68,7 +70,7 @@ export default function Header() {
           {/* Settings Icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-500 cursor-pointer"
+            className="h-6 w-6 text-gray-500 cursor-pointer transition-transform duration-300 hover:rotate-180"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
