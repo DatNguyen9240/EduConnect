@@ -1,31 +1,14 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useShowForm } from "@/hooks/useLoginForm";
+import { useRegisterForm } from "@hooks/useRegisterForm";
+import { ROUTES } from "@constants/routes";
+import { ASSETS } from "@constants/assets";
+import { Input } from "@components/common/Input";
+import { Button } from "@components/common/Button";
 
 export default function Register() {
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  useEffect(() => {
-    setTimeout(() => setShowForm(true), 100);
-  }, []);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Register data:", formData);
-  };
+  const showForm = useShowForm();
+  const { formData, handleChange, handleSubmit } = useRegisterForm();
 
   return (
     <div className="flex min-h-screen bg-[#f0f4ff]">
@@ -33,7 +16,7 @@ export default function Register() {
       <div className="w-1/2 flex items-center justify-center bg-[#2962FF] rounded-r-[50px] p-10">
         <div className="max-w-md w-full bg-white rounded-[30px] p-6 shadow-xl text-center">
           <img
-            src="/assets/banner/bannerRegister.png" // Ensure this exists
+            src={ASSETS.BANNER.REGISTER}
             alt="Register Banner"
             className="w-full object-contain rounded-[24px] mb-6 shadow-lg"
           />
@@ -55,7 +38,7 @@ export default function Register() {
         >
           {/* Logo */}
           <img
-            src="/assets/logo/logo.png"
+            src={ASSETS.LOGO.MAIN}
             alt="Edufactory Logo"
             className="mx-auto mb-6"
             width={64}
@@ -67,76 +50,59 @@ export default function Register() {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Họ và tên
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 rounded-[16px] border border-gray-300 focus:ring-2 focus:ring-[#2962FF] bg-gray-50 text-sm"
-                placeholder="Nguyễn Văn A"
-              />
-            </div>
+            <Input
+              id="fullName"
+              name="fullName"
+              type="text"
+              label="Họ và tên"
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="Nguyễn Văn A"
+              required
+            />
 
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 rounded-[16px] border border-gray-300 focus:ring-2 focus:ring-[#2962FF] bg-gray-50 text-sm"
-                placeholder="example@email.com"
-              />
-            </div>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              label="Email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="example@email.com"
+              required
+            />
 
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Mật khẩu
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 rounded-[16px] border border-gray-300 focus:ring-2 focus:ring-[#2962FF] bg-gray-50 text-sm"
-                placeholder="********"
-              />
-            </div>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              label="Mật khẩu"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="********"
+              required
+            />
 
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Xác nhận mật khẩu
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 rounded-[16px] border border-gray-300 focus:ring-2 focus:ring-[#2962FF] bg-gray-50 text-sm"
-                placeholder="********"
-              />
-            </div>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              label="Xác nhận mật khẩu"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="********"
+              required
+            />
 
-            <button
-              type="submit"
-              className="w-full bg-[#2962FF] text-white py-2 rounded-[16px] font-semibold hover:bg-[#1e4ddf] transition duration-300 shadow-md"
-            >
+            <Button type="submit" fullWidth size="lg">
               Đăng ký
-            </button>
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Đã có tài khoản?{" "}
             <Link
-              to="/login"
+              to={ROUTES.LOGIN}
               className="text-blue-600 hover:underline font-medium"
             >
               Đăng nhập ngay

@@ -1,14 +1,12 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useShowForm } from "@/hooks/useLoginForm";
+import { ROUTES } from "@constants/routes";
+import { ASSETS } from "@constants/assets";
+import { Input } from "@components/common/Input";
+import { Button } from "@components/common/Button";
 
 export default function Login() {
-  const [showForm, setShowForm] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setShowForm(true);
-    }, 100);
-  }, []);
+  const showForm = useShowForm();
 
   return (
     <div className="flex min-h-screen bg-[#f0f4ff]">
@@ -16,7 +14,7 @@ export default function Login() {
       <div className="w-1/2 flex items-center justify-center bg-[#2962FF] rounded-r-[50px] p-10">
         <div className="max-w-md w-full bg-white rounded-[30px] p-6 shadow-xl text-center">
           <img
-            src="/assets/banner/bannerLogin.png" // Ensure this image is available in public/assets/banner/
+            src={ASSETS.BANNER.LOGIN}
             alt="Login Banner"
             className="w-full object-contain rounded-[24px] mb-6 shadow-lg"
           />
@@ -24,7 +22,8 @@ export default function Login() {
             Welcome back to Edufactory!
           </h2>
           <p className="text-sm text-gray-600">
-            Log in to explore personalized learning, expert instructors, and career-boosting content.
+            Log in to explore personalized learning, expert instructors, and
+            career-boosting content.
           </p>
         </div>
       </div>
@@ -38,7 +37,7 @@ export default function Login() {
         >
           {/* Logo */}
           <img
-            src="/assets/logo/logo.png"
+            src={ASSETS.LOGO.MAIN}
             alt="Edufactory Logo"
             className="mx-auto mb-6"
             width={64}
@@ -50,41 +49,26 @@ export default function Login() {
           </h2>
 
           <form>
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email Address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-[16px] focus:ring-2 focus:ring-[#2962FF] bg-gray-50 text-sm"
-                placeholder="example@edufactory.com"
-              />
-            </div>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              label="Email Address"
+              placeholder="example@edufactory.com"
+              required
+            />
 
-            <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-[16px] focus:ring-2 focus:ring-[#2962FF] bg-gray-50 text-sm"
-                placeholder="********"
-              />
-              <div className="text-right mt-1 text-sm text-[#2962FF] hover:underline cursor-pointer">
-                Forgot Password?
-              </div>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              label="Password"
+              placeholder="********"
+              required
+            />
+
+            <div className="text-right mt-1 text-sm text-[#2962FF] hover:underline cursor-pointer">
+              <Link to={ROUTES.FORGOT_PASSWORD}>Forgot Password?</Link>
             </div>
 
             <div className="mb-4 flex items-center">
@@ -95,18 +79,15 @@ export default function Login() {
               <span className="text-sm text-gray-700">Keep me logged in</span>
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-[#2962FF] text-white py-2 rounded-[16px] font-semibold hover:bg-[#1e4ddf] transition duration-300 shadow-md"
-            >
+            <Button type="submit" fullWidth size="lg">
               Sign In
-            </button>
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Chưa có tài khoản?{" "}
             <Link
-              to="/register"
+              to={ROUTES.REGISTER}
               className="text-blue-600 hover:underline font-medium"
             >
               Đăng ký ngay
