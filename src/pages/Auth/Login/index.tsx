@@ -1,112 +1,99 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useShowForm } from "@/hooks/useLoginForm";
+import { ROUTES } from "@constants/routes";
+import { ASSETS } from "@constants/assets";
+import { Input } from "@components/common/Input";
+import { Button } from "@components/common/Button";
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement login logic
-    console.log("Login data:", formData);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const showForm = useShowForm();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Đăng nhập vào tài khoản
+    <div className="flex min-h-screen bg-[#f0f4ff]">
+      {/* Left Panel with Banner */}
+      <div className="w-1/2 flex items-center justify-center bg-[#2962FF] rounded-r-[50px] p-10">
+        <div className="max-w-md w-full bg-white rounded-[30px] p-6 shadow-xl text-center">
+          <img
+            src={ASSETS.BANNER.LOGIN}
+            alt="Login Banner"
+            className="w-full object-contain rounded-[24px] mb-6 shadow-lg"
+          />
+          <h2 className="text-2xl font-extrabold text-[#2962FF] mb-2">
+            Welcome back to Edufactory!
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Hoặc{" "}
+          <p className="text-sm text-gray-600">
+            Log in to explore personalized learning, expert instructors, and
+            career-boosting content.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Panel with Login Form */}
+      <div className="w-1/2 flex items-center justify-center bg-white">
+        <div
+          className={`bg-white p-10 rounded-[30px] shadow-xl w-full max-w-sm transition-all duration-500 transform ${
+            showForm ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          }`}
+        >
+          {/* Logo */}
+          <img
+            src={ASSETS.LOGO.MAIN}
+            alt="Edufactory Logo"
+            className="mx-auto mb-6"
+            width={64}
+            height={64}
+          />
+
+          <h2 className="text-2xl font-bold text-[#1e2b4f] mb-6 text-center">
+            Sign in to your account
+          </h2>
+
+          <form>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              label="Email Address"
+              placeholder="example@edufactory.com"
+              required
+            />
+
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              label="Password"
+              placeholder="********"
+              required
+            />
+
+            <div className="text-right mt-1 text-sm text-[#2962FF] hover:underline cursor-pointer">
+              <Link to={ROUTES.FORGOT_PASSWORD}>Forgot Password?</Link>
+            </div>
+
+            <div className="mb-4 flex items-center">
+              <input
+                type="checkbox"
+                className="mr-2 accent-[#2962FF] rounded"
+              />
+              <span className="text-sm text-gray-700">Keep me logged in</span>
+            </div>
+
+            <Button type="submit" fullWidth size="lg">
+              Sign In
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Chưa có tài khoản?{" "}
             <Link
-              to="/register"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              to={ROUTES.REGISTER}
+              className="text-blue-600 hover:underline font-medium"
             >
-              đăng ký tài khoản mới
+              Đăng ký ngay
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Mật khẩu
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Mật khẩu"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-900"
-              >
-                Ghi nhớ đăng nhập
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <a
-                href="#"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Quên mật khẩu?
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Đăng nhập
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );

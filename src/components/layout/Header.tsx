@@ -13,7 +13,7 @@ export default function Header() {
     <header className="flex items-center justify-between p-4 bg-white">
       <div className="flex items-center justify-between max-w-screen-xl w-full mx-auto px-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center">
+        <div className="flex items-center">
           <img
             src="/assets/logo/logo.png"
             alt="Edu Connect Logo"
@@ -23,7 +23,7 @@ export default function Header() {
           <span className="text-blue-600 text-xl font-baloo font-bold">
             Edu Connect
           </span>
-        </Link>
+        </div>
 
         {/* Search Bar */}
         <div className="flex items-center border rounded-full px-4 py-2 flex-grow mx-4 max-w-md">

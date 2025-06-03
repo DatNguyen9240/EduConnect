@@ -2,6 +2,7 @@ import ErrorBoundary from "@pages/Error/Error";
 import { Suspense } from "react";
 import "./styles/GlobalStyle/index.css";
 import Loading from "@components/common/loading";
+
 import { RouterProvider } from "react-router-dom";
 import { RouterConfig } from "@/routes/RouterConfig";
 
