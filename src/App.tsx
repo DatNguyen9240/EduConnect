@@ -11,9 +11,11 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<Loading />}>
-        <RouterProvider router={router} />
-      </Suspense>
+      <div className="h-screen overflow-y-auto">
+        <Suspense fallback={<Loading />}>
+          <RouterProvider router={router} />
+        </Suspense>
+      </div>
     </ErrorBoundary>
   );
 }
