@@ -3,6 +3,7 @@ import { lazy } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import AuthLayout from '@/components/layout/AuthLayout';
 import Error from '@/pages/Error/Error';
+import ProfileScreen from '@/pages/Auth/Profile';
 
 // Lazy load components - chỉ tải khi cần thiết
 const Home = lazy(() => import('@/pages/Home'));
@@ -58,6 +59,10 @@ export const RouterConfig = () => {
         {
           path: 'register',
           element: <Register />,
+        },
+        {
+          path: 'proflie',
+          element: <ProfileScreen />,
         },
       ],
     },

@@ -13,7 +13,7 @@ export const ROUTES = {
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
   DASHBOARD: '/dashboard',
-  PROFILE: '/profile',
+  PROFILE: '/ProfileScreen',
   SO_DAU_BAI: '/so-dau-bai',
   THONG_KE_BAO_CAO: '/thong-ke-bao-cao',
   QUAN_LY_HOC_TAP: '/quan-ly-hoc-tap',

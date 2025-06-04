@@ -1,9 +1,10 @@
 import ChatWidget from "@/components/ChatWitget";
+import GradeTable from "@/components/common/GradeTable";
 
 export default function QuanLyHocTap() {
   return (
     <div>
-      <h1>Quản Lý Học Tập</h1>
+     <GradeTable/>
       <ChatWidget />
     </div>
   );
