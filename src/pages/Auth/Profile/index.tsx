@@ -27,12 +27,12 @@ ChartJS.register(
 
 const ProfileScreen: React.FC = () => {
   const [editMode, setEditMode] = useState<boolean>(false);
-
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
   const [profileData, setProfileData] = useState({
     name: 'Hoàng Quốc Trí',
     email: 'trihqse170376@example.com',
     bio: 'Sinh viên năm cuối ngành Công nghệ Thông tin tại FPT University.',
-    profilePic: 'https://i.pinimg.com/originals/3b/f4/26/3bf426c6589910174a635d0a401de5b1.jpg', // Default image
+    profilePic: 'assets/avatar/default.jpg',
     grade: '1st Year',
     dob: '17/07/1999',
     gender: 'Male',
@@ -101,15 +101,26 @@ const ProfileScreen: React.FC = () => {
     }
   };
 
+  // Open modal with full-size image
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="container mx-auto p-6 animate__animated animate__fadeIn">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Profile Picture and Bio */}
-        <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg">
+        <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg border-8 border-gray-400">
           <img
             src={profileData.profilePic}
             alt="Profile"
-            className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 transition-transform duration-500 hover:scale-110"
+            className="w-32 h-32 rounded-full object-cover border-8 border-blue-500 transition-transform duration-500 hover:scale-110 cursor-pointer"
+            onClick={openModal} // Open modal when image is clicked
           />
           <h2 className="text-2xl font-bold mt-4 text-gray-800">{profileData.name}</h2>
           <p className="text-sm text-gray-600">{profileData.email}</p>
@@ -117,7 +128,7 @@ const ProfileScreen: React.FC = () => {
         </div>
 
         {/* Personal Information */}
-        <div className="p-6 bg-white rounded-lg shadow-lg">
+        <div className="p-6 bg-white rounded-lg shadow-lg border-8 border-gray-400">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Personal Information</h3>
           <div className="space-y-3">
             <div>
@@ -140,7 +151,7 @@ const ProfileScreen: React.FC = () => {
       </div>
 
       {/* Parents Information */}
-      <div className="p-6 mt-6 bg-white rounded-lg shadow-lg">
+      <div className="p-6 mt-6 bg-white rounded-lg shadow-lg border-8 border-gray-400">
         <h3 className="text-xl font-semibold mb-4 text-blue-600">Parents</h3>
         <div className="space-y-4">
           <div>
@@ -160,7 +171,7 @@ const ProfileScreen: React.FC = () => {
       </div>
 
       {/* Line Chart for Study Hours */}
-      <div className="p-6 mt-6 bg-white rounded-lg shadow-lg">
+      <div className="p-6 mt-6 bg-white rounded-lg shadow-lg border-8 border-gray-400">
         <h3 className="text-xl font-semibold mb-4 text-blue-600">Study Hours Progress</h3>
         <Line data={lineChartData} options={{ responsive: true }} />
       </div>
@@ -168,7 +179,7 @@ const ProfileScreen: React.FC = () => {
       <div className="container mx-auto p-6 animate__animated animate__fadeIn">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Doughnut Chart for Interests */}
-          <div className="p-6 bg-white rounded-lg shadow-lg border-4 border-gray-400">
+          <div className="p-6 bg-white rounded-lg shadow-lg border-8 border-gray-400">
             <h3 className="text-xl font-semibold mb-4 text-blue-600">Interests Distribution</h3>
             <div className="mx-auto">
               <Doughnut
@@ -192,7 +203,7 @@ const ProfileScreen: React.FC = () => {
           </div>
 
           {/* Edit Profile Section */}
-          <div className="p-6 bg-white rounded-lg shadow-lg border-4 border-gray-400">
+          <div className="p-6 bg-white rounded-lg shadow-lg border-8 border-gray-400">
             <h3 className="text-xl font-semibold mb-4 text-blue-600">Edit Profile</h3>
             <div className="space-y-3">
               <label className="block text-lg font-semibold mb-2">Name</label>
@@ -259,6 +270,25 @@ const ProfileScreen: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for Full Image */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div className="relative bg-white p-4 rounded-lg">
+            <img
+              src={profileData.profilePic}
+              alt="Full Profile"
+              className="w-full h-full object-contain"
+            />
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-2 text-black text-xl font-bold"
+            >
+              X
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
