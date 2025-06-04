@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
-import { useShowForm } from "@/hooks/useLoginForm";
-import { useRegisterForm } from "@hooks/useRegisterForm";
-import { ROUTES } from "@constants/routes";
-import { ASSETS } from "@constants/assets";
-import { Input } from "@components/common/Input";
-import { Button } from "@components/common/Button";
+import { Link } from 'react-router-dom';
+import { useShowForm } from '@/hooks/useLoginForm';
+import { useRegisterForm } from '@hooks/useRegisterForm';
+import { ROUTES } from '@constants/routes';
+import { ASSETS } from '@constants/assets';
+import { Input } from '@components/common/Input';
+import { Button } from '@components/common/Button';
 
 export default function Register() {
   const showForm = useShowForm();
@@ -33,7 +33,7 @@ export default function Register() {
       <div className="w-1/2 flex items-center justify-center bg-white">
         <div
           className={`bg-white p-10 rounded-[30px] shadow-xl w-full max-w-sm transition-all duration-500 transform ${
-            showForm ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            showForm ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}
         >
           {/* Logo */}
@@ -100,11 +100,8 @@ export default function Register() {
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
-            Đã có tài khoản?{" "}
-            <Link
-              to={ROUTES.LOGIN}
-              className="text-blue-600 hover:underline font-medium"
-            >
+            Đã có tài khoản?{' '}
+            <Link to={ROUTES.LOGIN} className="text-blue-600 hover:underline font-medium">
               Đăng nhập ngay
             </Link>
           </p>

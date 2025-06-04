@@ -1,5 +1,5 @@
-import { NavLink } from "react-router-dom";
-import { navbarItems } from "@/routes/RouterConfig";
+import { NavLink } from 'react-router-dom';
+import { navbarItems } from '@/constants/routes';
 
 export default function NavBar() {
   return (
@@ -12,8 +12,8 @@ export default function NavBar() {
               className={({ isActive }) =>
                 `flex flex-col justify-center items-center h-full px-4 transition-colors duration-200 ${
                   isActive
-                    ? "bg-blue-100 text-blue-700 font-semibold"
-                    : "hover:bg-blue-700 text-white/80"
+                    ? 'bg-blue-100 text-blue-700 font-semibold'
+                    : 'hover:bg-blue-700 text-white/80'
                 }`
               }
             >
@@ -22,8 +22,8 @@ export default function NavBar() {
                   <div
                     className={`flex items-center justify-center w-9 h-9 rounded border transition-colors duration-200 ${
                       isActive
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white/20 text-white border-white/50"
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white/20 text-white border-white/50'
                     }`}
                   >
                     <item.icon className="h-6 w-6" />

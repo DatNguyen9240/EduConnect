@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 interface RegisterFormData {
   fullName: string;
@@ -9,10 +9,10 @@ interface RegisterFormData {
 
 export const useRegisterForm = () => {
   const [formData, setFormData] = useState<RegisterFormData>({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,7 +25,7 @@ export const useRegisterForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Register data:", formData);
+    console.log('Register data:', formData);
     // Thêm logic xử lý đăng ký ở đây
   };
 

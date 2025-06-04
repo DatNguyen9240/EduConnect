@@ -1,7 +1,7 @@
-import { Component } from "react";
-import type { ReactNode, ErrorInfo } from "react";
-import classNames from "classnames/bind";
-import styles from "./Error.module.css";
+import { Component } from 'react';
+import type { ReactNode, ErrorInfo } from 'react';
+import classNames from 'classnames/bind';
+import styles from './Error.module.css';
 const cx = classNames.bind(styles);
 
 interface ErrorBoundaryProps {
@@ -25,7 +25,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error("Error caught by ErrorBoundary:", error, info);
+    console.error('Error caught by ErrorBoundary:', error, info);
 
     this.setState({
       errorInfo: info,
@@ -35,12 +35,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className={cx("wrapper")}>
-          <h1 className={cx("title-error")}>
+        <div className={cx('wrapper')}>
+          <h1 className={cx('title-error')}>
             Something went wrong. Please try again or contact support.
           </h1>
 
-          <details style={{ whiteSpace: "pre-wrap" }}>
+          <details style={{ whiteSpace: 'pre-wrap' }}>
             Thông tin lỗi
             {this.state.errorInfo?.componentStack}
           </details>
