@@ -12,8 +12,7 @@
 
 html,
 body {
-  height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .font-baloo {
@@ -84,3 +83,8 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/*
+  Nếu bạn muốn một vùng cụ thể cuộn độc lập, ví dụ vùng content:
+  <div className="h-screen overflow-y-auto">...</div>
+*/
