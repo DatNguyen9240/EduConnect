@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -9,16 +9,13 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input: React.FC<InputProps> = ({
   label,
   error,
-  containerClassName = "",
-  className = "",
+  containerClassName = '',
+  className = '',
   ...props
 }) => {
   return (
     <div className={`mb-4 ${containerClassName}`}>
-      <label
-        htmlFor={props.id}
-        className="block text-sm font-medium text-gray-700 mb-1"
-      >
+      <label htmlFor={props.id} className="block text-sm font-medium text-gray-700 mb-1">
         {label}
       </label>
       <input
