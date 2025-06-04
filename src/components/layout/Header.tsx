@@ -1,12 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { settingsMenu } from "@/routes/RouterConfig";
+} from '@/components/ui/dropdown-menu';
+import { settingsMenu } from '@/constants/routes';
 
 export default function Header() {
   return (
@@ -14,24 +14,14 @@ export default function Header() {
       <div className="flex items-center justify-between max-w-screen-xl w-full mx-auto px-6">
         {/* Logo */}
         <div className="flex items-center">
-          <img
-            src="/assets/logo/logo.png"
-            alt="Edu Connect Logo"
-            className="h-8 mr-2"
-          />{" "}
+          <img src="/assets/logo/logo.png" alt="Edu Connect Logo" className="h-8 mr-2" />{' '}
           {/* Assuming logo path */}
-          <span className="text-blue-600 text-xl font-baloo font-bold">
-            Edu Connect
-          </span>
+          <span className="text-blue-600 text-xl font-baloo font-bold">Edu Connect</span>
         </div>
 
         {/* Search Bar */}
         <div className="flex items-center border rounded-full px-4 py-2 flex-grow mx-4 max-w-md">
-          <input
-            type="text"
-            placeholder="Tìm kiếm..."
-            className="outline-none flex-grow"
-          />
+          <input type="text" placeholder="Tìm kiếm..." className="outline-none flex-grow" />
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5 text-gray-400 ml-2"
@@ -56,7 +46,7 @@ export default function Header() {
               src="/assets/avatar/default.jpg"
               alt="User Avatar"
               className="h-8 w-8 rounded-full mr-2"
-            />{" "}
+            />{' '}
             {/* Assuming avatar path */}
             <span className="text-gray-700">Đạt</span>
           </div>
@@ -89,15 +79,11 @@ export default function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link to={settingsMenu.profile.path}>
-                  {settingsMenu.profile.label}
-                </Link>
+                <Link to={settingsMenu.profile.path}>{settingsMenu.profile.label}</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to={settingsMenu.signOut.path}>
-                  {settingsMenu.signOut.label}
-                </Link>
+                <Link to={settingsMenu.signOut.path}>{settingsMenu.signOut.label}</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

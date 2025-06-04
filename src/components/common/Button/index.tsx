@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "text";
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text';
+type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -14,51 +14,50 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const getVariantClasses = (variant: ButtonVariant) => {
   switch (variant) {
-    case "primary":
-      return "bg-[#2962FF] text-white hover:bg-[#1e4ddf]";
-    case "secondary":
-      return "bg-gray-200 text-gray-800 hover:bg-gray-300";
-    case "outline":
-      return "border-2 border-[#2962FF] text-[#2962FF] hover:bg-[#2962FF] hover:text-white";
-    case "text":
-      return "text-[#2962FF] hover:bg-[#2962FF]/10";
+    case 'primary':
+      return 'bg-[#2962FF] text-white hover:bg-[#1e4ddf]';
+    case 'secondary':
+      return 'bg-gray-200 text-gray-800 hover:bg-gray-300';
+    case 'outline':
+      return 'border-2 border-[#2962FF] text-[#2962FF] hover:bg-[#2962FF] hover:text-white';
+    case 'text':
+      return 'text-[#2962FF] hover:bg-[#2962FF]/10';
     default:
-      return "bg-[#2962FF] text-white hover:bg-[#1e4ddf]";
+      return 'bg-[#2962FF] text-white hover:bg-[#1e4ddf]';
   }
 };
 
 const getSizeClasses = (size: ButtonSize) => {
   switch (size) {
-    case "sm":
-      return "px-3 py-1.5 text-sm";
-    case "md":
-      return "px-4 py-2 text-base";
-    case "lg":
-      return "px-5 py-2.5 text-base";
+    case 'sm':
+      return 'px-3 py-1.5 text-sm';
+    case 'md':
+      return 'px-4 py-2 text-base';
+    case 'lg':
+      return 'px-5 py-2.5 text-base';
     default:
-      return "px-4 py-2 text-base";
+      return 'px-4 py-2 text-base';
   }
 };
 
 export const Button: React.FC<ButtonProps> = ({
   children,
-  variant = "primary",
-  size = "md",
+  variant = 'primary',
+  size = 'md',
   fullWidth = false,
   isLoading = false,
   leftIcon,
   rightIcon,
-  className = "",
+  className = '',
   disabled,
   ...props
 }) => {
   const baseClasses =
-    "rounded-[16px] font-semibold transition duration-300 shadow-md flex items-center justify-center gap-2";
+    'rounded-[16px] font-semibold transition duration-300 shadow-md flex items-center justify-center gap-2';
   const variantClasses = getVariantClasses(variant);
   const sizeClasses = getSizeClasses(size);
-  const widthClass = fullWidth ? "w-full" : "";
-  const disabledClass =
-    disabled || isLoading ? "opacity-50 cursor-not-allowed" : "";
+  const widthClass = fullWidth ? 'w-full' : '';
+  const disabledClass = disabled || isLoading ? 'opacity-50 cursor-not-allowed' : '';
 
   return (
     <button
