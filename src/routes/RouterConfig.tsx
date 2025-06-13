@@ -3,6 +3,17 @@ import { lazy } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import AuthLayout from '@/components/layout/AuthLayout';
 import Error from '@/pages/Error/Error';
+import {
+  LayoutDashboard,
+  MessageSquare,
+  GraduationCap,
+  Users,
+  Calendar,
+  BarChart3,
+  Utensils,
+  Settings,
+  BarChart,
+} from 'lucide-react';
 
 // Lazy load components - chỉ tải khi cần thiết
 const Home = lazy(() => import('@/pages/Home'));
@@ -63,3 +74,14 @@ export const RouterConfig = () => {
     },
   ]);
 };
+
+export const menuItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/', active: false },
+  { icon: MessageSquare, label: 'Chat', path: '/chat', active: false },
+  { icon: BarChart, label: 'Thống kê', path: '/thong-ke-bao-cao', badge: '35', active: false },
+  { icon: Users, label: 'Teacher', path: '/giao-vien', active: false },
+  { icon: Calendar, label: 'Event', path: '/su-kien', active: true },
+  { icon: BarChart3, label: 'Finance', path: '/tai-chinh', active: false },
+  { icon: Utensils, label: 'Food', path: '/thuc-don', badge: '1', active: false },
+  { icon: Settings, label: 'Settings', path: '/cai-dat', active: false },
+];

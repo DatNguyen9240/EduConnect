@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text' | 'ghost';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -22,6 +22,8 @@ const getVariantClasses = (variant: ButtonVariant) => {
       return 'border-2 border-[#2962FF] text-[#2962FF] hover:bg-[#2962FF] hover:text-white';
     case 'text':
       return 'text-[#2962FF] hover:bg-[#2962FF]/10';
+    case 'ghost':
+      return 'hover:bg-gray-100 text-gray-700';
     default:
       return 'bg-[#2962FF] text-white hover:bg-[#1e4ddf]';
   }
