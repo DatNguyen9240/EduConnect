@@ -1,6 +1,16 @@
 import { MoreVertical } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
+type Event = {
+  title: string;
+  date: string;
+  time: string;
+  price: number;
+  tickets: number;
+  progress: number;
+  // Thêm các trường khác nếu cần
+};
+
 export default function EventList() {
   const events = [
     {
@@ -8,7 +18,7 @@ export default function EventList() {
       date: 'Nov 21th, 2020',
       title: 'Movie Night',
       time: '10:00 - 10:00 PM',
-      price: '$5.0',
+      price: 5.0,
       progress: 75,
       tickets: 23,
     },
@@ -17,7 +27,7 @@ export default function EventList() {
       date: 'Nov 6th, 2020',
       title: 'Color Run',
       time: '10:00 - 10:00 PM',
-      price: '$0',
+      price: 0,
       progress: 50,
       tickets: 17,
     },
@@ -26,7 +36,7 @@ export default function EventList() {
       date: 'Nov 21th, 2020',
       title: 'Hostage Situation',
       time: '10:00 - 10:00 PM',
-      price: '$5.0',
+      price: 5.0,
       progress: 20,
       tickets: 4,
     },
@@ -35,7 +45,7 @@ export default function EventList() {
       date: 'Nov 21th, 2020',
       title: 'Yard Sale',
       time: '10:00 - 10:00 PM',
-      price: '$5.0',
+      price: 5.0,
       progress: 60,
       tickets: 13,
     },
@@ -55,7 +65,7 @@ export default function EventList() {
   );
 }
 
-function EventCard({ event }: { event: any }) {
+function EventCard({ event }: { event: Event }) {
   return (
     <div className="bg-[#2a2a4e] rounded-lg p-3">
       <div className="flex justify-between items-start">

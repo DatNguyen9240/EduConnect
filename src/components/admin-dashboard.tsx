@@ -1,17 +1,15 @@
 'use client';
 
+import { Bell, Calendar, ChevronLeft, ChevronRight, Search, Sidebar } from 'lucide-react';
+import { Button } from './common/Button';
+import { Input } from './common/Input';
+import { Avatar, AvatarFallback } from './ui/avatar';
+import EventList from './ui/event-list';
 import { useState } from 'react';
-import { Bell, ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/common/Button';
-import { Input } from '@/components/common/Input';
-import Sidebar from '@/components/ui/sidebar';
-import Calendar from '@/components/ui/calendar';
-import EventList from '@/components/ui/event-list';
 
 export default function AdminDashboard() {
-  const [currentMonth, setCurrentMonth] = useState('December');
-  const [currentYear, setCurrentYear] = useState(2021);
+  const [currentMonth] = useState('December');
+  const [currentYear] = useState(2021);
 
   return (
     <div className="flex h-screen bg-[#1e1e38] text-white">

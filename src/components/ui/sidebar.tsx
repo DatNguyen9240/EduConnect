@@ -1,11 +1,14 @@
 import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { menuItems } from '@/routes/RouterConfig';
+import { routeMenuConfig } from '@/routes/RouterConfig';
 import { useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
 
 export default function Sidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+
+  const menuItems = routeMenuConfig.filter((item) => item.showInMenu);
 
   return (
     <div
@@ -48,9 +51,18 @@ export default function Sidebar() {
             </div>
           </div>
           <div className="space-y-1 mt-2">
-            {menuItems.slice(0, 5).map((item, index) => (
-              <MenuItem key={index} {...item} active={currentPath === item.path} />
-            ))}
+            {menuItems.map((item, index) =>
+              item.icon ? (
+                <MenuItem
+                  key={index}
+                  icon={item.icon}
+                  label={item.label}
+                  path={item.path}
+                  badge={item.badge}
+                  active={currentPath === item.path}
+                />
+              ) : null
+            )}
           </div>
         </div>
 
@@ -63,9 +75,20 @@ export default function Sidebar() {
             </div>
           </div>
           <div className="space-y-1 mt-2">
-            {menuItems.slice(5).map((item, index) => (
-              <MenuItem key={index + 5} {...item} active={currentPath === item.path} />
-            ))}
+            {menuItems
+              .slice(5)
+              .map((item, index) =>
+                item.icon ? (
+                  <MenuItem
+                    key={index + 5}
+                    icon={item.icon}
+                    label={item.label}
+                    path={item.path}
+                    badge={item.badge}
+                    active={currentPath === item.path}
+                  />
+                ) : null
+              )}
           </div>
         </div>
       </div>
@@ -73,19 +96,15 @@ export default function Sidebar() {
   );
 }
 
-function MenuItem({
-  icon: Icon,
-  label,
-  active,
-  badge,
-  path,
-}: {
-  icon: any;
+type MenuItemProps = {
+  icon: React.ElementType;
   label: string;
   active?: boolean;
-  badge?: string;
+  badge?: string | null;
   path: string;
-}) {
+};
+
+function MenuItem({ icon: Icon, label, active, badge, path }: MenuItemProps) {
   const navigate = useNavigate();
 
   return (
@@ -98,12 +117,14 @@ function MenuItem({
           : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
       )}
     >
-      <Icon
-        className={cn(
-          'h-5 w-5 flex-shrink-0 transition-colors duration-200',
-          active ? 'text-white' : 'text-gray-500'
-        )}
-      />
+      {Icon && (
+        <Icon
+          className={cn(
+            'h-5 w-5 flex-shrink-0 transition-colors duration-200',
+            active ? 'text-white' : 'text-gray-500'
+          )}
+        />
+      )}
       <div className="overflow-hidden transition-all duration-300">
         <div className="min-w-[120px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
           <span className="font-medium ml-4">{label}</span>

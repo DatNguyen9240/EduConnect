@@ -68,7 +68,6 @@ export default function Calendar() {
 
 function CalendarCell({
   day,
-  month,
   dots,
   highlight,
   avatars,
@@ -76,14 +75,12 @@ function CalendarCell({
   color,
 }: {
   day: number;
-  month?: string;
   dots?: string[];
   highlight?: boolean;
   avatars?: number[];
   event?: { text: string; subtext: string };
   color?: string;
 }) {
-  const isCurrentMonth = !month;
   const bgColor = highlight ? color || '#ff754c' : '#2a2a4e';
 
   return (

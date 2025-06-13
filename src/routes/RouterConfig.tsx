@@ -6,7 +6,6 @@ import Error from '@/pages/Error/Error';
 import {
   LayoutDashboard,
   MessageSquare,
-  GraduationCap,
   Users,
   Calendar,
   BarChart3,
@@ -24,6 +23,115 @@ const ThongKeBaoCao = lazy(() => import('@/pages/ThongKeBaoCao'));
 const QuanLyHocTap = lazy(() => import('@/pages/QuanLyHocTap'));
 const HocSinh = lazy(() => import('@/pages/HocSinh'));
 const QuanTriThongTin = lazy(() => import('@/pages/QuanTriThongTin'));
+const AdminDashboard = lazy(() => import('@/components/admin-dashboard'));
+
+export const routeMenuConfig = [
+  {
+    path: '/admin-dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    element: <AdminDashboard />,
+    showInMenu: true,
+    badge: null,
+  },
+  {
+    path: '/chat',
+    label: 'Chat',
+    icon: MessageSquare,
+    element: <div>Chat page</div>,
+    showInMenu: true,
+    badge: null,
+  },
+  {
+    path: '/thong-ke-bao-cao',
+    label: 'Thống kê',
+    icon: BarChart,
+    element: <ThongKeBaoCao />,
+    showInMenu: true,
+    badge: '35',
+  },
+  {
+    path: '/giao-vien',
+    label: 'Teacher',
+    icon: Users,
+    element: <div>Teacher page</div>,
+    showInMenu: true,
+    badge: null,
+  },
+  {
+    path: '/su-kien',
+    label: 'Event',
+    icon: Calendar,
+    element: <div>Event page</div>,
+    showInMenu: true,
+    badge: null,
+  },
+  {
+    path: '/tai-chinh',
+    label: 'Finance',
+    icon: BarChart3,
+    element: <div>Finance page</div>,
+    showInMenu: true,
+    badge: null,
+  },
+  {
+    path: '/thuc-don',
+    label: 'Food',
+    icon: Utensils,
+    element: <div>Food page</div>,
+    showInMenu: true,
+    badge: '1',
+  },
+  {
+    path: '/cai-dat',
+    label: 'Settings',
+    icon: Settings,
+    element: <div>Settings page</div>,
+    showInMenu: true,
+    badge: null,
+  },
+  // Các route không show menu
+  {
+    path: '/',
+    label: 'Home',
+    icon: null,
+    element: <Home />,
+    showInMenu: false,
+    badge: null,
+  },
+  {
+    path: '/so-dau-bai',
+    label: 'Sổ đầu bài',
+    icon: null,
+    element: <SoDauBai />,
+    showInMenu: false,
+    badge: null,
+  },
+  {
+    path: '/quan-ly-hoc-tap',
+    label: 'Quản lý học tập',
+    icon: null,
+    element: <QuanLyHocTap />,
+    showInMenu: false,
+    badge: null,
+  },
+  {
+    path: '/hoc-sinh',
+    label: 'Học sinh',
+    icon: null,
+    element: <HocSinh />,
+    showInMenu: false,
+    badge: null,
+  },
+  {
+    path: '/quan-tri-thong-tin',
+    label: 'Quản trị thông tin',
+    icon: null,
+    element: <QuanTriThongTin />,
+    showInMenu: false,
+    badge: null,
+  },
+];
 
 export const RouterConfig = () => {
   return createBrowserRouter([
@@ -36,26 +144,9 @@ export const RouterConfig = () => {
           index: true,
           element: <Home />,
         },
-        {
-          path: 'so-dau-bai',
-          element: <SoDauBai />,
-        },
-        {
-          path: 'thong-ke-bao-cao',
-          element: <ThongKeBaoCao />,
-        },
-        {
-          path: 'quan-ly-hoc-tap',
-          element: <QuanLyHocTap />,
-        },
-        {
-          path: 'hoc-sinh',
-          element: <HocSinh />,
-        },
-        {
-          path: 'quan-tri-thong-tin',
-          element: <QuanTriThongTin />,
-        },
+        ...routeMenuConfig
+          .filter((r) => r.path !== '/')
+          .map((r) => ({ path: r.path.replace(/^\//, ''), element: r.element })),
       ],
     },
     {
@@ -74,14 +165,3 @@ export const RouterConfig = () => {
     },
   ]);
 };
-
-export const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/', active: false },
-  { icon: MessageSquare, label: 'Chat', path: '/chat', active: false },
-  { icon: BarChart, label: 'Thống kê', path: '/thong-ke-bao-cao', badge: '35', active: false },
-  { icon: Users, label: 'Teacher', path: '/giao-vien', active: false },
-  { icon: Calendar, label: 'Event', path: '/su-kien', active: true },
-  { icon: BarChart3, label: 'Finance', path: '/tai-chinh', active: false },
-  { icon: Utensils, label: 'Food', path: '/thuc-don', badge: '1', active: false },
-  { icon: Settings, label: 'Settings', path: '/cai-dat', active: false },
-];

@@ -1,4 +1,4 @@
-import ChatWidget from "@/components/ChatWitget";
+import ChatWidget from '@/components/ChatWitget';
 
 export default function QuanLyHocTap() {
   return (
