@@ -13,6 +13,7 @@ import {
   Settings,
   BarChart,
 } from 'lucide-react';
+import LichThi from '@/pages/LichThi';
 
 // Lazy load components - chỉ tải khi cần thiết
 const Home = lazy(() => import('@/pages/Home'));
@@ -59,10 +60,10 @@ export const routeMenuConfig = [
     badge: null,
   },
   {
-    path: '/su-kien',
-    label: 'Event',
+    path: '/lich-thi',
+    label: 'Lịch thi',
     icon: Calendar,
-    element: <div>Event page</div>,
+    element: <LichThi />,
     showInMenu: true,
     badge: null,
   },

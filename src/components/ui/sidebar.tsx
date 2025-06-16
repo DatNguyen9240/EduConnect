@@ -13,7 +13,7 @@ export default function Sidebar() {
   return (
     <div
       className={cn(
-        'group/sidebar h-screen flex flex-col bg-white border-r border-gray-200',
+        'group/sidebar min-h-screen flex flex-col bg-white border-r border-gray-200',
         'w-20 hover:w-64 transition-all duration-300 ease-in-out'
       )}
     >
@@ -66,7 +66,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div>
+        {/* <div>
           <div className="overflow-hidden transition-all duration-300">
             <div className="min-w-[120px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
               <p className="text-xs font-semibold text-gray-500 px-4 py-2 uppercase tracking-wider">
@@ -90,7 +90,7 @@ export default function Sidebar() {
                 ) : null
               )}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

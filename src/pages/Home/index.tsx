@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col items-center justify-center px-6 py-12 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative">
       <h1 className="text-4xl font-extrabold text-blue-700 mb-4 text-center">
         Chào mừng đến với EduConnect
       </h1>
