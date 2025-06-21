@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useShowForm } from '@/hooks/useLoginForm';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { ROUTES } from '@constants/routes';
 import { ASSETS } from '@constants/assets';
 import { Input } from '@components/common/Input';
 import { Button } from '@components/common/Button';
+import { GoogleLogin } from '@components/common/GoogleLogin';
 
 export default function Login() {
   const showForm = useShowForm();
+  const { handleGoogleSuccess, handleGoogleError, isLoading } = useGoogleAuth();
 
   return (
     <div className="flex min-h-screen bg-[#f0f4ff]">
@@ -47,6 +50,27 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-[#1e2b4f] mb-6 text-center">
             Sign in to your account
           </h2>
+
+          {/* Google Login Button */}
+          <div className="mb-6">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              className="mb-4"
+            >
+              {isLoading ? 'Signing in...' : 'Continue with Google'}
+            </GoogleLogin>
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+            </div>
+          </div>
 
           <form>
             <Input
