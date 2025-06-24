@@ -86,3 +86,4 @@ const api = {
 };
 
 export default axiosInstance;
+export { api };

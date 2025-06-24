@@ -31,7 +31,7 @@ export const useGoogleAuth = () => {
     }
   };
 
-  const handleGoogleError = (error: any) => {
+  const handleGoogleError = (error: unknown) => {
     console.error('Google authentication error:', error);
     toast.error('Google authentication failed. Please try again.');
     setIsLoading(false);

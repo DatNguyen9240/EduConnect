@@ -22,9 +22,10 @@ const Register = lazy(() => import('@/pages/Auth/Register'));
 const SoDauBai = lazy(() => import('@/pages/SoDauBai'));
 const ThongKeBaoCao = lazy(() => import('@/pages/ThongKeBaoCao'));
 const QuanLyHocTap = lazy(() => import('@/pages/QuanLyHocTap'));
-const HocSinh = lazy(() => import('@/pages/HocSinh'));
+const HocSinh = lazy(() => import('@/pages/StudentManagement'));
 const QuanTriThongTin = lazy(() => import('@/pages/QuanTriThongTin'));
 const AdminDashboard = lazy(() => import('@/components/admin-dashboard'));
+const Profile = lazy(() => import('@/pages/Profile'));
 
 export const routeMenuConfig = [
   {
@@ -44,6 +45,14 @@ export const routeMenuConfig = [
     badge: null,
   },
   {
+    path: '/profile',
+    label: 'Profile',
+    icon: Users,
+    element: <Profile />,
+    showInMenu: false,
+    badge: null,
+  },
+  {
     path: '/thong-ke-bao-cao',
     label: 'Thống kê',
     icon: BarChart,
@@ -52,18 +61,26 @@ export const routeMenuConfig = [
     badge: '35',
   },
   {
-    path: '/giao-vien',
-    label: 'Teacher',
-    icon: Users,
-    element: <div>Teacher page</div>,
-    showInMenu: true,
-    badge: null,
-  },
-  {
     path: '/lich-thi',
     label: 'Lịch thi',
     icon: Calendar,
     element: <LichThi />,
+    showInMenu: true,
+    badge: null,
+  },
+  {
+    path: '/thoi-khoa-bieu',
+    label: 'Thời khóa biểu',
+    icon: BarChart3,
+    element: <QuanTriThongTin />,
+    showInMenu: true,
+    badge: null,
+  },
+  {
+    path: '/giao-vien',
+    label: 'Teacher',
+    icon: Users,
+    element: <div>Teacher page</div>,
     showInMenu: true,
     badge: null,
   },
@@ -130,6 +147,14 @@ export const routeMenuConfig = [
     icon: null,
     element: <QuanTriThongTin />,
     showInMenu: false,
+    badge: null,
+  },
+  {
+    path: 'student-management',
+    label: 'Student Management',
+    icon: Users,
+    element: <HocSinh />,
+    showInMenu: true,
     badge: null,
   },
 ];
