@@ -22,7 +22,7 @@ const Register = lazy(() => import('@/pages/Auth/Register'));
 const SoDauBai = lazy(() => import('@/pages/SoDauBai'));
 const ThongKeBaoCao = lazy(() => import('@/pages/ThongKeBaoCao'));
 const QuanLyHocTap = lazy(() => import('@/pages/QuanLyHocTap'));
-const HocSinh = lazy(() => import('@/pages/HocSinh'));
+const HocSinh = lazy(() => import('@/pages/StudentManagement'));
 const QuanTriThongTin = lazy(() => import('@/pages/QuanTriThongTin'));
 const AdminDashboard = lazy(() => import('@/components/admin-dashboard'));
 const Profile = lazy(() => import('@/pages/Profile'));
@@ -147,6 +147,14 @@ export const routeMenuConfig = [
     icon: null,
     element: <QuanTriThongTin />,
     showInMenu: false,
+    badge: null,
+  },
+  {
+    path: 'student-management',
+    label: 'Student Management',
+    icon: Users,
+    element: <HocSinh />,
+    showInMenu: true,
     badge: null,
   },
 ];
