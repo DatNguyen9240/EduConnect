@@ -1,14 +1,55 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useShowForm } from '@/hooks/useLoginForm';
-import { useRegisterForm } from '@hooks/useRegisterForm';
+// import { useRegisterForm } from '@hooks/useRegisterForm';
 import { ROUTES } from '@constants/routes';
 import { ASSETS } from '@constants/assets';
-import { Input } from '@components/common/Input';
 import { Button } from '@components/common/Button';
+import { useForm } from 'react-hook-form';
+import { schema, type Schema } from '@/utils/rules';
+import InputComponent from '@/components/common/Input/InputComponent';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useMutation } from '@tanstack/react-query';
+import { registerAccount } from '@/api/auth.api';
+import { isAxiosBadRequestError } from '@/utils/utils';
+import type { ErrorResponse } from '@/types/utils.type';
+
+type FormData = Schema;
 
 export default function Register() {
   const showForm = useShowForm();
-  const { formData, handleChange, handleSubmit } = useRegisterForm();
+  // const { formData, handleChange, handleSubmit } = useRegisterForm();
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: yupResolver(schema),
+  });
+
+  const registerAccountMutation = useMutation({
+    mutationFn: (body: FormData) => registerAccount(body),
+  });
+
+  const onSubmit = handleSubmit((data) => {
+    registerAccountMutation.mutate(data, {
+      onSuccess: () => {
+        navigate('/login');
+      },
+      onError: (error) => {
+        if (isAxiosBadRequestError<ErrorResponse<FormData>>(error)) {
+          const formError = error.response?.data.error;
+          if (formError) {
+            setError('email', {
+              message: formError[0],
+              type: 'Server',
+            });
+          }
+        }
+      },
+    });
+  });
 
   return (
     <div className="flex min-h-screen bg-[#f0f4ff]">
@@ -49,49 +90,57 @@ export default function Register() {
             Create your account
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <Input
-              id="fullName"
-              name="fullName"
+          <form onSubmit={onSubmit} className="space-y-5" noValidate>
+            <InputComponent
+              id="firstName"
+              name="firstName"
               type="text"
-              label="Họ và tên"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="Nguyễn Văn A"
-              required
+              label="Tên"
+              placeholder="An"
+              register={register}
+              errorMessage={errors.firstName?.message}
             />
 
-            <Input
+            <InputComponent
+              id="lastName"
+              name="lastName"
+              type="text"
+              label="Họ"
+              placeholder="Nguyễn Văn"
+              register={register}
+              errorMessage={errors.lastName?.message}
+            />
+
+            <InputComponent
               id="email"
               name="email"
               type="email"
               label="Email"
-              value={formData.email}
-              onChange={handleChange}
               placeholder="example@email.com"
-              required
+              register={register}
+              errorMessage={errors.email?.message}
             />
 
-            <Input
+            <InputComponent
               id="password"
               name="password"
               type="password"
               label="Mật khẩu"
-              value={formData.password}
-              onChange={handleChange}
               placeholder="********"
-              required
+              register={register}
+              errorMessage={errors.password?.message}
+              autoComplete="on"
             />
 
-            <Input
+            <InputComponent
               id="confirmPassword"
               name="confirmPassword"
               type="password"
               label="Xác nhận mật khẩu"
-              value={formData.confirmPassword}
-              onChange={handleChange}
               placeholder="********"
-              required
+              register={register}
+              errorMessage={errors.confirmPassword?.message}
+              autoComplete="on"
             />
 
             <Button type="submit" fullWidth size="lg">

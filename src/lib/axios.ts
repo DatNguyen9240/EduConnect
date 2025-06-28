@@ -1,5 +1,23 @@
+import { URL_LOGIN, URL_REFRESH_TOKEN } from '@/api/auth.api';
 import apiConfig from '@/constants/apiConfig';
-import axios from 'axios';
+import type { AuthLoginResponse, RefreshTokenResponse } from '@/types/auth.type';
+import type { ErrorResponse } from '@/types/utils.type';
+import {
+  clearLS,
+  getAccessTokenFromLS,
+  getRefreshTokenFromLS,
+  setAccessTokenToLS,
+  setRefreshTokenToLS,
+} from '@/utils/auth';
+import { getAccountIdFromToken, isTokenExpired } from '@/utils/jwt';
+import { isAxiosBadRequestError, isAxiosUnauthorizedError } from '@/utils/utils';
+import axios, { AxiosError, HttpStatusCode } from 'axios';
+import { toast } from 'react-toastify';
+
+//
+let accessToken = getAccessTokenFromLS();
+let refreshToken = getRefreshTokenFromLS();
+let refreshTokenRequest: Promise<string> | null = null;
 
 const axiosInstance = axios.create({
   baseURL: apiConfig.baseURL,
@@ -11,9 +29,20 @@ const axiosInstance = axios.create({
 
 // Thêm interceptor để gắn token vào request
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) {
+  async (config) => {
+    if (
+      accessToken &&
+      isTokenExpired(accessToken) &&
+      config.url !== URL_REFRESH_TOKEN &&
+      config.url !== URL_LOGIN
+    ) {
+      if (!refreshTokenRequest) {
+        refreshTokenRequest = handleRefreshToken();
+      }
+      accessToken = await refreshTokenRequest;
+      refreshTokenRequest = null;
+    }
+    if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
@@ -21,26 +50,128 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor để xử lý lỗi 401 Unauthorized
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config;
+// Add a response interceptor
+axiosInstance.interceptors.response.use(
+  function (response) {
+    const { url } = response.config;
+    if (url === URL_LOGIN) {
+      const data = response.data as AuthLoginResponse;
+      accessToken = data.data.token;
+      refreshToken = data.data.refreshToken;
+      setAccessTokenToLS(accessToken);
+      setRefreshTokenToLS(refreshToken);
+    } else if (url === '/api/Auth/logout') {
+      accessToken = '';
+      refreshToken = '';
+      clearLS();
+    }
+    return response;
+  },
+  async (error: AxiosError) => {
+    if (error.response?.status !== HttpStatusCode.BadRequest) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any | undefined = error.response?.data;
+      const message = data.message || error.message;
+      toast.error(message);
+    }
 
-//     if (error.response?.status === 401 && !originalRequest._retry) {
-//       originalRequest._retry = true;
+    if (
+      ![HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized].includes(
+        error.response?.status as number
+      )
+    ) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any | undefined = error.response?.data;
+      const message = data?.message || error.message;
+      toast.error(message);
+    }
 
-//       // Dispatch logout
-//       store.dispatch(logout());
+    if (isAxiosUnauthorizedError<ErrorResponse<{ name: string; message: string }>>(error)) {
+      const config = error.response?.config;
+      const url = config?.url || '';
+      // console.log('[401 ERROR]', url, 'Expired Token:', isAxiosExpiredTokenError(error));
 
-//       // Xóa token khỏi localStorage
-//       localStorage.removeItem('accessToken');
+      if (url === URL_REFRESH_TOKEN) {
+        clearLS();
+        toast.error('Session expired, please login again.');
+        return Promise.reject(error);
+      }
 
-//       return Promise.reject(error);
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+      if (refreshToken && accessToken) {
+        try {
+          refreshTokenRequest = refreshTokenRequest || handleRefreshToken();
+          accessToken = await refreshTokenRequest;
+          refreshTokenRequest = null;
+
+          // Retry lại request với token mới
+          if (config) {
+            config.headers = config.headers || {};
+            config.headers.Authorization = `Bearer ${accessToken}`;
+            return axiosInstance(config);
+          }
+        } catch (refreshError) {
+          clearLS();
+          toast.error('Session expired, please login again.');
+        }
+      } else {
+        clearLS();
+        toast.error('Session expired, please login again.');
+      }
+    }
+
+    if (isAxiosBadRequestError(error)) {
+      const data = error.response?.data as { error?: string[] } | undefined;
+      if (
+        data?.error &&
+        Array.isArray(data.error) &&
+        data.error.some(
+          (msg: string) =>
+            msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('expired')
+        )
+      ) {
+        clearLS();
+        toast.error('Session expired, please login again.');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+export async function handleRefreshToken(): Promise<string> {
+  const token = getAccessTokenFromLS();
+  const refresh = getRefreshTokenFromLS();
+  const accountId = getAccountIdFromToken(token);
+
+  if (!refresh || !accountId) {
+    clearLS();
+    throw new Error('No refreshToken or accountId found.');
+  }
+
+  try {
+    const response = await axiosInstance.post<RefreshTokenResponse>(URL_REFRESH_TOKEN, {
+      accountId,
+      refreshToken: refresh,
+    });
+
+    // API trả về kiểu { data: { token, refreshToken }, ... }
+    if (response.data.success && response.data.data) {
+      const { token: newToken, refreshToken: newRefreshToken } = response.data.data;
+      setAccessTokenToLS(newToken);
+      setRefreshTokenToLS(newRefreshToken);
+
+      accessToken = newToken;
+      refreshToken = newRefreshToken;
+
+      return newToken;
+    } else {
+      clearLS();
+      throw new Error('Refresh token failed');
+    }
+  } catch (error) {
+    clearLS();
+    throw error;
+  }
+}
 
 // Type for query parameters
 type QueryParams = Record<string, string | number | boolean>;
@@ -85,5 +216,4 @@ const api = {
   },
 };
 
-export default axiosInstance;
-export { api };
+export default api;
