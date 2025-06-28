@@ -112,7 +112,7 @@ export default async function LichThi() {
   const data = await getData();
 
   return (
-    <div className="container mx-auto">
+    <div className="container">
       <TaskFilterExam />
       <div className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6">
         <DataTable columns={columns} data={data} />

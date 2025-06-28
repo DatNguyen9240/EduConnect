@@ -1,5 +1,5 @@
-import { createBrowserRouter } from 'react-router-dom';
-import { lazy } from 'react';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { lazy, useContext } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import AuthLayout from '@/components/layout/AuthLayout';
 import Error from '@/pages/Error/Error';
@@ -14,6 +14,7 @@ import {
   BarChart,
 } from 'lucide-react';
 import LichThi from '@/pages/LichThi';
+import { AppContext } from '@/contexts/app.context';
 
 // Lazy load components - chỉ tải khi cần thiết
 const Home = lazy(() => import('@/pages/Home'));
@@ -159,33 +160,71 @@ export const routeMenuConfig = [
   },
 ];
 
+function ProtectedRoute() {
+  const { isAuthenticated } = useContext(AppContext);
+
+  return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
+}
+
+function RejectedRoute() {
+  const { isAuthenticated } = useContext(AppContext);
+
+  return !isAuthenticated ? <Outlet /> : <Navigate to="/admin-dashboard" replace />;
+}
+
+function HomeOnlyRoute() {
+  const { isAuthenticated } = useContext(AppContext);
+
+  // Nếu đã đăng nhập, không cho vào Home, redirect về /admin-dashboard
+  // Nếu chưa đăng nhập, cho vào Home
+  return !isAuthenticated ? <Outlet /> : <Navigate to="/admin-dashboard" replace />;
+}
+
 export const RouterConfig = () => {
   return createBrowserRouter([
     {
-      path: '/',
+      path: '',
       element: <MainLayout />,
       errorElement: <Error>Something went wrong</Error>,
       children: [
         {
-          index: true,
-          element: <Home />,
+          path: '/',
+          element: <HomeOnlyRoute />,
+          children: [
+            {
+              index: true,
+              element: <Home />,
+            },
+          ],
         },
-        ...routeMenuConfig
-          .filter((r) => r.path !== '/')
-          .map((r) => ({ path: r.path.replace(/^\//, ''), element: r.element })),
+        {
+          path: '/',
+          element: <ProtectedRoute />,
+          children: routeMenuConfig
+            .filter((r) => r.path !== '/')
+            .map((r) => ({
+              path: r.path.replace(/^\//, ''),
+              element: r.element,
+            })),
+        },
       ],
     },
     {
-      path: '/',
-      element: <AuthLayout />,
+      element: <RejectedRoute />,
       children: [
         {
-          path: 'login',
-          element: <Login />,
-        },
-        {
-          path: 'register',
-          element: <Register />,
+          path: '/',
+          element: <AuthLayout />,
+          children: [
+            {
+              path: 'login',
+              element: <Login />,
+            },
+            {
+              path: 'register',
+              element: <Register />,
+            },
+          ],
         },
       ],
     },
