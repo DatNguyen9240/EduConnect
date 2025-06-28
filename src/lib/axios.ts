@@ -109,7 +109,7 @@ axiosInstance.interceptors.response.use(
             config.headers.Authorization = `Bearer ${accessToken}`;
             return axiosInstance(config);
           }
-        } catch (refreshError) {
+        } catch {
           clearLS();
           toast.error('Session expired, please login again.');
         }
