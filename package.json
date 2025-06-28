@@ -10,7 +10,7 @@
     "lint": "eslint . --fix",
     "lint:check": "eslint . --fix",
     "prebuild": "npm run format && npm run lint",
-    "build": "tsc -b ld",
+    "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
