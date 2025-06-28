@@ -1,19 +1,19 @@
-import type { RegisterOptions, UseFormRegister } from 'react-hook-form';
+import type { RegisterOptions, UseFormRegister, FieldValues, Path } from 'react-hook-form';
 import { Input } from '@components/common/Input';
 
-interface Props {
+interface Props<T extends FieldValues = FieldValues> {
   id?: string;
   type: React.HTMLInputTypeAttribute;
   label?: string;
   errorMessage?: string;
   placeholder?: string;
-  name: string;
-  register: UseFormRegister<any>;
-  rules?: RegisterOptions<any>;
+  name: Path<T>;
+  register: UseFormRegister<T>;
+  rules?: RegisterOptions<T>;
   autoComplete?: string;
 }
 
-export default function InputComponent({
+export default function InputComponent<T extends FieldValues = FieldValues>({
   id,
   type,
   label,
@@ -23,15 +23,13 @@ export default function InputComponent({
   register,
   rules,
   autoComplete,
-}: Props) {
+}: Props<T>) {
   return (
     <Input
       id={id}
       type={type}
       label={label}
       autoComplete={autoComplete}
-      // value={formData.fullName}
-      // onChange={handleChange}
       placeholder={placeholder}
       {...register(name, rules)}
       error={errorMessage}
