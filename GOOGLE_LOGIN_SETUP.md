@@ -33,3 +33,4 @@ VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id_here
 - Đảm bảo domain được thêm vào Authorized origins trong Google Cloud Console
 - Sử dụng HTTPS trong production
 - Không commit Client ID vào git
+  / test
