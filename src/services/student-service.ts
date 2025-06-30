@@ -6,16 +6,16 @@ import { generateStudentId, generateParentId } from '@/ultils/Student/student-ut
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class StudentService {
-  private static students: Student[] = [...mockStudents];
+  private static students: Student[] = mockStudents;
 
   static async getAllStudents(): Promise<Student[]> {
     await delay(500); // Mô phỏng network delay
     return [...this.students];
   }
 
-  static async getStudentById(id: string): Promise<Student | null> {
+  static async getStudentById(studentId: string): Promise<Student | null> {
     await delay(300);
-    return this.students.find((student) => student.id === id) || null;
+    return this.students.find((student) => student.studentID === studentId) || null;
   }
 
   static async createStudent(formData: StudentFormData): Promise<Student> {
@@ -23,8 +23,7 @@ export class StudentService {
 
     const newStudent: Student = {
       ...formData,
-      id: Date.now().toString(),
-      studentId: formData.studentId || generateStudentId(this.students),
+      studentID: Date.now().toString(),
       parentId: formData.parentId || generateParentId(),
     };
 
@@ -32,27 +31,28 @@ export class StudentService {
     return newStudent;
   }
 
-  static async updateStudent(id: string, formData: StudentFormData): Promise<Student> {
+  static async updateStudent(studentId: string, formData: StudentFormData): Promise<Student> {
     await delay(600);
 
-    const index = this.students.findIndex((student) => student.id === id);
+    const index = this.students.findIndex((student) => student.studentID === studentId);
     if (index === -1) {
       throw new Error('Student not found');
     }
 
     const updatedStudent: Student = {
+      ...this.students[index],
       ...formData,
-      id,
+      updatedAt: new Date().toISOString(),
     };
 
     this.students[index] = updatedStudent;
     return updatedStudent;
   }
 
-  static async deleteStudent(id: string): Promise<void> {
+  static async deleteStudent(studentId: string): Promise<void> {
     await delay(400);
 
-    const index = this.students.findIndex((student) => student.id === id);
+    const index = this.students.findIndex((student) => student.studentID === studentId);
     if (index === -1) {
       throw new Error('Student not found');
     }
@@ -67,9 +67,34 @@ export class StudentService {
     return this.students.filter(
       (student) =>
         student.fullName.toLowerCase().includes(lowercaseQuery) ||
-        student.studentId.toLowerCase().includes(lowercaseQuery) ||
+        student.studentID.toLowerCase().includes(lowercaseQuery) ||
         student.className.toLowerCase().includes(lowercaseQuery) ||
         student.parentName.toLowerCase().includes(lowercaseQuery)
     );
+  }
+
+  static async getStudents(): Promise<Student[]> {
+    return this.students;
+  }
+
+  static async getStudentsByClass(classId: number): Promise<Student[]> {
+    return this.students.filter((student) => student.classID === classId);
+  }
+
+  static async addStudent(formData: StudentFormData): Promise<Student> {
+    await delay(800);
+
+    const studentId = Date.now().toString();
+    const newStudent: Student = {
+      ...formData,
+      studentID: studentId,
+      accountID: `ACC_${studentId}`,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+    };
+
+    this.students.push(newStudent);
+    return newStudent;
   }
 }

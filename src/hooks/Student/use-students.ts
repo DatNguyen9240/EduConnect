@@ -17,9 +17,22 @@ export function useStudents() {
   const classes = mockClasses;
 
   const addStudent = (formData: StudentFormData) => {
+    const studentId = Date.now().toString();
+    // Tách họ và tên
+    const nameParts = formData.fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
     const newStudent: Student = {
       ...formData,
-      id: Date.now().toString(),
+      classID: formData.classID ? Number(formData.classID) : null,
+      studentID: studentId,
+      accountID: `ACC_${studentId}`,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+      firstName,
+      lastName,
+      avatarUrl: '', // hoặc avatar mặc định nếu muốn
     };
     setStudents((prev) => [...prev, newStudent]);
     toast({
@@ -28,9 +41,24 @@ export function useStudents() {
     });
   };
 
-  const updateStudent = (id: string, formData: StudentFormData) => {
+  const updateStudent = (studentId: string, formData: StudentFormData) => {
+    // Tách họ và tên
+    const nameParts = formData.fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
     setStudents((prev) =>
-      prev.map((student) => (student.id === id ? { ...formData, id } : student))
+      prev.map((student) =>
+        student.studentID === studentId
+          ? {
+              ...student,
+              ...formData,
+              classID: formData.classID ? Number(formData.classID) : null,
+              updatedAt: new Date().toISOString(),
+              firstName,
+              lastName,
+            }
+          : student
+      )
     );
     toast({
       title: 'Thành công',
@@ -38,8 +66,8 @@ export function useStudents() {
     });
   };
 
-  const deleteStudent = (id: string) => {
-    setStudents((prev) => prev.filter((student) => student.id !== id));
+  const deleteStudent = (studentId: string) => {
+    setStudents((prev) => prev.filter((student) => student.studentID !== studentId));
     toast({
       title: 'Thành công',
       description: SUCCESS_MESSAGES.DELETE_STUDENT,

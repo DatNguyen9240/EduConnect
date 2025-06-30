@@ -53,6 +53,12 @@ axiosInstance.interceptors.request.use(
 // Add a response interceptor
 axiosInstance.interceptors.response.use(
   function (response) {
+    console.log('API Response:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data,
+    });
+
     const { url } = response.config;
     if (url === URL_LOGIN) {
       const data = response.data as AuthLoginResponse;
@@ -68,6 +74,20 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
+    // Log detailed error information
+    console.error('API Error:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.config?.headers,
+    });
+
+    // Handle 404 errors without showing toast
+    if (error.response?.status === HttpStatusCode.NotFound) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status !== HttpStatusCode.BadRequest) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any | undefined = error.response?.data;
@@ -75,21 +95,9 @@ axiosInstance.interceptors.response.use(
       toast.error(message);
     }
 
-    if (
-      ![HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized].includes(
-        error.response?.status as number
-      )
-    ) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any | undefined = error.response?.data;
-      const message = data?.message || error.message;
-      toast.error(message);
-    }
-
     if (isAxiosUnauthorizedError<ErrorResponse<{ name: string; message: string }>>(error)) {
       const config = error.response?.config;
       const url = config?.url || '';
-      // console.log('[401 ERROR]', url, 'Expired Token:', isAxiosExpiredTokenError(error));
 
       if (url === URL_REFRESH_TOKEN) {
         clearLS();
@@ -119,20 +127,6 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    if (isAxiosBadRequestError(error)) {
-      const data = error.response?.data as { error?: string[] } | undefined;
-      if (
-        data?.error &&
-        Array.isArray(data.error) &&
-        data.error.some(
-          (msg: string) =>
-            msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('expired')
-        )
-      ) {
-        clearLS();
-        toast.error('Session expired, please login again.');
-      }
-    }
     return Promise.reject(error);
   }
 );
@@ -153,7 +147,6 @@ export async function handleRefreshToken(): Promise<string> {
       refreshToken: refresh,
     });
 
-    // API trả về kiểu { data: { token, refreshToken }, ... }
     if (response.data.success && response.data.data) {
       const { token: newToken, refreshToken: newRefreshToken } = response.data.data;
       setAccessTokenToLS(newToken);
