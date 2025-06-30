@@ -15,7 +15,7 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ students }: StatsCardsProps) {
-  const stats = getStudentStats(students);
+  const stats = getStudentStats(students, []);
 
   const cards = [
     {

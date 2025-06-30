@@ -1,6 +1,4 @@
 import type { Student } from '@/types/student';
-import { mockClasses } from '@/data/Student/classes';
-import { mockParents } from '@/data/Student/parents';
 
 export const generateStudentId = (students: Student[]): string => {
   const maxId = students.reduce((max, student) => {
@@ -11,8 +9,8 @@ export const generateStudentId = (students: Student[]): string => {
   return `HS${String(maxId + 1).padStart(3, '0')}`;
 };
 
-export const generateParentId = (): string => {
-  const maxId = mockParents.reduce((max, parent) => {
+export const generateParentId = (parents: { id: string }[]): string => {
+  const maxId = parents.reduce((max, parent) => {
     const numericId = Number.parseInt(parent.id.replace('PH', ''));
     return numericId > max ? numericId : max;
   }, 0);
@@ -38,18 +36,22 @@ export const getStudentsByClass = (students: Student[], classId: string): Studen
   return students.filter((student) => student.classID === classId);
 };
 
-export const getStudentsByGrade = (students: Student[], grade: number): Student[] => {
-  const classesInGrade = mockClasses.filter((cls) => cls.grade === grade).map((cls) => cls.id);
+export const getStudentsByGrade = (
+  students: Student[],
+  grade: number,
+  classes: { id: string; grade: number }[]
+): Student[] => {
+  const classesInGrade = classes.filter((cls) => cls.grade === grade).map((cls) => cls.id);
   return students.filter((student) => classesInGrade.includes(student.classID));
 };
 
-export const getStudentStats = (students: Student[]) => {
+export const getStudentStats = (students: Student[], classes: { id: string; grade: number }[]) => {
   const stats = {
     total: students.length,
     byGrade: {
-      10: getStudentsByGrade(students, 10).length,
-      11: getStudentsByGrade(students, 11).length,
-      12: getStudentsByGrade(students, 12).length,
+      10: getStudentsByGrade(students, 10, classes).length,
+      11: getStudentsByGrade(students, 11, classes).length,
+      12: getStudentsByGrade(students, 12, classes).length,
     },
     byGender: {
       male: students.filter((s) => s.gender === 'Nam').length,
