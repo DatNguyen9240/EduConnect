@@ -55,14 +55,20 @@ export default function LichThi() {
   );
 
   // Xử lý khi đổi trang
-  const handlePageChange = useCallback((page: number) => {
-    setPagination({ ...pagination, pageIndex: page });
-  }, [pagination]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setPagination({ ...pagination, pageIndex: page });
+    },
+    [pagination]
+  );
 
   // Xử lý khi đổi page size
-  const handlePageSizeChange = useCallback((pageSize: number) => {
-    setPagination({ ...pagination, pageIndex: 1, pageSize });
-  }, [pagination]);
+  const handlePageSizeChange = useCallback(
+    (pageSize: number) => {
+      setPagination({ ...pagination, pageIndex: 1, pageSize });
+    },
+    [pagination]
+  );
 
   // Xử lý search từ DataTable
   const handleSearchChange = useCallback(

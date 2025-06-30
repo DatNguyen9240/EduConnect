@@ -8,7 +8,7 @@ interface StudentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   student: Student | null;
-  onSubmit: (data: any) => void;
+  onSubmit?: (data: Student) => void;
 }
 
 export function StudentDialog({ open, onOpenChange, student }: StudentDialogProps) {
@@ -18,7 +18,7 @@ export function StudentDialog({ open, onOpenChange, student }: StudentDialogProp
     if (!dateString) return '-';
     try {
       return new Date(dateString).toLocaleDateString('vi-VN');
-    } catch (e) {
+    } catch {
       return '-';
     }
   };
@@ -27,7 +27,7 @@ export function StudentDialog({ open, onOpenChange, student }: StudentDialogProp
     if (!dateString) return '-';
     try {
       return new Date(dateString).toLocaleString('vi-VN');
-    } catch (e) {
+    } catch {
       return '-';
     }
   };

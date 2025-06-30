@@ -6,12 +6,18 @@ import type { GoogleUser } from '@/types';
 import { setAccessTokenToLS, setRefreshTokenToLS } from '@/utils/auth';
 import { AppContext } from '@/contexts/app.context';
 
+interface GoogleLoginApiResponse {
+  token: string;
+  refreshToken: string;
+  [key: string]: unknown;
+}
+
 export const useGoogleAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { setIsAuthenticated } = useContext(AppContext);
 
-  const handleGoogleSuccess = async (user: GoogleUser, apiResponse?: any) => {
+  const handleGoogleSuccess = async (user: GoogleUser, apiResponse?: GoogleLoginApiResponse) => {
     setIsLoading(true);
     try {
       // Log only essential user information

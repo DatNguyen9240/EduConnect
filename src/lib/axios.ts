@@ -10,7 +10,7 @@ import {
   setRefreshTokenToLS,
 } from '@/utils/auth';
 import { getAccountIdFromToken, isTokenExpired } from '@/utils/jwt';
-import { isAxiosBadRequestError, isAxiosUnauthorizedError } from '@/utils/utils';
+import { isAxiosUnauthorizedError } from '@/utils/utils';
 import axios, { AxiosError, HttpStatusCode } from 'axios';
 import { toast } from 'react-toastify';
 

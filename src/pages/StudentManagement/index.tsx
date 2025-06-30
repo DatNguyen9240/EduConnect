@@ -5,7 +5,7 @@ import { Button } from '@/components/common/Button';
 import { Plus } from 'lucide-react';
 import { useStudents } from '@/hooks/Student/use-students';
 import { useStudentList } from '@/hooks/Student/use-student-list';
-import type { Student, StudentFormData } from '@/types/student';
+import type { Student } from '@/types/student';
 import { SearchBar } from '@/components/ui/CrudStudent/search-bar';
 import { StudentStats } from '@/components/ui/CrudStudent/student-stats';
 import { StudentTable } from '@/components/ui/CrudStudent/student-table';
@@ -22,7 +22,7 @@ import {
 import { StatsCards } from '@/components/ui/CrudStudent/stats-cards';
 
 export default function StudentManagement() {
-  const { addStudent, updateStudent, deleteStudent } = useStudents();
+  const { deleteStudent } = useStudents();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
@@ -120,21 +120,6 @@ export default function StudentManagement() {
     setIsDialogOpen(true);
   };
 
-  const handleViewStudent = (student: Student) => {
-    setViewingStudent(student);
-    setEditingStudent(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmitStudent = (formData: StudentFormData) => {
-    if (editingStudent) {
-      updateStudent(editingStudent.studentID, formData);
-    } else {
-      addStudent(formData);
-    }
-    setIsDialogOpen(false);
-  };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -188,7 +173,6 @@ export default function StudentManagement() {
           ) : (
             <StudentTable
               students={filteredStudents}
-              onView={handleViewStudent}
               onEdit={handleEditStudent}
               onDelete={deleteStudent}
               currentPage={currentPage}
@@ -203,7 +187,6 @@ export default function StudentManagement() {
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         student={viewingStudent || editingStudent}
-        onSubmit={handleSubmitStudent}
       />
     </div>
   );

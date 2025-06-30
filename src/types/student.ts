@@ -2,7 +2,7 @@ export interface Student {
   studentID: string;
   accountID: string;
   parentID: string;
-  classID: number | null;
+  classID: string;
   fullName: string;
   email: string;
   firstName: string;

@@ -26,7 +26,6 @@ const QuanLyHocTap = lazy(() => import('@/pages/QuanLyHocTap'));
 const HocSinh = lazy(() => import('@/pages/StudentManagement'));
 const QuanTriThongTin = lazy(() => import('@/pages/QuanTriThongTin'));
 const AdminDashboard = lazy(() => import('@/components/admin-dashboard'));
-const Profile = lazy(() => import('@/pages/Profile'));
 
 export const routeMenuConfig = [
   {
@@ -49,7 +48,7 @@ export const routeMenuConfig = [
     path: '/profile',
     label: 'Profile',
     icon: Users,
-    element: <Profile />,
+    element: <div>Profile page</div>,
     showInMenu: false,
     badge: null,
   },

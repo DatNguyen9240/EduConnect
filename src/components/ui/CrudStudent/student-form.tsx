@@ -32,8 +32,8 @@ export function StudentForm({ student, onSubmit, onCancel }: StudentFormProps) {
     className: student?.className || '',
     parentID: student?.parentID || '',
     parentName: student?.parentName || '',
-    parentPhone: (student as any)?.parentPhone || '',
-    address: (student as any)?.address || '',
+    parentPhone: student?.parentPhone || '',
+    address: student?.address || '',
     email: student?.email || '',
   });
 

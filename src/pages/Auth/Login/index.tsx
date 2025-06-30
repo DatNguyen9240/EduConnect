@@ -60,7 +60,7 @@ export default function Login() {
   });
 
   // Google login handler
-  const handleGoogleLogin = async (googleUser: GoogleUser, _credential: string) => {
+  const handleGoogleLogin = async (googleUser: GoogleUser) => {
     try {
       const { data: apiResponse } = await googleLogin(googleUser);
       handleGoogleSuccess(googleUser, apiResponse);

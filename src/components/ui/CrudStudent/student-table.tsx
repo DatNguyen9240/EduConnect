@@ -14,11 +14,9 @@ import { Eye, Trash2, Edit } from 'lucide-react';
 import type { Student } from '@/types/student';
 import { StudentDialog } from './student-dialog';
 import { useState } from 'react';
-import { EyeIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface StudentTableProps {
   students: Student[];
-  onView: (student: Student) => void;
   onEdit: (student: Student) => void;
   onDelete: (studentId: string) => void;
   currentPage: number;
@@ -28,7 +26,6 @@ interface StudentTableProps {
 
 export function StudentTable({
   students,
-  onView,
   onEdit,
   onDelete,
   currentPage,
@@ -106,64 +103,6 @@ export function StudentTable({
       </div>
     );
   }
-
-  const columns = [
-    {
-      header: 'Mã học sinh',
-      accessorKey: 'studentID',
-    },
-    {
-      header: 'Họ và tên',
-      accessorKey: 'fullName',
-    },
-    {
-      header: 'Email',
-      accessorKey: 'email',
-    },
-    {
-      header: 'Lớp',
-      accessorKey: 'className',
-    },
-    {
-      header: 'Phụ huynh',
-      accessorKey: 'parentName',
-    },
-    {
-      header: 'Thao tác',
-      id: 'actions',
-      cell: ({ row }: { row: { original: Student } }) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleViewDetails(row.original)}
-            title="Xem chi tiết"
-            className="h-8 w-8 p-0"
-          >
-            <EyeIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(row.original)}
-            title="Chỉnh sửa"
-            className="h-8 w-8 p-0"
-          >
-            <PencilIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(row.original.studentID)}
-            title="Xóa"
-            className="h-8 w-8 p-0"
-          >
-            <TrashIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
 
   return (
     <div>

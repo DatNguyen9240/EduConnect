@@ -5,13 +5,12 @@ import type { Student, StudentFormData } from '@/types/student';
 import { toast } from '@/hooks/Toast/use-toast';
 
 // Import data từ các file riêng
-import { mockStudents } from '@/data/Student/students';
 import { mockClasses, getClassName } from '@/data/Student/classes';
 import { SUCCESS_MESSAGES } from '@/constants/student';
 
 export function useStudents() {
   // Thay thế initialStudents bằng mockStudents
-  const [students, setStudents] = useState<Student[]>(mockStudents);
+  const [students, setStudents] = useState<Student[]>([]);
 
   // Thay thế classes bằng mockClasses
   const classes = mockClasses;
@@ -24,7 +23,7 @@ export function useStudents() {
     const lastName = nameParts.slice(1).join(' ') || '';
     const newStudent: Student = {
       ...formData,
-      classID: formData.classID ? Number(formData.classID) : null,
+      classID: formData.classID ? String(formData.classID) : '',
       studentID: studentId,
       accountID: `ACC_${studentId}`,
       isActive: true,
@@ -52,7 +51,7 @@ export function useStudents() {
           ? {
               ...student,
               ...formData,
-              classID: formData.classID ? Number(formData.classID) : null,
+              classID: formData.classID ? String(formData.classID) : '',
               updatedAt: new Date().toISOString(),
               firstName,
               lastName,

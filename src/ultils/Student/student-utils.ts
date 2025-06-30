@@ -4,7 +4,7 @@ import { mockParents } from '@/data/Student/parents';
 
 export const generateStudentId = (students: Student[]): string => {
   const maxId = students.reduce((max, student) => {
-    const numericId = Number.parseInt(student.studentId.replace('HS', ''));
+    const numericId = Number.parseInt(student.studentID.replace('HS', ''));
     return numericId > max ? numericId : max;
   }, 0);
 
@@ -35,12 +35,12 @@ export const formatDate = (dateString: string): string => {
 };
 
 export const getStudentsByClass = (students: Student[], classId: string): Student[] => {
-  return students.filter((student) => student.classId === classId);
+  return students.filter((student) => student.classID === classId);
 };
 
 export const getStudentsByGrade = (students: Student[], grade: number): Student[] => {
   const classesInGrade = mockClasses.filter((cls) => cls.grade === grade).map((cls) => cls.id);
-  return students.filter((student) => classesInGrade.includes(student.classId));
+  return students.filter((student) => classesInGrade.includes(student.classID));
 };
 
 export const getStudentStats = (students: Student[]) => {
