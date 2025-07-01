@@ -42,4 +42,4 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   );
 };
 
-export const useProfileContext = () => useContext(ProfileContext); 
+export const useProfileContext = () => useContext(ProfileContext);
