@@ -12,8 +12,8 @@ export const GoogleLogin = ({ onSuccess, onError, className = '' }: GoogleLoginP
       // Decode the JWT token to get user information
       const credentialResponseDecoded = jwtDecode(credentialResponse.credential) as GoogleUser;
 
-      // Call the success callback with user data and credential
-      onSuccess(credentialResponseDecoded, credentialResponse.credential);
+      // Call the success callback with user data
+      onSuccess(credentialResponseDecoded);
     } catch (error) {
       console.error('Error decoding Google token:', error);
       onError?.(error);

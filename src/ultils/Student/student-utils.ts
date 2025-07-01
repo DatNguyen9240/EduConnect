@@ -1,16 +1,18 @@
 import type { Student } from '@/types/student';
+import { mockClasses } from '@/data/Student/classes';
+import { mockParents } from '@/data/Student/parents';
 
 export const generateStudentId = (students: Student[]): string => {
   const maxId = students.reduce((max, student) => {
-    const numericId = Number.parseInt(student.studentID.replace('HS', ''));
+    const numericId = Number.parseInt(student.studentId.replace('HS', ''));
     return numericId > max ? numericId : max;
   }, 0);
 
   return `HS${String(maxId + 1).padStart(3, '0')}`;
 };
 
-export const generateParentId = (parents: { id: string }[]): string => {
-  const maxId = parents.reduce((max, parent) => {
+export const generateParentId = (): string => {
+  const maxId = mockParents.reduce((max, parent) => {
     const numericId = Number.parseInt(parent.id.replace('PH', ''));
     return numericId > max ? numericId : max;
   }, 0);
@@ -33,25 +35,21 @@ export const formatDate = (dateString: string): string => {
 };
 
 export const getStudentsByClass = (students: Student[], classId: string): Student[] => {
-  return students.filter((student) => student.classID === classId);
+  return students.filter((student) => student.classId === classId);
 };
 
-export const getStudentsByGrade = (
-  students: Student[],
-  grade: number,
-  classes: { id: string; grade: number }[]
-): Student[] => {
-  const classesInGrade = classes.filter((cls) => cls.grade === grade).map((cls) => cls.id);
-  return students.filter((student) => classesInGrade.includes(student.classID));
+export const getStudentsByGrade = (students: Student[], grade: number): Student[] => {
+  const classesInGrade = mockClasses.filter((cls) => cls.grade === grade).map((cls) => cls.id);
+  return students.filter((student) => classesInGrade.includes(student.classId));
 };
 
-export const getStudentStats = (students: Student[], classes: { id: string; grade: number }[]) => {
+export const getStudentStats = (students: Student[]) => {
   const stats = {
     total: students.length,
     byGrade: {
-      10: getStudentsByGrade(students, 10, classes).length,
-      11: getStudentsByGrade(students, 11, classes).length,
-      12: getStudentsByGrade(students, 12, classes).length,
+      10: getStudentsByGrade(students, 10).length,
+      11: getStudentsByGrade(students, 11).length,
+      12: getStudentsByGrade(students, 12).length,
     },
     byGender: {
       male: students.filter((s) => s.gender === 'Nam').length,
