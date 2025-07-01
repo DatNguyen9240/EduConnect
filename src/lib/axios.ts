@@ -102,6 +102,7 @@ axiosInstance.interceptors.response.use(
       if (url === URL_REFRESH_TOKEN) {
         clearLS();
         toast.error('Session expired, please login again.');
+        window.location.href = '/';
         return Promise.reject(error);
       }
 
@@ -120,10 +121,12 @@ axiosInstance.interceptors.response.use(
         } catch {
           clearLS();
           toast.error('Session expired, please login again.');
+          window.location.href = '/';
         }
       } else {
         clearLS();
         toast.error('Session expired, please login again.');
+        window.location.href = '/';
       }
     }
 

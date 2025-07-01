@@ -6,6 +6,7 @@ import {
   getRolesFromToken,
 } from '@/utils/jwt';
 import { createContext, useState, useEffect } from 'react';
+import { clearLS } from '@/utils/auth';
 
 interface UserInfo {
   accountId: string;
@@ -62,6 +63,18 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     initialAppContext.isAuthenticated
   );
   const [userInfo, setUserInfo] = useState<UserInfo | null>(initialAppContext.userInfo);
+
+  // Check token validity on mount
+  useEffect(() => {
+    const token = getAccessTokenFromLS();
+    const accountId = getAccountIdFromToken(token);
+    if (token && !accountId) {
+      clearLS();
+      setIsAuthenticated(false);
+      setUserInfo(null);
+      window.location.href = '/';
+    }
+  }, []);
 
   // Update user info when authentication status changes
   useEffect(() => {
