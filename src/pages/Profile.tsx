@@ -1,25 +1,15 @@
 'use client';
 
-import type React from 'react';
-import { useProfile } from '../hooks/use-profile';
-import AccountDetails from '@components/ui/Profile/account-details';
-import ParentDetails from '@components/ui/Profile/parent-details';
-import ProfileActions from '@components/ui/Profile/profile-actions';
+import React, { useState } from 'react';
+import { ProfileProvider, useProfileContext } from '../contexts/profile.context';
+import UserProfileCard from '@components/ui/Profile/user-profile-card';
+import ProfileUpdateForm from '@components/ui/Profile/ProfileUpdateForm';
 
-const ProfilePage: React.FC = () => {
-  const { profile } = useProfile();
+const ProfilePageInner: React.FC = () => {
+  const { profile, loading, fetchProfile } = useProfileContext();
+  const [editing, setEditing] = useState(false);
 
-  const handleEditProfile = () => {
-    console.log('Edit profile clicked');
-    // TODO: Implement edit profile functionality
-  };
-
-  const handleChangePassword = () => {
-    console.log('Change password clicked');
-    // TODO: Implement change password functionality
-  };
-
-  if (!profile) {
+  if (loading || !profile) {
     return (
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md mt-8">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Profile Information</h2>
@@ -31,18 +21,43 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md mt-8">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Profile Information</h2>
-
-      <AccountDetails username={profile.username} email={profile.email} />
-
-      <ParentDetails
-        fullName={profile.fullName}
-        phone={profile.phone}
-        parentEmail={profile.parentEmail}
+      <UserProfileCard
+        firstName={profile.firstName || ''}
+        lastName={profile.lastName || ''}
+        email={profile.email || ''}
+        phoneNumber={profile.phoneNumber || ''}
+        dateOfBirth={profile.dateOfBirth}
+        avatarUrl={profile.avatarUrl}
       />
-
-      <ProfileActions onEditProfile={handleEditProfile} onChangePassword={handleChangePassword} />
+      <button
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        onClick={() => setEditing(true)}
+      >
+        Edit Profile
+      </button>
+      {editing && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => setEditing(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <h3 className="text-xl font-bold mb-4">Cập nhật thông tin cá nhân</h3>
+            <ProfileUpdateForm onSuccess={async () => { await fetchProfile(); setEditing(false); }} onCancel={() => setEditing(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+const ProfilePage: React.FC = () => (
+  <ProfileProvider>
+    <ProfilePageInner />
+  </ProfileProvider>
+);
 
 export default ProfilePage;

@@ -1,21 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import type { Profile } from '../types/profile';
-import { ProfileService } from '../services/profile-service';
-
-// Remove the dummy data from here since it's now in data/profile-data.ts
+import { getProfileById } from '../api/profile.api';
+import { AppContext } from '../contexts/app.context';
 
 export const useProfile = () => {
+  const { userInfo } = useContext(AppContext);
+  const accountId = userInfo?.accountId;
+  console.log('accountId', accountId);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!accountId) return;
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const profileData = await ProfileService.getProfile();
+        const profileData = await getProfileById(accountId);
         setProfile(profileData);
       } catch (err) {
         setError('Failed to load profile data');
@@ -26,13 +29,14 @@ export const useProfile = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, [accountId]);
 
   // Method to update profile
-  const updateProfile = async (updates: Partial<Profile>) => {
+  const updateProfile = async (userId: string /*, updates: Partial<Profile> */) => {
     try {
       setLoading(true);
-      const updatedProfile = await ProfileService.updateProfile(updates);
+      // TODO: Gọi API cập nhật profile với updates khi có
+      const updatedProfile = await getProfileById(userId);
       setProfile(updatedProfile);
       return updatedProfile;
     } catch (err) {

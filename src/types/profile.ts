@@ -1,13 +1,9 @@
 export interface Profile {
-  // Account table fields
-  accountId: number;
-  username: string;
-  email: string;
-  roleId: number;
-
-  // Parent table fields
-  parentId: number;
-  fullName: string;
-  phone: string;
-  parentEmail: string;
+  // Thêm các trường cho UI profile
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  phoneNumber?: string | null;
+  dateOfBirth?: string | null;
+  avatarUrl?: string | null;
 }
