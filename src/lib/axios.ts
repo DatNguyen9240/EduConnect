@@ -151,7 +151,11 @@ export async function handleRefreshToken(): Promise<string> {
     });
 
     if (response.data.success && response.data.data) {
-      const { token: newToken, refreshToken: newRefreshToken } = response.data.data;
+      const newToken =
+        (response.data.data as { accessToken?: string }).accessToken ||
+        (response.data.data as { token?: string }).token ||
+        '';
+      const newRefreshToken = response.data.data.refreshToken || '';
       setAccessTokenToLS(newToken);
       setRefreshTokenToLS(newRefreshToken);
 
