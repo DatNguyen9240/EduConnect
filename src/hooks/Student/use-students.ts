@@ -4,22 +4,27 @@ import { useState } from 'react';
 import type { Student, StudentFormData } from '@/types/student';
 import { toast } from '@/hooks/Toast/use-toast';
 
-// Import data từ các file riêng
-import { mockStudents } from '@/data/Student/students';
-import { mockClasses, getClassName } from '@/data/Student/classes';
 import { SUCCESS_MESSAGES } from '@/constants/student';
 
 export function useStudents() {
-  // Thay thế initialStudents bằng mockStudents
-  const [students, setStudents] = useState<Student[]>(mockStudents);
-
-  // Thay thế classes bằng mockClasses
-  const classes = mockClasses;
+  const [students, setStudents] = useState<Student[]>([]);
 
   const addStudent = (formData: StudentFormData) => {
+    const studentId = Date.now().toString();
+    const nameParts = formData.fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
     const newStudent: Student = {
       ...formData,
-      id: Date.now().toString(),
+      classID: formData.classID ? String(formData.classID) : '',
+      studentID: studentId,
+      accountID: `ACC_${studentId}`,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+      firstName,
+      lastName,
+      avatarUrl: '', // hoặc avatar mặc định nếu muốn
     };
     setStudents((prev) => [...prev, newStudent]);
     toast({
@@ -28,9 +33,24 @@ export function useStudents() {
     });
   };
 
-  const updateStudent = (id: string, formData: StudentFormData) => {
+  const updateStudent = (studentId: string, formData: StudentFormData) => {
+    // Tách họ và tên
+    const nameParts = formData.fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
     setStudents((prev) =>
-      prev.map((student) => (student.id === id ? { ...formData, id } : student))
+      prev.map((student) =>
+        student.studentID === studentId
+          ? {
+              ...student,
+              ...formData,
+              classID: formData.classID ? String(formData.classID) : '',
+              updatedAt: new Date().toISOString(),
+              firstName,
+              lastName,
+            }
+          : student
+      )
     );
     toast({
       title: 'Thành công',
@@ -38,8 +58,8 @@ export function useStudents() {
     });
   };
 
-  const deleteStudent = (id: string) => {
-    setStudents((prev) => prev.filter((student) => student.id !== id));
+  const deleteStudent = (studentId: string) => {
+    setStudents((prev) => prev.filter((student) => student.studentID !== studentId));
     toast({
       title: 'Thành công',
       description: SUCCESS_MESSAGES.DELETE_STUDENT,
@@ -48,12 +68,8 @@ export function useStudents() {
 
   return {
     students,
-    classes,
     addStudent,
     updateStudent,
     deleteStudent,
   };
 }
-
-// Export thêm getClassName function
-export { getClassName };

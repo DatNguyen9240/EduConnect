@@ -17,7 +17,7 @@ export interface GoogleUser {
 
 // Google Login Props Interface
 export interface GoogleLoginProps {
-  onSuccess: (user: GoogleUser) => void;
+  onSuccess: (user: GoogleUser, credential: string) => void;
   onError?: (error: unknown) => void;
   className?: string;
   children?: React.ReactNode;

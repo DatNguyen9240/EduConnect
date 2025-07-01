@@ -1,19 +1,37 @@
 export interface Student {
-  id: string;
-  studentId: string; // StudentID từ database
-  fullName: string; // FullName
-  dateOfBirth: string; // DateOfBirth
-  gender: string; // Gender
-  classId: string; // ClassID
-  className: string; // Tên lớp để hiển thị
-  parentId: string; // ParentID
-  parentName: string; // Tên phụ huynh
-  parentPhone: string; // SĐT phụ huynh
-  address: string; // Địa chỉ
-  email: string; // Email học sinh
+  studentID: string;
+  accountID: string;
+  parentID: string;
+  classID: string;
+  fullName: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+  dateOfBirth: string | null;
+  gender: string;
+  className: string;
+  parentName: string;
+  address?: string;
+  parentPhone?: string;
 }
 
-export type StudentFormData = Omit<Student, 'id'>;
+export type StudentFormData = {
+  studentID: string;
+  fullName: string;
+  dateOfBirth: string;
+  gender: string;
+  classID: string;
+  className: string;
+  parentID: string;
+  parentName: string;
+  parentPhone: string;
+  address: string;
+  email: string;
+};
 
 export interface Class {
   id: string;
