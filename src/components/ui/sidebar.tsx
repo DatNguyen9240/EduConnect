@@ -4,7 +4,7 @@ import { routeMenuConfig } from '@/routes/RouterConfig';
 import { useNavigate, useLocation } from 'react-router-dom';
 import React from 'react';
 
-export default function Sidebar() {
+export default function Sidebar({ onHoverChange }: { onHoverChange?: (hovered: boolean) => void }) {
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -14,8 +14,11 @@ export default function Sidebar() {
     <div
       className={cn(
         'group/sidebar min-h-screen flex flex-col bg-white border-r border-gray-200',
-        'w-20 hover:w-64 transition-all duration-300 ease-in-out'
+        'w-20 hover:w-64 transition-all duration-300 ease-in-out',
+        'fixed top-0 left-0 h-screen z-30'
       )}
+      onMouseEnter={() => onHoverChange && onHoverChange(true)}
+      onMouseLeave={() => onHoverChange && onHoverChange(false)}
     >
       {/* Logo Section */}
       <div className="p-4 flex items-center gap-3 border-b border-gray-200">
@@ -111,7 +114,9 @@ function MenuItem({ icon: Icon, label, active, badge, path }: MenuItemProps) {
     <div
       onClick={() => navigate(path)}
       className={cn(
-        'flex items-center pl-3.5 pr-4 py-3 rounded-xl mb-1 cursor-pointer transition-all duration-200',
+        'flex items-center py-2 px-3 rounded-lg mb-1 cursor-pointer transition-all duration-200',
+        'group-hover/sidebar:justify-start',
+        'justify-center',
         active
           ? 'bg-blue-600 text-white shadow-md'
           : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
@@ -126,16 +131,16 @@ function MenuItem({ icon: Icon, label, active, badge, path }: MenuItemProps) {
         />
       )}
       <div className="overflow-hidden transition-all duration-300">
-        <div className="min-w-[120px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
-          <span className="font-medium ml-4">{label}</span>
+        <div className="min-w-[80px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
+          <span className="font-medium ml-2 text-sm">{label}</span>
         </div>
       </div>
       {badge && (
         <div className="overflow-hidden transition-all duration-300">
-          <div className="min-w-[40px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
+          <div className="min-w-[32px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
             <span
               className={cn(
-                'ml-2 text-xs px-2 py-0.5 rounded-full font-medium',
+                'ml-1 text-xs px-1 py-0.5 rounded-full font-medium',
                 active ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
               )}
             >

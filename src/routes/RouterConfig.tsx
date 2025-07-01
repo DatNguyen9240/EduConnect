@@ -152,7 +152,7 @@ export const routeMenuConfig = [
   },
   {
     path: 'student-management',
-    label: 'Student Management',
+    label: 'Quản lý học sinh',
     icon: Users,
     element: <HocSinh />,
     showInMenu: true,
