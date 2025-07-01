@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from '../ui/sidebar';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function MainLayout() {
   const [sidebarHover, setSidebarHover] = useState(false);
