@@ -9,13 +9,12 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema, type LoginSchema } from '@/utils/rules';
 import { useMutation } from '@tanstack/react-query';
-import { loginAccount, googleLogin } from '@/api/auth.api';
+import { loginAccount } from '@/api/auth.api';
 import { isAxiosBadRequestError } from '@/utils/utils';
 import type { ErrorResponse } from '@/types/utils.type';
 import InputComponent from '@/components/common/Input/InputComponent';
 import { useContext } from 'react';
 import { AppContext } from '@/contexts/app.context';
-import type { GoogleUser } from '@/types/auth';
 
 type FormData = LoginSchema;
 
@@ -59,16 +58,6 @@ export default function Login() {
     });
   });
 
-  // Google login handler
-  const handleGoogleLogin = async (googleUser: GoogleUser) => {
-    try {
-      const { data: apiResponse } = await googleLogin(googleUser);
-      handleGoogleSuccess(googleUser, apiResponse);
-    } catch (error) {
-      handleGoogleError(error);
-    }
-  };
-
   return (
     <div className=" flex min-h-screen bg-[#f0f4ff]">
       {/* Left Panel with Banner */}
@@ -111,7 +100,11 @@ export default function Login() {
 
           {/* Google Login Button */}
           <div className="mb-6">
-            <GoogleLogin onSuccess={handleGoogleLogin} onError={handleGoogleError} className="mb-4">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              className="mb-4"
+            >
               {isLoading ? 'Signing in...' : 'Continue with Google'}
             </GoogleLogin>
           </div>
