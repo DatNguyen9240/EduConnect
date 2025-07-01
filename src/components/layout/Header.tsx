@@ -1,9 +1,21 @@
 import { Link } from 'react-router-dom';
 import { settingsMenu } from '@/constants/routes';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { clearLS } from '@/utils/auth';
+import { AppContext } from '@/contexts/app.context';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
+
+  const handleLogout = () => {
+    clearLS();
+    setIsAuthenticated(false);
+    setUserInfo(null);
+    navigate('/');
+  };
 
   return (
     <header className="flex items-center justify-between p-4 bg-white">
@@ -81,13 +93,15 @@ export default function Header() {
                   {settingsMenu.profile.label}
                 </Link>
                 <div className="border-t border-gray-100 my-1"></div>
-                <Link
-                  to={settingsMenu.signOut.path}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors"
-                  onClick={() => setIsOpen(false)}
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors"
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleLogout();
+                  }}
                 >
                   {settingsMenu.signOut.label}
-                </Link>
+                </button>
               </div>
             )}
           </div>
