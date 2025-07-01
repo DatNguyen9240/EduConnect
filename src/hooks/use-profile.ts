@@ -8,7 +8,6 @@ import { AppContext } from '../contexts/app.context';
 export const useProfile = () => {
   const { userInfo } = useContext(AppContext);
   const accountId = userInfo?.accountId;
-  console.log('accountId', accountId);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

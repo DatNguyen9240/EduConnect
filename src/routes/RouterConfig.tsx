@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import LichThi from '@/pages/LichThi';
 import { AppContext } from '@/contexts/app.context';
+import ProfilePage from '@/pages/Profile';
 
 // Lazy load components - chỉ tải khi cần thiết
 const Home = lazy(() => import('@/pages/Home'));
@@ -48,7 +49,7 @@ export const routeMenuConfig = [
     path: '/profile',
     label: 'Profile',
     icon: Users,
-    element: <div>Profile page</div>,
+    element: <ProfilePage />,
     showInMenu: false,
     badge: null,
   },
