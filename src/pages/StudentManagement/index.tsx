@@ -141,9 +141,6 @@ export default function StudentManagement() {
 
       <StatsCards students={students} />
 
-      {/* Debug info */}
-      <div className="text-sm text-gray-500 mb-4">Tổng số học sinh: {students.length}</div>
-
       <SimpleCard>
         <SimpleCardHeader>
           <SimpleCardTitle>Danh sách học sinh</SimpleCardTitle>
@@ -158,12 +155,6 @@ export default function StudentManagement() {
             </Button>
           </div>
 
-          {/* Debug info */}
-          <div className="text-sm text-gray-500 mb-4">
-            Số học sinh đã lọc: {filteredStudents.length}
-          </div>
-
-          {/* Explicit error handling */}
           {isError ? (
             <div className="text-red-500">Lỗi: {errorMessage}</div>
           ) : isLoading ? (

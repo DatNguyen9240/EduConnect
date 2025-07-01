@@ -110,31 +110,31 @@ export function StudentTable({
       <div className="text-sm text-gray-500 mb-4">Đang hiển thị {students.length} học sinh</div>
 
       <div className="rounded-md border">
-        <Table className="min-w-full divide-y divide-gray-200">
+        <Table className="min-w-full divide-y divide-gray-200 text-xs">
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Họ và tên
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Email
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Lớp
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Ngày sinh
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Giới tính
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Phụ huynh
               </TableHead>
-              <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Trạng thái
               </TableHead>
-              <TableHead className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <TableHead className="px-2 py-2 text-right font-semibold text-gray-500 uppercase tracking-wider">
                 Thao tác
               </TableHead>
             </TableRow>
@@ -142,75 +142,80 @@ export function StudentTable({
           <TableBody className="bg-white divide-y divide-gray-200">
             {students.map((student) => (
               <TableRow key={student.studentID} className="hover:bg-gray-50">
-                <TableCell className="px-6 py-4 whitespace-nowrap">
+                <TableCell className="px-2 py-2 whitespace-nowrap">
                   <div className="flex items-center">
-                    <div className="h-10 w-10 flex-shrink-0">
-                      <img className="h-10 w-10 rounded-full" src={student.avatarUrl} alt="" />
+                    <div className="h-8 w-8 flex-shrink-0">
+                      <img className="h-8 w-8 rounded-full" src={student.avatarUrl} alt="" />
                     </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{student.fullName}</div>
-                      <div className="text-sm text-gray-500">
+                    <div className="ml-2">
+                      <div className="text-xs font-medium text-gray-900">{student.fullName}</div>
+                      <div className="text-xs text-gray-500">
                         {student.firstName} {student.lastName}
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{student.email}</div>
+                <TableCell className="px-2 py-2 whitespace-nowrap">
+                  <div className="text-xs text-gray-900">{student.email}</div>
                 </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap">
-                  <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                <TableCell className="px-2 py-2 whitespace-nowrap">
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5"
+                  >
                     {student.className || 'N/A'}
                   </Badge>
                 </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
+                <TableCell className="px-2 py-2 whitespace-nowrap">
+                  <div className="text-xs text-gray-900">
                     {student.dateOfBirth
                       ? new Date(student.dateOfBirth).toLocaleDateString('vi-VN')
                       : '-'}
                   </div>
                 </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{student.gender || '-'}</div>
+                <TableCell className="px-2 py-2 whitespace-nowrap">
+                  <div className="text-xs text-gray-900">{student.gender || '-'}</div>
                 </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{student.parentName}</div>
+                <TableCell className="px-2 py-2 whitespace-nowrap">
+                  <div className="text-xs text-gray-900">{student.parentName}</div>
                 </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap">
+                <TableCell className="px-2 py-2 whitespace-nowrap">
                   <Badge
                     variant={student.isActive ? 'default' : 'secondary'}
                     className={
-                      student.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      student.isActive
+                        ? 'bg-green-100 text-green-800 text-xs px-2 py-0.5'
+                        : 'bg-gray-100 text-gray-800 text-xs px-2 py-0.5'
                     }
                   >
                     {student.isActive ? 'Đang học' : 'Đã nghỉ'}
                   </Badge>
                 </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex items-center justify-end space-x-2">
+                <TableCell className="px-2 py-2 whitespace-nowrap text-right text-xs font-medium">
+                  <div className="flex items-center justify-end space-x-1">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleViewDetails(student)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-blue-600 hover:text-blue-900 px-1"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-3 w-3" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onEdit(student)}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      className="text-indigo-600 hover:text-indigo-900 px-1"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(student.studentID)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 hover:text-red-900 px-1"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 </TableCell>
