@@ -46,7 +46,13 @@ const ProfilePageInner: React.FC = () => {
               ×
             </button>
             <h3 className="text-xl font-bold mb-4">Cập nhật thông tin cá nhân</h3>
-            <ProfileUpdateForm onSuccess={async () => { await fetchProfile(); setEditing(false); }} onCancel={() => setEditing(false)} />
+            <ProfileUpdateForm
+              onSuccess={async () => {
+                await fetchProfile();
+                setEditing(false);
+              }}
+              onCancel={() => setEditing(false)}
+            />
           </div>
         </div>
       )}

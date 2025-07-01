@@ -5,7 +5,7 @@ import { useProfileContext } from '../../../contexts/profile.context';
 import { toast } from 'react-toastify';
 import type { AxiosError } from 'axios';
 import { AppContext } from '../../../contexts/app.context';
-import DatePicker from "react-datepicker";
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { parseISO, format } from 'date-fns';
 
@@ -17,8 +17,7 @@ interface ProfileUpdateFormProps {
 const inputClass =
   'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition';
 const labelClass = 'block font-medium mb-1 text-gray-700';
-const buttonClass =
-  'px-5 py-2 rounded-lg font-semibold transition focus:outline-none';
+const buttonClass = 'px-5 py-2 rounded-lg font-semibold transition focus:outline-none';
 
 const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCancel }) => {
   const { profile } = useProfileContext();
@@ -83,11 +82,14 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCanc
       formData.append('LastName', form.lastName);
       formData.append('PhoneNumber', form.phoneNumber);
       formData.append('Email', form.email);
-      formData.append('DateOfBirth', form.dateOfBirth ? new Date(form.dateOfBirth).toISOString().split('T')[0] : '');
+      formData.append(
+        'DateOfBirth',
+        form.dateOfBirth ? new Date(form.dateOfBirth).toISOString().split('T')[0] : ''
+      );
       if (form.avatarFile) {
         formData.append('AvatarFile', form.avatarFile);
       }
-      for (let pair of formData.entries()) {
+      for (const pair of formData.entries()) {
         console.log(pair[0], pair[1]);
       }
       const res: UpdateProfileResponse = await updateProfileById(userId, formData);
@@ -122,12 +124,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCanc
             </div>
           )}
           <label className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-1 cursor-pointer shadow hover:bg-blue-600 transition">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
+            <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
             <span className="text-xs">Đổi</span>
           </label>
         </div>

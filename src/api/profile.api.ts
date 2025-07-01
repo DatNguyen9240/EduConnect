@@ -36,7 +36,7 @@ export interface UpdateProfilePayload {
 
 export interface UpdateProfileResponse {
   success: boolean;
-  data?: any;
+  data?: Profile;
   error?: string[];
 }
 
@@ -45,7 +45,10 @@ export const updateProfileById = async (
   formData: FormData
 ): Promise<UpdateProfileResponse> => {
   try {
-    const response = await axiosInstance.put<UpdateProfileResponse>(`/api/Profile/${userId}`, formData);
+    const response = await axiosInstance.put<UpdateProfileResponse>(
+      `/api/Profile/${userId}`,
+      formData
+    );
     return response.data;
   } catch (error) {
     if ((error as AxiosError<UpdateProfileResponse>).response?.data) {
