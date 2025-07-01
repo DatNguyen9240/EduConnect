@@ -1,17 +1,29 @@
-export const setAccessTokenToLS = (token: string) => {
-  localStorage.setItem('token', token);
+export const setAccessTokenToLS = (token: string | undefined | null) => {
+  if (token && token !== 'undefined') {
+    localStorage.setItem('token', token);
+  } else {
+    localStorage.removeItem('token');
+  }
 };
 
-export const setRefreshTokenToLS = (refreshToken: string) => {
-  localStorage.setItem('refreshToken', refreshToken);
+export const setRefreshTokenToLS = (refreshToken: string | undefined | null) => {
+  if (refreshToken && refreshToken !== 'undefined') {
+    localStorage.setItem('refreshToken', refreshToken);
+  } else {
+    localStorage.removeItem('refreshToken');
+  }
 };
 
 export const getAccessTokenFromLS = (): string => {
-  return localStorage.getItem('token') || '';
+  const token = localStorage.getItem('token');
+  if (!token || token === 'undefined') return '';
+  return token;
 };
 
 export const getRefreshTokenFromLS = (): string => {
-  return localStorage.getItem('refreshToken') || '';
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken || refreshToken === 'undefined') return '';
+  return refreshToken;
 };
 
 export const clearLS = () => {
