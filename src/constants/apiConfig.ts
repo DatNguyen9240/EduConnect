@@ -1,5 +1,5 @@
 const apiConfig = {
-  baseURL: import.meta.env.VITE_API_URL || 'https://educonnect.tienlab.myds.me',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 10000,
 };
 

@@ -4,32 +4,33 @@ import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+// Thay thế imports
 import { SimpleLabel } from '@/components/ui/CrudStudent/simple-label';
 import { SimpleSelect, SimpleSelectItem } from '@/components/ui/CrudStudent/simple-select';
-import type { Class, Student, StudentFormData } from '@/types/student';
+import type { Student, StudentFormData } from '@/types/student';
 import { useSimpleToast } from '@/hooks/Toast/use-simple-toast';
 
 // Import constants và data
+import { mockClasses } from '@/data/Student/classes';
 import { GENDER_OPTIONS, VALIDATION_MESSAGES } from '@/constants/student';
 
 interface StudentFormProps {
   student?: Student | null;
   onSubmit: (formData: StudentFormData) => void;
   onCancel: () => void;
-  classes: Class[];
 }
 
-export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFormProps) {
+export function StudentForm({ student, onSubmit, onCancel }: StudentFormProps) {
   const { toast } = useSimpleToast();
 
   const [formData, setFormData] = useState<StudentFormData>({
-    studentID: student?.studentID || '',
+    studentId: student?.studentId || '',
     fullName: student?.fullName || '',
     dateOfBirth: student?.dateOfBirth || '',
     gender: student?.gender || '',
-    classID: student?.classID ? String(student.classID) : '',
+    classId: student?.classId || '',
     className: student?.className || '',
-    parentID: student?.parentID || '',
+    parentId: student?.parentId || '',
     parentName: student?.parentName || '',
     parentPhone: student?.parentPhone || '',
     address: student?.address || '',
@@ -39,7 +40,7 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.studentID || !formData.classID || !formData.parentName) {
+    if (!formData.fullName || !formData.studentId || !formData.classId || !formData.parentName) {
       toast({
         title: 'Lỗi',
         description: VALIDATION_MESSAGES.REQUIRED_FIELDS,
@@ -51,30 +52,35 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
     onSubmit(formData);
   };
 
+  const classes = mockClasses.map((cls) => ({
+    id: cls.id,
+    name: `Lớp ${cls.name}`,
+  }));
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-4 py-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
-            <SimpleLabel htmlFor="firstName" required>
-              Họ
-            </SimpleLabel>
-            <Input
-              id="studentID"
-              value={formData.studentID}
-              onChange={(e) => setFormData((prev) => ({ ...prev, studentID: e.target.value }))}
-              placeholder="Nhập họ"
-            />
-          </div>
-          <div className="grid gap-2">
             <SimpleLabel htmlFor="fullName" required>
-              Tên
+              Họ và tên
             </SimpleLabel>
             <Input
               id="fullName"
               value={formData.fullName}
               onChange={(e) => setFormData((prev) => ({ ...prev, fullName: e.target.value }))}
-              placeholder="Nhập tên"
+              placeholder="Nhập họ và tên đầy đủ"
+            />
+          </div>
+          <div className="grid gap-2">
+            <SimpleLabel htmlFor="studentId" required>
+              Mã học sinh
+            </SimpleLabel>
+            <Input
+              id="studentId"
+              value={formData.studentId}
+              onChange={(e) => setFormData((prev) => ({ ...prev, studentId: e.target.value }))}
+              placeholder="VD: HS001"
             />
           </div>
         </div>
@@ -83,13 +89,13 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
           <div className="grid gap-2">
             <SimpleLabel required>Lớp</SimpleLabel>
             <SimpleSelect
-              value={formData.classID}
+              value={formData.classId}
               onValueChange={(value) => {
                 const selectedClass = classes.find((c) => c.id === value);
                 setFormData((prev) => ({
                   ...prev,
-                  classID: value,
-                  className: selectedClass?.name || '',
+                  classId: value,
+                  className: selectedClass?.name || value,
                 }));
               }}
               placeholder="Chọn lớp"
@@ -108,7 +114,7 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
             <Input
               id="dateOfBirth"
               type="date"
-              value={formData.dateOfBirth || ''}
+              value={formData.dateOfBirth}
               onChange={(e) => setFormData((prev) => ({ ...prev, dateOfBirth: e.target.value }))}
             />
           </div>
@@ -141,9 +147,21 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
           </div>
         </div>
 
+        <div className="grid gap-2">
+          <SimpleLabel htmlFor="address" required>
+            Địa chỉ
+          </SimpleLabel>
+          <Input
+            id="address"
+            value={formData.address}
+            onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+            placeholder="Nhập địa chỉ đầy đủ"
+          />
+        </div>
+
         <div className="border-t pt-4">
           <h4 className="font-medium mb-3">Thông tin phụ huynh</h4>
-          <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <SimpleLabel htmlFor="parentName" required>
                 Tên phụ huynh
@@ -153,6 +171,17 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
                 value={formData.parentName}
                 onChange={(e) => setFormData((prev) => ({ ...prev, parentName: e.target.value }))}
                 placeholder="Nhập tên phụ huynh"
+              />
+            </div>
+            <div className="grid gap-2">
+              <SimpleLabel htmlFor="parentPhone" required>
+                SĐT phụ huynh
+              </SimpleLabel>
+              <Input
+                id="parentPhone"
+                value={formData.parentPhone}
+                onChange={(e) => setFormData((prev) => ({ ...prev, parentPhone: e.target.value }))}
+                placeholder="VD: 0901234567"
               />
             </div>
           </div>
