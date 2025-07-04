@@ -28,7 +28,7 @@ function AppGuard() {
   const [showSelector, setShowSelector] = React.useState(false);
 
   // Khi chưa chọn con (login lần đầu), hiển thị selector KHÔNG có nút close
-  if (userInfo?.roles.includes('Parent') && !selectedStudent) {
+  if (userInfo?.role === 'Parent' && !selectedStudent) {
     return <ParentProfileSelector />;
   }
 
