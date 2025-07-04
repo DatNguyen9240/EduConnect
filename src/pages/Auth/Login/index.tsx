@@ -4,7 +4,7 @@ import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { ROUTES } from '@constants/routes';
 import { ASSETS } from '@constants/assets';
 import { Button } from '@components/common/Button';
-import { GoogleLogin } from '@components/common/GoogleLogin';
+import { GoogleLogin } from '@react-oauth/google';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema, type LoginSchema } from '@/utils/rules';
@@ -15,7 +15,6 @@ import type { ErrorResponse } from '@/types/utils.type';
 import InputComponent from '@/components/common/Input/InputComponent';
 import { useContext } from 'react';
 import { AppContext } from '@/contexts/app.context';
-import type { GoogleUser } from '@/types/auth';
 
 type FormData = LoginSchema;
 
@@ -23,7 +22,7 @@ export default function Login() {
   const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
   const navigate = useNavigate();
   const showForm = useShowForm();
-  const { handleGoogleSuccess, handleGoogleError, isLoading } = useGoogleAuth();
+  const { handleGoogleError } = useGoogleAuth();
   const {
     register,
     handleSubmit,
@@ -67,10 +66,19 @@ export default function Login() {
   });
 
   // Google login handler
-  const handleGoogleLogin = async (googleUser: GoogleUser) => {
+  const handleGoogleLogin = async (credential: string) => {
     try {
-      const { data: apiResponse } = await googleLogin(googleUser);
-      handleGoogleSuccess(googleUser, apiResponse);
+      const { data: apiResponse } = await googleLogin(credential);
+      // Lưu token và refreshToken vào localStorage
+      localStorage.setItem('token', apiResponse.token);
+      localStorage.setItem('refreshToken', apiResponse.refreshToken);
+      // Đánh dấu đã đăng nhập
+      setIsAuthenticated(true);
+      // (Tùy chọn) Lấy thêm thông tin user nếu cần
+      // const userInfo = await getParentInfo();
+      // setUserInfo(userInfo.data);
+      // Chuyển hướng sang dashboard
+      navigate('/admin-dashboard');
     } catch (error) {
       handleGoogleError(error);
     }
@@ -118,9 +126,17 @@ export default function Login() {
 
           {/* Google Login Button */}
           <div className="mb-6">
-            <GoogleLogin onSuccess={handleGoogleLogin} onError={handleGoogleError} className="mb-4">
-              {isLoading ? 'Signing in...' : 'Continue with Google'}
-            </GoogleLogin>
+            <GoogleLogin
+              onSuccess={(response) => {
+                if (response.credential) {
+                  handleGoogleLogin(response.credential);
+                } else {
+                  alert('Không lấy được Google Token!');
+                }
+              }}
+              onError={() => handleGoogleError(new Error('Google Login Error'))}
+              text="continue_with"
+            />
           </div>
 
           {/* Divider */}

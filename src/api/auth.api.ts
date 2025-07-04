@@ -1,6 +1,5 @@
 import api from '@/lib/axios';
 import type { AuthLoginResponse, AuthResponse } from '@/types/auth.type';
-import type { GoogleUser } from '@/types/auth';
 
 export const URL_LOGIN = '/api/Auth/login';
 export const URL_REGISTER = '/api/Auth/register';
@@ -28,18 +27,11 @@ export const loginAccount = (body: { email: string; password: string }) => {
 };
 
 // Google Login API
-export const googleLogin = (googleUser: GoogleUser) => {
-  // Map GoogleUser to backend expected payload
-  const payload = {
-    googleId: googleUser.sub,
-    email: googleUser.email,
-    name: googleUser.name,
-    givenName: googleUser.given_name,
-    familyName: googleUser.family_name,
-    picture: googleUser.picture,
-    emailVerified: googleUser.email_verified,
-  };
-  return api.post<AuthLoginResponse>('/api/Auth/google-login', payload);
+export const googleLogin = (googleToken: string) => {
+  return api.post<AuthLoginResponse>(
+    'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/Auth/google-token-login',
+    { googleToken }
+  );
 };
 
 export const getParentInfo = () => {

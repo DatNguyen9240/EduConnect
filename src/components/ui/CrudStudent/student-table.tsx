@@ -166,9 +166,6 @@ export function StudentTable({
               <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Phụ huynh
               </TableHead>
-              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
-                Trạng thái
-              </TableHead>
               <TableHead className="px-2 py-2 text-right font-semibold text-gray-500 uppercase tracking-wider">
                 Thao tác
               </TableHead>
@@ -220,18 +217,6 @@ export function StudentTable({
                 </TableCell>
                 <TableCell className="px-2 py-2 whitespace-nowrap">
                   <div className="text-xs text-gray-900">{student.parentName}</div>
-                </TableCell>
-                <TableCell className="px-2 py-2 whitespace-nowrap">
-                  <Badge
-                    variant={student.isActive ? 'default' : 'secondary'}
-                    className={
-                      student.isActive
-                        ? 'bg-green-100 text-green-800 text-xs px-2 py-0.5'
-                        : 'bg-gray-100 text-gray-800 text-xs px-2 py-0.5'
-                    }
-                  >
-                    {student.isActive ? 'Đang học' : 'Đã nghỉ'}
-                  </Badge>
                 </TableCell>
                 <TableCell className="px-2 py-2 whitespace-nowrap text-right text-xs font-medium">
                   <div className="flex items-center justify-end space-x-1">
