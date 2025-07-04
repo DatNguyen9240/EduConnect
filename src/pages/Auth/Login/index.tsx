@@ -44,9 +44,11 @@ export default function Login() {
           // Sau khi login thành công, gọi API lấy user info
           const res = await getParentInfo();
           setUserInfo(res.data); // userId, role, id, fullName
+          localStorage.setItem('profile', JSON.stringify(res.data));
         } catch {
           // fallback nếu lỗi
           setUserInfo(null);
+          localStorage.removeItem('profile');
         }
         setIsAuthenticated(true);
         navigate('/admin-dashboard');

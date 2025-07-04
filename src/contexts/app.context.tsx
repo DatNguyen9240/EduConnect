@@ -40,7 +40,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
     initialAppContext.isAuthenticated
   );
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(() => {
+    const profile = localStorage.getItem('profile');
+    return profile ? JSON.parse(profile) : null;
+  });
 
   // Khi logout thì clear userInfo
   useEffect(() => {
