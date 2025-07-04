@@ -10,7 +10,8 @@ export function useExams(params?: Partial<GetExamParams>) {
 
   // Nếu là parent và đã chọn con, truyền studentId của con vào API
   const currentStudentId =
-    (userInfo?.roles.includes('Parent') && selectedStudent?.studentId) ||
+    (userInfo?.role === 'Parent' && selectedStudent?.studentId) ||
+    (userInfo?.role === 'Student' && userInfo?.id) ||
     params?.studentId ||
     undefined;
 

@@ -22,7 +22,7 @@ const buttonClass = 'px-5 py-2 rounded-lg font-semibold transition focus:outline
 const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCancel }) => {
   const { profile } = useProfileContext();
   const { userInfo } = useContext(AppContext);
-  const userId = userInfo?.accountId || '';
+  const userId = userInfo?.userId || '';
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',

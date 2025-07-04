@@ -7,17 +7,17 @@ import { AppContext } from '../contexts/app.context';
 
 export const useProfile = () => {
   const { userInfo } = useContext(AppContext);
-  const accountId = userInfo?.accountId;
+  const userId = userInfo?.userId;
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!accountId) return;
+    if (!userId) return;
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const profileData = await getProfileById(accountId);
+        const profileData = await getProfileById(userId);
         setProfile(profileData);
       } catch (err) {
         setError('Failed to load profile data');
@@ -28,7 +28,7 @@ export const useProfile = () => {
     };
 
     fetchProfile();
-  }, [accountId]);
+  }, [userId]);
 
   // Method to update profile
   const updateProfile = async (userId: string /*, updates: Partial<Profile> */) => {

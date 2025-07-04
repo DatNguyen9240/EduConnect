@@ -20,7 +20,7 @@ export default function ParentProfileSelector({
   const [loadingStudents, setLoadingStudents] = useState(false);
 
   useEffect(() => {
-    if (userInfo?.roles.includes('Parent')) {
+    if (userInfo?.role === 'Parent') {
       getParentInfo().then((res) => {
         setParentId(res.data.id);
       });
