@@ -1,98 +1,103 @@
-import { ChevronsUpDown } from 'lucide-react';
+import { useContext } from 'react';
+import { AppContext } from '@/contexts/app.context';
+import { useSelectedStudent } from '@/contexts/selected-student.context';
+import { useGrades } from '@/hooks/useGrades';
+import type { UserInfo } from '@/contexts/app.context';
+import type { Student } from '@/types/student';
+import { DataTable } from './DataTable/data-table';
+import { scoreColumns, type ScoreRow } from './DataTable/score-columns';
+// Định nghĩa trực tiếp type Grade nếu chưa có file types/grade
+interface Grade {
+  gradeID: number;
+  studentID: string;
+  studentName: string;
+  subjectID: number;
+  subjectName: string;
+  classID: number;
+  className: string;
+  score: number;
+  gradeType: string;
+  gradeLevel: number;
+  semester: string;
+  evaluation: string;
+  createdDate: string | null;
+  updatedDate: string | null;
+}
 
-const data = [
-  {
-    subject: 'Toán',
-    oral: 10,
-    fifteen: 10,
-    period: 10,
-    final: 10,
-    avg: 8,
-    highlight: true,
-  },
-  {
-    subject: 'Ngữ văn',
-    oral: 10,
-    fifteen: 10,
-    period: 10,
-    final: 5,
-    avg: 9.75,
-  },
-  { subject: 'Tin học', oral: 10, fifteen: 10, period: 10, final: 10, avg: 9.5 },
-  { subject: 'Lịch sử', oral: 10, fifteen: 10, period: 10, final: 5, avg: 9.5 },
-  { subject: 'Địa lý', oral: 10, fifteen: 10, period: 10, final: 10, avg: 9.0 },
-  { subject: 'Vật lý', oral: 10, fifteen: 10, period: 10, final: 5, avg: 9.0 },
-  { subject: 'Hóa học', oral: 10, fifteen: 10, period: 10, final: 10, avg: 8.0 },
-  { subject: 'Sinh học', oral: 10, fifteen: 10, period: 10, final: 5, avg: 8.0 },
-  { subject: 'Tiếng Anh', oral: 10, fifteen: 10, period: 10, final: 10, avg: 8.0 },
-  { subject: 'GDCD', oral: 10, fifteen: 10, period: 10, final: 5, avg: 8.0 },
+const SUBJECTS = [
+  'Toán',
+  'Ngữ Văn',
+  'Tin Học',
+  'Lịch Sử',
+  'Địa Lý',
+  'Vật Lý',
+  'Hóa Học',
+  'Sinh Học',
+  'Tiếng Anh',
+  'GDCD',
+  'Thể Dục',
 ];
 
+function getStudentId(userInfo: UserInfo | null, selectedStudent: Student | null): string {
+  if (!userInfo) return '';
+  if (userInfo.role === 'Student') {
+    try {
+      const profile = JSON.parse(localStorage.getItem('profile') || '{}');
+      return profile.id || '';
+    } catch {
+      return '';
+    }
+  }
+  if (userInfo.role === 'Parent') {
+    try {
+      const student =
+        selectedStudent || JSON.parse(localStorage.getItem('selectedStudent') || '{}');
+      return student.studentId || '';
+    } catch {
+      return '';
+    }
+  }
+  return '';
+}
+
 export default function ScoreTable() {
+  const { userInfo } = useContext(AppContext);
+  const { selectedStudent } = useSelectedStudent();
+  const studentId = getStudentId(userInfo, selectedStudent);
+  const { data, isLoading, isError } = useGrades(studentId, !!studentId);
+  const grades: Grade[] = data?.data || [];
+
+  // Map dữ liệu điểm số theo môn học và loại điểm
+  const subjectRows: ScoreRow[] = SUBJECTS.map((subject) => {
+    const subjectGrades = grades.filter((g) => g.subjectName === subject);
+    return {
+      subject,
+      oral: subjectGrades.find((g) => g.gradeType === 'Miệng')?.score ?? '',
+      fifteen: subjectGrades.find((g) => g.gradeType === '15p')?.score ?? '',
+      period: subjectGrades.find((g) => g.gradeType === '1 tiết')?.score ?? '',
+      final: subjectGrades.find((g) => g.gradeType === 'Cuối Kì')?.score ?? '',
+      avg:
+        subjectGrades.length > 0
+          ? (
+              subjectGrades.reduce(
+                (sum, g) => sum + (typeof g.score === 'number' ? g.score : 0),
+                0
+              ) / subjectGrades.length
+            ).toFixed(2)
+          : '',
+      note: subjectGrades
+        .map((g) => g.evaluation)
+        .filter(Boolean)
+        .join('; '),
+    };
+  });
+
   return (
-    <div className="border-2 border-blue-400 rounded-lg overflow-x-auto bg-white">
-      <table className="min-w-full text-center">
-        <thead>
-          <tr className="bg-blue-50 font-bold">
-            <th className="py-2 px-2 border-b border-blue-200">Môn</th>
-            <th className="py-2 px-2 border-b border-blue-200">
-              <div className="flex items-center justify-center gap-1">
-                Miệng <ChevronsUpDown className="inline w-4 h-4 text-gray-400" />
-              </div>
-            </th>
-            <th className="py-2 px-2 border-b border-blue-200">
-              <div className="flex items-center justify-center gap-1">
-                15p <ChevronsUpDown className="inline w-4 h-4 text-gray-400" />
-              </div>
-            </th>
-            <th className="py-2 px-2 border-b border-blue-200">
-              <div className="flex items-center justify-center gap-1">
-                1 tiết <ChevronsUpDown className="inline w-4 h-4 text-gray-400" />
-              </div>
-            </th>
-            <th className="py-2 px-2 border-b border-blue-200">
-              <div className="flex items-center justify-center gap-1">
-                Cuối Kì <ChevronsUpDown className="inline w-4 h-4 text-gray-400" />
-              </div>
-            </th>
-            <th className="py-2 px-2 border-b border-blue-200">Điểm TB</th>
-            <th className="py-2 px-2 border-b border-blue-200">Ghi chú</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, idx) => {
-            let rowClass = '';
-            if (idx === 0) {
-              rowClass = 'bg-white text-blue-700 font-semibold';
-            } else {
-              rowClass = idx % 2 === 1 ? 'bg-blue-50' : 'bg-white';
-            }
-            return (
-              <tr key={idx} className={rowClass}>
-                <td className="py-2 px-2 border-t border-dotted border-blue-200">
-                  {row.highlight ? (
-                    <a href="#" className="text-blue-700 underline font-semibold">
-                      {row.subject}
-                    </a>
-                  ) : (
-                    row.subject
-                  )}
-                </td>
-                <td className="py-2 px-2 border-t border-dotted border-blue-200">{row.oral}</td>
-                <td className="py-2 px-2 border-t border-dotted border-blue-200">{row.fifteen}</td>
-                <td className="py-2 px-2 border-t border-dotted border-blue-200">{row.period}</td>
-                <td className="py-2 px-2 border-t border-dotted border-blue-200">{row.final}</td>
-                <td className="py-2 px-2 border-t border-dotted border-blue-200">{row.avg}</td>
-                <td className="py-2 px-2 border-t border-dotted border-blue-200">
-                  <a href="#" className="text-blue-600 hover:underline">
-                    Chi tiết &rarr;
-                  </a>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6">
+      <DataTable columns={scoreColumns} data={subjectRows} isLoading={isLoading} />
+      {isError && (
+        <div className="text-red-600 text-center mt-4">Không lấy được dữ liệu điểm số.</div>
+      )}
     </div>
   );
 }
