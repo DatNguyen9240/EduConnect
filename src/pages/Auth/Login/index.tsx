@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema, type LoginSchema } from '@/utils/rules';
 import { useMutation } from '@tanstack/react-query';
-import { loginAccount, googleLogin } from '@/api/auth.api';
+import { loginAccount, googleLogin, getParentInfo } from '@/api/auth.api';
 import { isAxiosBadRequestError } from '@/utils/utils';
 import type { ErrorResponse } from '@/types/utils.type';
 import InputComponent from '@/components/common/Input/InputComponent';
@@ -20,7 +20,7 @@ import type { GoogleUser } from '@/types/auth';
 type FormData = LoginSchema;
 
 export default function Login() {
-  const { setIsAuthenticated } = useContext(AppContext);
+  const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
   const navigate = useNavigate();
   const showForm = useShowForm();
   const { handleGoogleSuccess, handleGoogleError, isLoading } = useGoogleAuth();
@@ -39,8 +39,15 @@ export default function Login() {
 
   const onSubmit = handleSubmit((data) => {
     loginAccountMutation.mutate(data, {
-      onSuccess: (data) => {
-        console.log(data);
+      onSuccess: async () => {
+        try {
+          // Sau khi login thành công, gọi API lấy user info
+          const res = await getParentInfo();
+          setUserInfo(res.data); // userId, role, id, fullName
+        } catch {
+          // fallback nếu lỗi
+          setUserInfo(null);
+        }
         setIsAuthenticated(true);
         navigate('/admin-dashboard');
       },

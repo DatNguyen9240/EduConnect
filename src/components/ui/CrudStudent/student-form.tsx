@@ -60,9 +60,9 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
               Họ
             </SimpleLabel>
             <Input
-              id="studentID"
+              id="studentId"
               value={formData.studentId}
-              onChange={(e) => setFormData((prev) => ({ ...prev, studentId: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, studentID: e.target.value }))}
               placeholder="Nhập họ"
             />
           </div>

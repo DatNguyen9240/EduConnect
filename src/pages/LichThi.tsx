@@ -41,6 +41,7 @@ export default function LichThi() {
 
   // Gọi API với React Query
   const { data, isLoading, isError, refetch } = useExams(queryParams);
+  console.log('Exam data:', data);
 
   // Xử lý khi đổi filter - memoize để tránh infinite loop
   const handleFilterChange = useCallback(

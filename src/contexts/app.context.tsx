@@ -1,18 +1,12 @@
 import { getAccessTokenFromLS } from '@/utils/auth';
-import {
-  getAccountIdFromToken,
-  getEmailFromToken,
-  getUsernameFromToken,
-  getRolesFromToken,
-} from '@/utils/jwt';
 import { createContext, useState, useEffect } from 'react';
-import { clearLS } from '@/utils/auth';
 
-interface UserInfo {
-  accountId: string;
-  email: string;
-  username: string;
-  roles: string[];
+// Sửa interface UserInfo cho đúng backend
+export interface UserInfo {
+  userId: string;
+  role: string;
+  id: string;
+  fullName: string;
 }
 
 interface AppContextInterface {
@@ -22,38 +16,22 @@ interface AppContextInterface {
   setUserInfo: React.Dispatch<React.SetStateAction<UserInfo | null>>;
   // Helper functions
   hasRole: (role: string) => boolean;
-  hasAnyRole: (roles: string[]) => boolean;
-  hasAllRoles: (roles: string[]) => boolean;
-  isAdmin: () => boolean;
-  isTeacher: () => boolean;
-  isStudent: () => boolean;
   isParent: () => boolean;
+  isStudent: () => boolean;
+  isTeacher: () => boolean;
+  isAdmin: () => boolean;
 }
-
-const getInitialUserInfo = (): UserInfo | null => {
-  const token = getAccessTokenFromLS();
-  if (!token) return null;
-
-  return {
-    accountId: getAccountIdFromToken(token),
-    email: getEmailFromToken(token),
-    username: getUsernameFromToken(token),
-    roles: getRolesFromToken(token),
-  };
-};
 
 const initialAppContext: AppContextInterface = {
   isAuthenticated: Boolean(getAccessTokenFromLS()),
   setIsAuthenticated: () => null,
-  userInfo: getInitialUserInfo(),
+  userInfo: null,
   setUserInfo: () => null,
   hasRole: () => false,
-  hasAnyRole: () => false,
-  hasAllRoles: () => false,
-  isAdmin: () => false,
-  isTeacher: () => false,
-  isStudent: () => false,
   isParent: () => false,
+  isStudent: () => false,
+  isTeacher: () => false,
+  isAdmin: () => false,
 };
 
 export const AppContext = createContext<AppContextInterface>(initialAppContext);
@@ -62,65 +40,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
     initialAppContext.isAuthenticated
   );
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(initialAppContext.userInfo);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
-  // Check token validity on mount
+  // Khi logout thì clear userInfo
   useEffect(() => {
-    const token = getAccessTokenFromLS();
-    const accountId = getAccountIdFromToken(token);
-    if (token && !accountId) {
-      clearLS();
-      setIsAuthenticated(false);
-      setUserInfo(null);
-      window.location.href = '/';
-    }
-  }, []);
-
-  // Update user info when authentication status changes
-  useEffect(() => {
-    if (isAuthenticated) {
-      const token = getAccessTokenFromLS();
-      if (token) {
-        setUserInfo({
-          accountId: getAccountIdFromToken(token),
-          email: getEmailFromToken(token),
-          username: getUsernameFromToken(token),
-          roles: getRolesFromToken(token),
-        });
-      }
-    } else {
+    if (!isAuthenticated) {
       setUserInfo(null);
     }
   }, [isAuthenticated]);
 
   // Helper functions
   const hasRole = (role: string): boolean => {
-    return userInfo?.roles.includes(role) || false;
+    return userInfo?.role === role;
   };
-
-  const hasAnyRole = (roles: string[]): boolean => {
-    return userInfo?.roles.some((role) => roles.includes(role)) || false;
-  };
-
-  const hasAllRoles = (roles: string[]): boolean => {
-    return userInfo?.roles.every((role) => roles.includes(role)) || false;
-  };
-
-  const isAdmin = (): boolean => {
-    return hasRole('Admin') || hasRole('admin');
-  };
-
-  const isTeacher = (): boolean => {
-    return hasRole('Teacher') || hasRole('teacher');
-  };
-
-  const isStudent = (): boolean => {
-    return hasRole('Student') || hasRole('student');
-  };
-
-  const isParent = (): boolean => {
-    return hasRole('Parent') || hasRole('parent');
-  };
+  const isParent = () => hasRole('Parent');
+  const isStudent = () => hasRole('Student');
+  const isTeacher = () => hasRole('Teacher');
+  const isAdmin = () => hasRole('Admin');
 
   return (
     <AppContext.Provider
@@ -130,12 +66,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         userInfo,
         setUserInfo,
         hasRole,
-        hasAnyRole,
-        hasAllRoles,
-        isAdmin,
-        isTeacher,
-        isStudent,
         isParent,
+        isStudent,
+        isTeacher,
+        isAdmin,
       }}
     >
       {children}

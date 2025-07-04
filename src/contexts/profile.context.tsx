@@ -23,9 +23,9 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async () => {
-    if (!userInfo?.accountId) return;
+    if (!userInfo?.userId) return;
     setLoading(true);
-    const data = await getProfileById(userInfo.accountId);
+    const data = await getProfileById(userInfo.userId);
     setProfile(data);
     setLoading(false);
   };
@@ -33,7 +33,7 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   useEffect(() => {
     fetchProfile();
     // eslint-disable-next-line
-  }, [userInfo?.accountId]);
+  }, [userInfo?.userId]);
 
   return (
     <ProfileContext.Provider value={{ profile, setProfile, fetchProfile, loading }}>

@@ -67,7 +67,7 @@ export const useToken = () => {
   };
 
   const isAdmin = (): boolean => {
-    return hasRole('Admin') || hasRole('admin');
+    return hasRole('Principal') || hasRole('principal');
   };
 
   const isTeacher = (): boolean => {
