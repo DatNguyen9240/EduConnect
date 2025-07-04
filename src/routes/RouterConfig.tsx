@@ -27,6 +27,7 @@ const QuanLyHocTap = lazy(() => import('@/pages/QuanLyHocTap'));
 const HocSinh = lazy(() => import('@/pages/StudentManagement'));
 const QuanTriThongTin = lazy(() => import('@/pages/QuanTriThongTin'));
 const AdminDashboard = lazy(() => import('@/components/admin-dashboard'));
+const ChatPage = lazy(() => import('@/pages/ChatPage'));
 
 export const routeMenuConfig = [
   {
@@ -41,7 +42,7 @@ export const routeMenuConfig = [
     path: '/chat',
     label: 'Chat',
     icon: MessageSquare,
-    element: <div>Chat page</div>,
+    element: <ChatPage />,
     showInMenu: true,
     badge: null,
   },

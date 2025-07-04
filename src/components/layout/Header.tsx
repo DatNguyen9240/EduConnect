@@ -4,6 +4,22 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clearLS } from '@/utils/auth';
 import { AppContext } from '@/contexts/app.context';
+import { getAccessTokenFromLS } from '@/utils/auth';
+import { getTokenInfo } from '@/utils/jwt';
+
+interface DecodedToken {
+  avatar_url?: string;
+  avatarUrl?: string;
+  lastName?: string;
+  [key: string]: unknown;
+}
+
+interface Profile {
+  avatarUrl?: string;
+  lastName?: string;
+  fullName?: string;
+  [key: string]: unknown;
+}
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,6 +32,32 @@ export default function Header() {
     setUserInfo(null);
     navigate('/');
   };
+
+  // Lấy profile từ localStorage
+  let profile: Profile = {};
+  try {
+    profile = JSON.parse(localStorage.getItem('profile') || '{}') as Profile;
+  } catch {
+    // ignore
+  }
+
+  // Lấy avatar và lastName từ token nếu có
+  const token = getAccessTokenFromLS();
+  const tokenInfo = (getTokenInfo(token) || {}) as DecodedToken;
+  const avatarUrl =
+    tokenInfo.avatar_url ||
+    tokenInfo.avatarUrl ||
+    profile.avatarUrl ||
+    '/assets/avatar/default.jpg';
+
+  const displayName =
+    (tokenInfo['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] as
+      | string
+      | undefined) ||
+    tokenInfo.lastName ||
+    profile.lastName ||
+    profile.fullName ||
+    'Người dùng';
 
   return (
     <header className="flex items-center justify-between p-4 bg-white">
@@ -50,11 +92,12 @@ export default function Header() {
           {/* User Info */}
           <div className="flex items-center mr-4">
             <img
-              src="/assets/avatar/default.jpg"
+              src={avatarUrl}
               alt="User Avatar"
-              className="h-8 w-8 rounded-full mr-2"
+              className="h-8 w-8 rounded-full mr-2 object-cover border border-gray-200"
+              style={{ objectFit: 'cover', aspectRatio: '1/1', background: '#fff' }}
             />
-            <span className="text-gray-700">Đạt</span>
+            <span className="text-gray-700">{displayName}</span>
           </div>
 
           {/* Settings Dropdown */}
