@@ -10,6 +10,7 @@ import { SearchBar } from '@/components/ui/CrudStudent/search-bar';
 import { StudentStats } from '@/components/ui/CrudStudent/student-stats';
 import { StudentTable } from '@/components/ui/CrudStudent/student-table';
 import { StudentDialog } from '@/components/ui/CrudStudent/student-dialog';
+import { AddStudentDialog } from '@/components/ui/CrudStudent/add-student-dialog';
 
 // Import SimpleCard components
 import {
@@ -20,6 +21,16 @@ import {
   SimpleCardTitle,
 } from '@/components/ui/CrudStudent/simple-card';
 import { StatsCards } from '@/components/ui/CrudStudent/stats-cards';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/common/Select';
+import { useClassList } from '@/hooks/useClassList';
+import { useClassStudents } from '@/hooks/useClassStudents';
+import { useUnassignedStudents } from '@/hooks/useUnassignedStudents';
 
 export default function StudentManagement() {
   const { deleteStudent } = useStudents();
@@ -29,6 +40,17 @@ export default function StudentManagement() {
   const [viewingStudent, setViewingStudent] = useState<Student | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
+  const [selectedClass, setSelectedClass] = useState<string>('all');
+  const { data: classListData } = useClassList();
+  const classOptions = classListData?.data?.items || [];
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [showUnassigned, setShowUnassigned] = useState(false);
+  const {
+    data: unassignedData,
+    isLoading: isUnassignedLoading,
+    error: unassignedError,
+    refetch: refetchUnassigned,
+  } = useUnassignedStudents();
 
   const {
     data: studentResponse,
@@ -42,14 +64,21 @@ export default function StudentManagement() {
     ascending: true,
   });
 
-  // Add response type check
-  if (!studentResponse) {
-    console.error('No student response received');
-    return <div>Loading...</div>;
-  }
+  const {
+    data: classStudentResponse,
+    isLoading: isClassStudentLoading,
+    error: classStudentError,
+    // isError: isClassStudentError,
+    refetch: refetchClassStudents,
+  } = useClassStudents(selectedClass, selectedClass !== 'all');
 
   // Extract data with type safety
-  const students = Array.isArray(studentResponse) ? studentResponse : studentResponse.data || [];
+  const students =
+    selectedClass === 'all'
+      ? Array.isArray(studentResponse)
+        ? studentResponse
+        : studentResponse?.data || []
+      : classStudentResponse?.data || [];
   const totalCount =
     typeof studentResponse === 'object' && 'totalCount' in studentResponse
       ? studentResponse.totalCount
@@ -69,10 +98,11 @@ export default function StudentManagement() {
 
   const filteredStudents = students.filter(
     (student) =>
-      student.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentID.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.className?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.parentName?.toLowerCase().includes(searchTerm.toLowerCase())
+      (selectedClass === 'all' || String(student.classID) === selectedClass) &&
+      (student.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.studentID.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.className?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.parentName?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   console.log('Filtered data:', {
@@ -111,7 +141,7 @@ export default function StudentManagement() {
   const handleAddStudent = () => {
     setEditingStudent(null);
     setViewingStudent(null);
-    setIsDialogOpen(true);
+    setIsAddDialogOpen(true);
   };
 
   const handleEditStudent = (student: Student) => {
@@ -120,13 +150,16 @@ export default function StudentManagement() {
     setIsDialogOpen(true);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const handleShowUnassigned = () => {
+    setShowUnassigned(true);
+    if (refetchUnassigned) refetchUnassigned();
+  };
 
-  if (error) {
-    console.error('Error details:', error);
-    return <div>Error loading students: {error.message}</div>;
+  if (selectedClass !== 'all' && isClassStudentLoading) {
+    return <div>Loading students for class...</div>;
+  }
+  if (selectedClass !== 'all' && classStudentError) {
+    return <div>Error loading students for class: {classStudentError.message}</div>;
   }
 
   return (
@@ -136,10 +169,21 @@ export default function StudentManagement() {
           <h1 className="text-3xl font-bold tracking-tight">Quản lý học sinh</h1>
           <p className="text-gray-500">Quản lý thông tin học sinh trong trường</p>
         </div>
-        <StudentStats totalStudents={totalCount} />
+        <div className="flex gap-2 items-center">
+          <StudentStats totalStudents={totalCount} />
+          {showUnassigned ? (
+            <Button variant="outline" onClick={() => setShowUnassigned(false)}>
+              Quay lại
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={handleShowUnassigned}>
+              Xem học sinh chưa có lớp
+            </Button>
+          )}
+        </div>
       </div>
 
-      <StatsCards students={students} />
+      <StatsCards students={students as Student[]} />
 
       <SimpleCard>
         <SimpleCardHeader>
@@ -147,15 +191,47 @@ export default function StudentManagement() {
           <SimpleCardDescription>Xem và quản lý thông tin tất cả học sinh</SimpleCardDescription>
         </SimpleCardHeader>
         <SimpleCardContent>
-          <div className="flex items-center justify-between mb-6">
-            <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-            <Button onClick={handleAddStudent}>
-              <Plus className="mr-2 h-4 w-4" />
-              Thêm học sinh
-            </Button>
+          <div className="flex items-center justify-between mb-6 gap-4">
+            <div className="flex gap-4 items-center">
+              <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+              {!showUnassigned && (
+                <Select value={selectedClass} onValueChange={setSelectedClass}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Chọn lớp" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả lớp</SelectItem>
+                    {classOptions.map((cls) => (
+                      <SelectItem key={cls.classID} value={cls.classID.toString()}>
+                        {cls.className}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Button onClick={handleAddStudent}>
+                <Plus className="mr-2 h-4 w-4" />
+                Thêm học sinh
+              </Button>
+            </div>
           </div>
 
-          {isError ? (
+          {showUnassigned ? (
+            isUnassignedLoading ? (
+              <div>Đang tải học sinh chưa có lớp...</div>
+            ) : unassignedError ? (
+              <div className="text-red-500">Lỗi: {unassignedError.message}</div>
+            ) : (
+              <StudentTable
+                students={unassignedData?.data as unknown as Student[]}
+                onEdit={handleEditStudent}
+                onDelete={deleteStudent}
+                currentPage={0}
+                totalPages={1}
+                onPageChange={() => {}}
+              />
+            )
+          ) : isError ? (
             <div className="text-red-500">Lỗi: {errorMessage}</div>
           ) : isLoading ? (
             <div className="text-blue-500">Đang tải...</div>
@@ -169,6 +245,8 @@ export default function StudentManagement() {
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
+              classID={selectedClass !== 'all' ? selectedClass : undefined}
+              refetchClassStudents={selectedClass !== 'all' ? refetchClassStudents : undefined}
             />
           )}
         </SimpleCardContent>
@@ -178,6 +256,17 @@ export default function StudentManagement() {
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         student={viewingStudent || editingStudent}
+      />
+
+      <AddStudentDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSuccess={() => {
+          setIsAddDialogOpen(false);
+          if (showUnassigned && refetchUnassigned) refetchUnassigned();
+          if (selectedClass !== 'all' && !showUnassigned && refetchClassStudents)
+            refetchClassStudents();
+        }}
       />
     </div>
   );

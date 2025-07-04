@@ -11,7 +11,7 @@ import {
 } from '@/utils/auth';
 import { getAccountIdFromToken, isTokenExpired } from '@/utils/jwt';
 import { isAxiosUnauthorizedError } from '@/utils/utils';
-import axios, { AxiosError, HttpStatusCode } from 'axios';
+import axios, { AxiosError, HttpStatusCode, type AxiosRequestConfig } from 'axios';
 import { toast } from 'react-toastify';
 
 //
@@ -193,8 +193,8 @@ const api = {
     return response.data;
   },
 
-  delete: async <T>(url: string) => {
-    const response = await axiosInstance.delete<T>(url);
+  delete: async <T>(url: string, config?: AxiosRequestConfig) => {
+    const response = await axiosInstance.delete<T>(url, config);
     return response.data;
   },
 

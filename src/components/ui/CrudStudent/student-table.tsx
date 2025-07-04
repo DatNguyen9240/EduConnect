@@ -14,6 +14,7 @@ import { Eye, Trash2, Edit } from 'lucide-react';
 import type { Student } from '@/types/student';
 import { StudentDialog } from './student-dialog';
 import { useState } from 'react';
+import { removeStudent, removeStudentFromClass } from '@/api/class.api';
 
 interface StudentTableProps {
   students: Student[];
@@ -22,6 +23,8 @@ interface StudentTableProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  classID?: string;
+  refetchClassStudents?: () => void;
 }
 
 export function StudentTable({
@@ -31,13 +34,42 @@ export function StudentTable({
   currentPage,
   totalPages,
   onPageChange,
+  classID,
+  refetchClassStudents,
 }: StudentTableProps) {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleViewDetails = (student: Student) => {
     setSelectedStudent(student);
     setIsDialogOpen(true);
+  };
+
+  const handleDeleteFromClass = async (studentId: string) => {
+    if (!classID) return;
+    setDeletingId(studentId);
+    try {
+      await removeStudentFromClass(classID, [studentId]);
+      if (refetchClassStudents) refetchClassStudents();
+    } catch {
+      alert('Xóa học sinh khỏi lớp thất bại!');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleDelete = async (studentId: string) => {
+    setDeletingId(studentId);
+    try {
+      await removeStudent(studentId);
+      if (onDelete) onDelete(studentId);
+      if (refetchClassStudents) refetchClassStudents();
+    } catch {
+      alert('Xóa học sinh thất bại!');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   // Add debug logging
@@ -114,6 +146,9 @@ export function StudentTable({
           <TableHeader>
             <TableRow className="bg-gray-50">
               <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
+                Mã HS
+              </TableHead>
+              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Họ và tên
               </TableHead>
               <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
@@ -131,9 +166,6 @@ export function StudentTable({
               <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
                 Phụ huynh
               </TableHead>
-              <TableHead className="px-2 py-2 text-left font-semibold text-gray-500 uppercase tracking-wider">
-                Trạng thái
-              </TableHead>
               <TableHead className="px-2 py-2 text-right font-semibold text-gray-500 uppercase tracking-wider">
                 Thao tác
               </TableHead>
@@ -142,6 +174,13 @@ export function StudentTable({
           <TableBody className="bg-white divide-y divide-gray-200">
             {students.map((student) => (
               <TableRow key={student.studentId} className="hover:bg-gray-50">
+                <TableCell
+                  className="px-2 py-2 whitespace-nowrap font-mono text-xs text-blue-700 cursor-pointer"
+                  title="Click để copy"
+                  onClick={() => navigator.clipboard.writeText(student.studentId)}
+                >
+                  {student.studentId}
+                </TableCell>
                 <TableCell className="px-2 py-2 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-8 w-8 flex-shrink-0">
@@ -179,18 +218,6 @@ export function StudentTable({
                 <TableCell className="px-2 py-2 whitespace-nowrap">
                   <div className="text-xs text-gray-900">{student.parentName}</div>
                 </TableCell>
-                <TableCell className="px-2 py-2 whitespace-nowrap">
-                  <Badge
-                    variant={student.isActive ? 'default' : 'secondary'}
-                    className={
-                      student.isActive
-                        ? 'bg-green-100 text-green-800 text-xs px-2 py-0.5'
-                        : 'bg-gray-100 text-gray-800 text-xs px-2 py-0.5'
-                    }
-                  >
-                    {student.isActive ? 'Đang học' : 'Đã nghỉ'}
-                  </Badge>
-                </TableCell>
                 <TableCell className="px-2 py-2 whitespace-nowrap text-right text-xs font-medium">
                   <div className="flex items-center justify-end space-x-1">
                     <Button
@@ -212,8 +239,13 @@ export function StudentTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onDelete(student.studentId)}
+                      onClick={() =>
+                        classID
+                          ? handleDeleteFromClass(student.studentId)
+                          : handleDelete(student.studentId)
+                      }
                       className="text-red-600 hover:text-red-900 px-1"
+                      disabled={deletingId === student.studentId}
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
