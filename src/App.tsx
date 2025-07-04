@@ -24,8 +24,12 @@ const queryClient = new QueryClient({
 
 function AppGuard() {
   const { userInfo } = useContext(AppContext);
-  const { selectedStudent } = useSelectedStudent();
+  const { selectedStudent, isLoaded } = useSelectedStudent();
   const [showSelector, setShowSelector] = React.useState(false);
+
+  if (!isLoaded) {
+    return null;
+  }
 
   // Khi chưa chọn con (login lần đầu), hiển thị selector KHÔNG có nút close
   if (userInfo?.role === 'Parent' && !selectedStudent) {
