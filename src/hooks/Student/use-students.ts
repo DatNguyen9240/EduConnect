@@ -17,7 +17,7 @@ export function useStudents() {
     const newStudent: Student = {
       ...formData,
       classID: formData.classID ? String(formData.classID) : '',
-      studentID: studentId,
+      studentId: studentId,
       accountID: `ACC_${studentId}`,
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -40,7 +40,7 @@ export function useStudents() {
     const lastName = nameParts.slice(1).join(' ') || '';
     setStudents((prev) =>
       prev.map((student) =>
-        student.studentID === studentId
+        student.studentId === studentId
           ? {
               ...student,
               ...formData,
@@ -59,7 +59,7 @@ export function useStudents() {
   };
 
   const deleteStudent = (studentId: string) => {
-    setStudents((prev) => prev.filter((student) => student.studentID !== studentId));
+    setStudents((prev) => prev.filter((student) => student.studentId !== studentId));
     toast({
       title: 'Thành công',
       description: SUCCESS_MESSAGES.DELETE_STUDENT,

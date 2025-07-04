@@ -2,18 +2,19 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useContext } from 'react';
 import { examApi, type GetExamParams, type ExamListResponse } from '@/api/exam.api';
 import { AppContext } from '@/contexts/app.context';
+import { useSelectedStudent } from '@/contexts/selected-student.context';
 
 export function useExams(params?: Partial<GetExamParams>) {
-  const { hasRole, isAdmin } = useContext(AppContext);
+  const { hasRole, isAdmin, userInfo } = useContext(AppContext);
+  const { selectedStudent } = useSelectedStudent();
 
-  // TODO: Sử dụng accountId từ token sau khi test xong
-  // const currentAccountId = userInfo?.accountId || '52f061e7-3a86-4cf9-9542-499d3c28bf1d';
-
-  // Sử dụng accountId mẫu để test
-  const currentAccountId = '52f061e7-3a86-4cf9-9542-499d3c28bf1d';
+  // Nếu là parent và đã chọn con, truyền studentId của con vào API
+  const currentStudentId =
+    (userInfo?.roles.includes('Parent') && selectedStudent?.studentId) ||
+    params?.studentId ||
+    undefined;
 
   // Kiểm tra role để quyết định API endpoint
-  // Principal có thể là Admin hoặc có role Principal cụ thể
   const isPrincipal = isAdmin() || hasRole('Principal') || hasRole('principal');
 
   // Calculate default parameters: từ đầu năm đến cuối năm hiện tại
@@ -26,7 +27,7 @@ export function useExams(params?: Partial<GetExamParams>) {
     () => ({
       startDate: params?.startDate || defaultStartDate,
       endDate: params?.endDate || defaultEndDate,
-      studentId: params?.studentId,
+      studentId: currentStudentId,
       searchTerm: params?.searchTerm,
       sortBy: params?.sortBy || 'examDate',
       ascending: params?.ascending ?? true,
@@ -36,7 +37,7 @@ export function useExams(params?: Partial<GetExamParams>) {
     [
       params?.startDate,
       params?.endDate,
-      params?.studentId,
+      currentStudentId,
       params?.searchTerm,
       params?.sortBy,
       params?.ascending,
@@ -52,14 +53,14 @@ export function useExams(params?: Partial<GetExamParams>) {
     if (isPrincipal) {
       return examApi.getAllExams(defaultParams);
     } else {
-      return examApi.getExamsByAccount(currentAccountId, defaultParams);
+      return examApi.getExamsByStudent(currentStudentId || '', defaultParams);
     }
   };
 
   return useQuery<ExamListResponse>({
-    queryKey: ['exams', isPrincipal ? 'all' : currentAccountId, defaultParams],
+    queryKey: ['exams', isPrincipal ? 'all' : currentStudentId || '', defaultParams],
     queryFn,
-    enabled: !!currentAccountId,
+    enabled: !!currentStudentId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });

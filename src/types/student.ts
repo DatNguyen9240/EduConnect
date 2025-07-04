@@ -1,5 +1,5 @@
 export interface Student {
-  studentID: string;
+  studentId: string;
   accountID: string;
   parentID: string;
   classID: string;
@@ -20,7 +20,7 @@ export interface Student {
 }
 
 export type StudentFormData = {
-  studentID: string;
+  studentId: string;
   fullName: string;
   dateOfBirth: string;
   gender: string;

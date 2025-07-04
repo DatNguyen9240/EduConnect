@@ -57,3 +57,19 @@ export const updateProfileById = async (
     throw error;
   }
 };
+
+export const getStudentsByParentId = (parentId: string, params?: Record<string, unknown>) => {
+  return axiosInstance.get<{
+    totalCount: number;
+    pageIndex: number;
+    pageSize: number;
+    totalPages: number;
+    success: boolean;
+    message: string;
+    data: unknown[];
+    error: unknown;
+  }>(
+    `https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/Parent/${parentId}/students`,
+    params
+  );
+};

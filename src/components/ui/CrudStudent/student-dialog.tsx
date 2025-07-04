@@ -12,7 +12,7 @@ interface StudentDialogProps {
 }
 
 export function StudentDialog({ open, onOpenChange, student }: StudentDialogProps) {
-  const { data: detailedStudent, isLoading, error } = useStudentDetail(student?.studentID);
+  const { data: detailedStudent, isLoading, error } = useStudentDetail(student?.studentId);
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '-';
@@ -70,7 +70,7 @@ export function StudentDialog({ open, onOpenChange, student }: StudentDialogProp
               </div>
             </div>
 
-            <InfoItem label="Mã học sinh" value={detailedStudent.studentID} />
+            <InfoItem label="Mã học sinh" value={detailedStudent.studentId} />
             <InfoItem label="Lớp" value={detailedStudent.className} />
             <InfoItem label="Họ" value={detailedStudent.lastName} />
             <InfoItem label="Tên" value={detailedStudent.firstName} />

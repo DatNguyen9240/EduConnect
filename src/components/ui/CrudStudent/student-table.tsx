@@ -141,7 +141,7 @@ export function StudentTable({
           </TableHeader>
           <TableBody className="bg-white divide-y divide-gray-200">
             {students.map((student) => (
-              <TableRow key={student.studentID} className="hover:bg-gray-50">
+              <TableRow key={student.studentId} className="hover:bg-gray-50">
                 <TableCell className="px-2 py-2 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-8 w-8 flex-shrink-0">
@@ -212,7 +212,7 @@ export function StudentTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onDelete(student.studentID)}
+                      onClick={() => onDelete(student.studentId)}
                       className="text-red-600 hover:text-red-900 px-1"
                     >
                       <Trash2 className="h-3 w-3" />

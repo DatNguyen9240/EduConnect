@@ -71,7 +71,7 @@ export function StudentTable({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDelete(row.original.studentID)}
+            onClick={() => onDelete(row.original.studentId)}
             title="Xóa"
             className="h-8 w-8 p-0"
           >

@@ -22,9 +22,6 @@ let refreshTokenRequest: Promise<string> | null = null;
 const axiosInstance = axios.create({
   baseURL: apiConfig.baseURL,
   timeout: apiConfig.timeout,
-  // headers: {
-  //   'Content-Type': 'application/json',
-  // },
 });
 
 // Thêm interceptor để gắn token vào request
