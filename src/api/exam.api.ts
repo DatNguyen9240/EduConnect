@@ -27,7 +27,7 @@ export interface GetExamParams {
 const filterParams = (params: GetExamParams) => {
   const filtered: Record<string, string | number | boolean> = {};
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) {
+    if (value !== undefined && key !== 'studentId') {
       filtered[key] = value;
     }
   });
@@ -39,7 +39,7 @@ export const examApi = {
   getAllExams: (params: GetExamParams) =>
     api.get<ExamListResponse>('/api/Exam/Exams', filterParams(params)),
 
-  // API cho non-Principal - xem lịch thi theo account
-  getExamsByAccount: (accountId: string, params: GetExamParams) =>
-    api.get<ExamListResponse>(`/api/Exam/by-account/${accountId}`, filterParams(params)),
+  // API cho non-Principal - xem lịch thi theo studentId
+  getExamsByStudent: (studentId: string, params: GetExamParams) =>
+    api.get<ExamListResponse>(`/api/Exam/by-student/${studentId}`, filterParams(params)),
 };

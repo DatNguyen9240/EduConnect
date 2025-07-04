@@ -2,7 +2,7 @@ import type { Student } from '@/types/student';
 
 export const generateStudentId = (students: Student[]): string => {
   const maxId = students.reduce((max, student) => {
-    const numericId = Number.parseInt(student.studentID.replace('HS', ''));
+    const numericId = Number.parseInt(student.studentId.replace('HS', ''));
     return numericId > max ? numericId : max;
   }, 0);
 

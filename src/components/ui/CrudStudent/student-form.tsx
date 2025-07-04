@@ -23,7 +23,7 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
   const { toast } = useSimpleToast();
 
   const [formData, setFormData] = useState<StudentFormData>({
-    studentID: student?.studentID || '',
+    studentId: student?.studentId || '',
     fullName: student?.fullName || '',
     dateOfBirth: student?.dateOfBirth || '',
     gender: student?.gender || '',
@@ -39,7 +39,7 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.studentID || !formData.classID || !formData.parentName) {
+    if (!formData.fullName || !formData.studentId || !formData.classID || !formData.parentName) {
       toast({
         title: 'Lỗi',
         description: VALIDATION_MESSAGES.REQUIRED_FIELDS,
@@ -60,8 +60,8 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
               Họ
             </SimpleLabel>
             <Input
-              id="studentID"
-              value={formData.studentID}
+              id="studentId"
+              value={formData.studentId}
               onChange={(e) => setFormData((prev) => ({ ...prev, studentID: e.target.value }))}
               placeholder="Nhập họ"
             />

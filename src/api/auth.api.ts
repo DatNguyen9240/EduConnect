@@ -41,3 +41,19 @@ export const googleLogin = (googleUser: GoogleUser) => {
   };
   return api.post<AuthLoginResponse>('/api/Auth/google-login', payload);
 };
+
+export const getParentInfo = () => {
+  return api.get<{
+    success: boolean;
+    message: string;
+    data: {
+      userId: string;
+      role: string;
+      id: string;
+      fullName: string;
+    };
+    error: unknown;
+  }>(
+    'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/Auth/user-role-id'
+  );
+};

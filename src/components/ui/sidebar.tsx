@@ -1,8 +1,8 @@
-import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { routeMenuConfig } from '@/routes/RouterConfig';
 import { useNavigate, useLocation } from 'react-router-dom';
 import React from 'react';
+import SelectedStudentInfo from './SelectedStudentInfo';
 
 export default function Sidebar({ onHoverChange }: { onHoverChange?: (hovered: boolean) => void }) {
   const location = useLocation();
@@ -32,15 +32,7 @@ export default function Sidebar({ onHoverChange }: { onHoverChange?: (hovered: b
 
       {/* User Profile Section */}
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 border-2 border-blue-600 flex-shrink-0" />
-          <div className="overflow-hidden transition-all duration-300">
-            <div className="min-w-[120px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
-              <p className="font-medium text-gray-800">Nguyễn Thành Công</p>
-              <p className="text-xs text-gray-500">lớp 11A1</p>
-            </div>
-          </div>
-        </div>
+        <SelectedStudentInfo />
       </div>
 
       {/* Menu Section */}
