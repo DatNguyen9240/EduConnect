@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
-import { FilterGroup, type FilterOption } from './FilterGroup';
+import { type FilterOption } from './FilterGroup';
 import { AppContext } from '@/contexts/app.context';
 
 interface TaskFilterExamProps {
@@ -73,13 +73,6 @@ export default function TaskFilterExam({ onChange, current }: TaskFilterExamProp
     handleFilterChange({ studentId: newStudentId === 'all' ? undefined : newStudentId });
   };
 
-  // Handle sort change
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSortBy = e.target.value;
-    setSortBy(newSortBy);
-    handleFilterChange({ sortBy: newSortBy });
-  };
-
   // Handle ascending change
   const handleAscendingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newAscending = e.target.value === 'true';
@@ -127,13 +120,6 @@ export default function TaskFilterExam({ onChange, current }: TaskFilterExamProp
     { label: 'Đã hủy', value: '3' },
   ];
 
-  const sortOptions: FilterOption[] = [
-    { label: 'Ngày thi', value: 'examDate' },
-    { label: 'Tên môn', value: 'subjectName' },
-    { label: 'Loại kiểm tra', value: 'examType' },
-    { label: 'Ngày trả điểm', value: 'gradeDate' },
-  ];
-
   const ascendingOptions: FilterOption[] = [
     { label: 'Tăng dần', value: 'true' },
     { label: 'Giảm dần', value: 'false' },
@@ -151,7 +137,7 @@ export default function TaskFilterExam({ onChange, current }: TaskFilterExamProp
     <div className="mb-6">
       <h2 className="text-xl font-semibold text-blue-700 mb-4">Lịch Thi</h2>
       <div className="bg-white shadow-md border border-blue-100 rounded-xl p-6">
-        {/* Date Range Filters */}
+        {/* Hàng 1: Date Range và Student Filter */}
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
@@ -171,48 +157,33 @@ export default function TaskFilterExam({ onChange, current }: TaskFilterExamProp
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          {/* Student Filter (only for Principal) */}
+          {isPrincipal && (
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-700 mb-1">Học sinh</label>
+              <select
+                value={studentId || 'all'}
+                onChange={handleStudentChange}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {studentOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
-        {/* Student Filter (only for Principal) */}
-        {isPrincipal && (
-          <div className="mb-4">
-            <label className="text-sm font-medium text-gray-700 mb-1 block">Học sinh</label>
-            <select
-              value={studentId || 'all'}
-              onChange={handleStudentChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {studentOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Sorting Options */}
-        <div className="flex flex-wrap gap-4 mb-4">
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700 mb-1">Sắp xếp theo</label>
-            <select
-              value={sortBy}
-              onChange={handleSortChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700 mb-1">Thứ tự</label>
+        {/* Hàng 2: Sorting Options và Other Filters */}
+        <div className="grid grid-cols-5 gap-4 mb-4 items-end">
+          <div className="flex flex-col w-full min-w-[120px]">
+            <label className="text-sm font-medium text-gray-700 mb-1">Ngày thi</label>
             <select
               value={ascending.toString()}
               onChange={handleAscendingChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             >
               {ascendingOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -221,35 +192,49 @@ export default function TaskFilterExam({ onChange, current }: TaskFilterExamProp
               ))}
             </select>
           </div>
+          <div className="flex flex-col w-full min-w-[120px]">
+            <label className="text-sm font-medium text-gray-700 mb-1">Học Kì</label>
+            <select
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            >
+              {semesterOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col w-full min-w-[120px]">
+            <label className="text-sm font-medium text-gray-700 mb-1">Môn học</label>
+            <select
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            >
+              {subjectOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col w-full min-w-[120px]">
+            <label className="text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-
-        {/* Other Filters */}
-        <FilterGroup
-          filters={[
-            {
-              label: 'Học Kì',
-              value: semester,
-              placeholder: 'Chọn học kì',
-              options: semesterOptions,
-              onChange: setSemester,
-              minWidth: '150px',
-            },
-            {
-              label: 'Môn học',
-              value: subject,
-              options: subjectOptions,
-              onChange: setSubject,
-              minWidth: '80px',
-            },
-            {
-              label: 'Trạng thái',
-              value: status,
-              options: statusOptions,
-              onChange: setStatus,
-              minWidth: '130px',
-            },
-          ]}
-        />
       </div>
     </div>
   );
