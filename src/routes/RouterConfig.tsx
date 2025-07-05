@@ -9,7 +9,6 @@ import {
   Users,
   Calendar,
   BarChart3,
-  Utensils,
   Settings,
   BarChart,
 } from 'lucide-react';
@@ -26,7 +25,7 @@ const ThongKeBaoCao = lazy(() => import('@/pages/ThongKeBaoCao'));
 const QuanLyHocTap = lazy(() => import('@/pages/QuanLyHocTap'));
 const HocSinh = lazy(() => import('@/pages/StudentManagement'));
 const QuanTriThongTin = lazy(() => import('@/pages/QuanTriThongTin'));
-const AdminDashboard = lazy(() => import('@/components/admin-dashboard'));
+const AdminDashboard = lazy(() => import('@/pages/AdminDashBoard/admin-dashboard'));
 const ChatPage = lazy(() => import('@/pages/ChatPage'));
 
 export const routeMenuConfig = [
@@ -56,11 +55,10 @@ export const routeMenuConfig = [
   },
   {
     path: '/thong-ke-bao-cao',
-    label: 'Thống kê',
+    label: 'Thống kê điểm',
     icon: BarChart,
     element: <ThongKeBaoCao />,
     showInMenu: true,
-    badge: '35',
   },
   {
     path: '/lich-thi',
@@ -85,22 +83,6 @@ export const routeMenuConfig = [
     element: <div>Teacher page</div>,
     showInMenu: true,
     badge: null,
-  },
-  {
-    path: '/tai-chinh',
-    label: 'Finance',
-    icon: BarChart3,
-    element: <div>Finance page</div>,
-    showInMenu: true,
-    badge: null,
-  },
-  {
-    path: '/thuc-don',
-    label: 'Food',
-    icon: Utensils,
-    element: <div>Food page</div>,
-    showInMenu: true,
-    badge: '1',
   },
   {
     path: '/cai-dat',

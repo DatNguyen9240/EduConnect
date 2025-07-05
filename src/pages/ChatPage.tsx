@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Phone, Video, MoreHorizontal, Mic, Paperclip, Send } from 'lucide-react';
+import { Search, Phone, Video, MoreHorizontal, Send } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -101,28 +101,33 @@ export default function ChatPage() {
     }
   };
 
+  // Thay đổi thông tin chat bot cho đồng bộ giao diện
+  const botName = 'EduConnect Bot';
+  const botRole = 'AI Chatbot';
+  const botAvatar = '/assets/avatar/bot.png';
+
   const chats: ChatItem[] = [
     {
-      id: '1',
-      name: 'Felecia Rower',
-      role: 'Frontend Developer',
-      lastMessage: 'I will purchase it for sure. 👍',
-      timestamp: 'Apr 10',
-      avatar: '/placeholder.svg?height=40&width=40',
+      id: 'bot',
+      name: botName,
+      role: botRole,
+      lastMessage: '',
+      timestamp: '',
+      avatar: botAvatar,
       isActive: true,
     },
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 border-t border-gray-200">
       {/* Sidebar */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-10 w-10">
-              <AvatarImage src="/placeholder.svg?height=40&width=40" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src={botAvatar} />
+              <AvatarFallback>Bot</AvatarFallback>
             </Avatar>
             <div className="w-3 h-3 bg-green-500 rounded-full absolute ml-7 mt-7 border-2 border-white"></div>
           </div>
@@ -193,12 +198,12 @@ export default function ChatPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                <AvatarFallback>FR</AvatarFallback>
+                <AvatarImage src={botAvatar} />
+                <AvatarFallback>Bot</AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-sm font-medium text-gray-900">Felecia Rower</h2>
-                <p className="text-xs text-gray-500">Frontend Developer</p>
+                <h2 className="text-sm font-medium text-gray-900">{botName}</h2>
+                <p className="text-xs text-gray-500">{botRole}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -286,38 +291,24 @@ export default function ChatPage() {
         {/* Message Input */}
         <div className="bg-white border-t border-gray-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="flex-1 relative">
+            <div className="flex-1 items-center ">
               <Input
                 placeholder="Type your message here..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 className="pr-20 bg-gray-50 border-gray-200"
               />
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 flex items-center justify-center"
-                >
-                  <Mic className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 flex items-center justify-center"
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
-            <Button
-              className="bg-indigo-500 hover:bg-indigo-600"
-              onClick={handleSend}
-              disabled={loading}
-            >
-              <Send className="h-4 w-4 mr-2" />
-              Send
-            </Button>
+            <div>
+              <Button
+                className="bg-indigo-500 hover:bg-indigo-600"
+                onClick={handleSend}
+                disabled={loading}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Send
+              </Button>
+            </div>
           </div>
         </div>
       </div>
