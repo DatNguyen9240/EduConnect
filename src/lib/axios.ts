@@ -63,7 +63,7 @@ axiosInstance.interceptors.response.use(
       refreshToken = data.data.refreshToken;
       setAccessTokenToLS(accessToken);
       setRefreshTokenToLS(refreshToken);
-    } else if (url === '/api/Auth/logout') {
+    } else if (url === '/api/v1/auth/logout') {
       accessToken = '';
       refreshToken = '';
       clearLS();

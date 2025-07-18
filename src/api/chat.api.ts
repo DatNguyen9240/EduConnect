@@ -13,6 +13,6 @@ export interface ChatHistoryResponse {
 }
 
 export const chatApi = {
-  chatWithBot: (message: string) => api.post('/api/Chat/chat-with-cached-history', { message }),
-  fetchChatHistory: () => api.get<ChatHistoryResponse>('/api/Chat/chat-history'),
+  chatWithBot: (message: string) => api.post('/api/v1/chat/messages', { message }),
+  fetchChatHistory: () => api.get<ChatHistoryResponse>('/api/v1/chat/messages'),
 };

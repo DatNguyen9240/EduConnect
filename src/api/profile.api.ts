@@ -13,7 +13,7 @@ interface ProfileApiResponse {
 }
 
 export const getProfileById = async (userId: string): Promise<Profile> => {
-  const response = await axiosInstance.get<{ data: ProfileApiResponse }>(`/api/Profile/${userId}`);
+  const response = await axiosInstance.get<{ data: ProfileApiResponse }>(`/api/v1/profiles/${userId}`);
   const data = response.data.data;
   return {
     firstName: data?.firstName ?? null,
@@ -46,7 +46,7 @@ export const updateProfileById = async (
 ): Promise<UpdateProfileResponse> => {
   try {
     const response = await axiosInstance.put<UpdateProfileResponse>(
-      `/api/Profile/${userId}`,
+      `/api/v1/profiles/${userId}`,
       formData
     );
     return response.data;
@@ -69,7 +69,7 @@ export const getStudentsByParentId = (parentId: string, params?: Record<string, 
     data: unknown[];
     error: unknown;
   }>(
-    `https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/Parent/${parentId}/students`,
+    `https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/v1/parents/${parentId}/students`,
     params
   );
 };

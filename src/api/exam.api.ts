@@ -37,9 +37,9 @@ const filterParams = (params: GetExamParams) => {
 export const examApi = {
   // API cho Principal - xem tất cả lịch thi
   getAllExams: (params: GetExamParams) =>
-    api.get<ExamListResponse>('/api/Exam/Exams', filterParams(params)),
+    api.get<ExamListResponse>('/api/v1/exams', filterParams(params)),
 
   // API cho non-Principal - xem lịch thi theo studentId
   getExamsByStudent: (studentId: string, params: GetExamParams) =>
-    api.get<ExamListResponse>(`/api/Exam/by-student/${studentId}`, filterParams(params)),
+    api.get<ExamListResponse>(`/api/v1/exams/by-student/${studentId}`, filterParams(params)),
 };

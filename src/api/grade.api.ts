@@ -3,5 +3,5 @@ import type { Grade } from '@/hooks/useGrades';
 
 export const gradeApi = {
   getGradesByStudent: (studentId: string): Promise<{ data: Grade[] }> =>
-    api.get(`/api/Grade/students/${studentId}/grades`),
+    api.get(`/api/v1/grades/by-student/${studentId}`),
 };

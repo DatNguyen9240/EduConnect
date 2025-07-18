@@ -1,9 +1,9 @@
 import api from '@/lib/axios';
 import type { AuthLoginResponse, AuthResponse } from '@/types/auth.type';
 
-export const URL_LOGIN = '/api/Auth/login';
-export const URL_REGISTER = '/api/Auth/register';
-export const URL_REFRESH_TOKEN = '/api/Auth/new-token';
+export const URL_LOGIN = '/api/v1/auth/login';
+export const URL_REGISTER = '/api/v1/auth/register';
+export const URL_REFRESH_TOKEN = '/api/v1/auth/token/refresh';
 
 export const registerAccount = (body: {
   email: string;
@@ -29,7 +29,7 @@ export const loginAccount = (body: { email: string; password: string }) => {
 // Google Login API
 export const googleLogin = (googleToken: string) => {
   return api.post<AuthLoginResponse>(
-    'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/Auth/google-token-login',
+    'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/v1/auth/logins/google',
     { googleToken }
   );
 };
@@ -46,6 +46,6 @@ export const getParentInfo = () => {
     };
     error: unknown;
   }>(
-    'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/Auth/user-role-id'
+    'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/v1/auth/users/role'
   );
 };
