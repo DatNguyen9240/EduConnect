@@ -4,9 +4,9 @@ import { examColumns } from '@/components/common/DataTable/exam-columns';
 import { DataTable } from '@/components/common/DataTable/data-table';
 import TaskFilterExam from '@/components/TaskFilter/TaskFilterExam';
 import { AppContext } from '@/contexts/app.context';
-import AddExamDialog from '@/components/Exam/AddExamDialog';
+import ExamDialog, { type ExamDetail } from '@/components/Exam/ExamDialog';
 import { Button } from '@/components/common/Button';
-import { Eye } from 'lucide-react';
+import { Eye, Trash } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -14,9 +14,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Calendar, Home, StickyNote, BookOpen } from 'lucide-react';
+import { Calendar, Home, StickyNote, BookOpen, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Exam } from '@/types/exam';
+import { getExamDetail } from '@/api/exam.api';
+import { useQuery } from '@tanstack/react-query';
+import { deleteExam } from '@/api/exam.api';
+import { toast } from 'react-toastify';
+import { useClassList } from '@/hooks/useClassList';
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return '';
@@ -31,16 +36,57 @@ function formatDate(dateStr?: string) {
 function ExamDetailModal({
   open,
   onClose,
-  exam,
+  examId,
 }: {
   open: boolean;
   onClose: () => void;
-  exam: Exam | null;
+  examId: number | null;
 }) {
-  if (!exam) return null;
-  // Exam không có studentNames, studentIds, className, classId, subjectId
-  // Nếu cần, bạn có thể lấy các trường này từ nơi khác hoặc bỏ qua
-  // Ở đây sẽ chỉ hiển thị các trường có trong Exam
+  const {
+    data: apiData,
+    isLoading,
+    isError,
+  } = useQuery<{ data: ExamDetail } | null>({
+    queryKey: ['exam-detail', examId],
+    queryFn: () =>
+      examId ? getExamDetail(examId) : Promise.resolve(null as { data: ExamDetail } | null),
+    enabled: !!examId && open,
+  });
+  const data = apiData?.data ?? null;
+
+  if (!open) return null;
+  if (isLoading)
+    return (
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          if (!v) onClose();
+        }}
+      >
+        <DialogContent className="max-w-lg w-full">
+          <DialogTitle>Đang tải chi tiết lịch thi</DialogTitle>
+          <div>Đang tải chi tiết lịch thi...</div>
+        </DialogContent>
+      </Dialog>
+    );
+  if (isError || !data)
+    return (
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          if (!v) onClose();
+        }}
+      >
+        <DialogContent className="max-w-lg w-full">
+          <DialogTitle>Lỗi tải chi tiết lịch thi</DialogTitle>
+          <div>Lỗi tải chi tiết lịch thi.</div>
+          <DialogFooter className="flex gap-2 justify-end">
+            <Button onClick={onClose}>Đóng</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  const exam = data;
   return (
     <Dialog
       open={open}
@@ -61,6 +107,8 @@ function ExamDetailModal({
             <BookOpen size={16} /> Môn học:
           </div>
           <div className="font-semibold">{exam.subjectName}</div>
+          <div className="flex items-center gap-2 text-gray-600">Mã môn:</div>
+          <div>{exam.subjectCode}</div>
           <div className="flex items-center gap-2 text-gray-600">
             <Calendar size={16} /> Ngày thi:
           </div>
@@ -81,6 +129,12 @@ function ExamDetailModal({
             <StickyNote size={16} /> Ghi chú:
           </div>
           <div>{exam.examNote}</div>
+          <div className="flex items-center gap-2 text-gray-600">Mã học sinh:</div>
+          <div>{exam.studentId}</div>
+          <div className="flex items-center gap-2 text-gray-600">Người tạo:</div>
+          <div>{exam.createdBy}</div>
+          <div className="flex items-center gap-2 text-gray-600">Ngày tạo:</div>
+          <div>{formatDate(exam.createdDate)}</div>
         </div>
         <DialogFooter className="flex gap-2 justify-end">
           <Button onClick={onClose}>Đóng</Button>
@@ -127,10 +181,17 @@ export default function LichThi() {
   // Gọi API với React Query
   const { data, isLoading, isError, refetch } = useExams(queryParams);
 
-  // State cho modal chi tiết
+  // Thay đổi state lưu selectedExam thành examId
+  const [selectedExamId, setSelectedExamId] = useState<number | null>(null);
   const [openDetail, setOpenDetail] = useState(false);
-  const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
+  // State cho modal chung
+  const [openExamDialog, setOpenExamDialog] = useState(false);
+  const [examDialogMode, setExamDialogMode] = useState<'add' | 'edit'>('add');
+  const [examDialogData, setExamDialogData] = useState<ExamDetail | null>(null);
   console.log('Exam data:', data);
+
+  const { data: classListData } = useClassList();
+  const classOptions = classListData?.data?.items || [];
 
   // Xử lý khi đổi filter - memoize để tránh infinite loop
   const handleFilterChange = useCallback(
@@ -174,7 +235,6 @@ export default function LichThi() {
 
   const { hasRole, isAdmin } = useContext(AppContext);
   const isPrincipal = isAdmin() || hasRole('Principal') || hasRole('principal');
-  const [openAddExam, setOpenAddExam] = useState(false);
 
   if (isError) {
     return (
@@ -198,13 +258,24 @@ export default function LichThi() {
       {/* Nút tạo lịch thi cho principal */}
       {isPrincipal && (
         <div className="flex justify-end mb-4">
-          <Button onClick={() => setOpenAddExam(true)}>Tạo lịch thi</Button>
+          <Button
+            onClick={() => {
+              setExamDialogMode('add');
+              setExamDialogData(null);
+              setOpenExamDialog(true);
+            }}
+          >
+            Tạo lịch thi
+          </Button>
         </div>
       )}
-      <AddExamDialog
-        open={openAddExam}
-        onClose={() => setOpenAddExam(false)}
+      <ExamDialog
+        mode={examDialogMode}
+        exam={examDialogData}
+        open={openExamDialog}
+        onClose={() => setOpenExamDialog(false)}
         onSuccess={() => refetch()}
+        classOptions={classOptions}
       />
       <TaskFilterExam onChange={handleFilterChange} current={filters} />
 
@@ -221,17 +292,53 @@ export default function LichThi() {
                   id: 'actions',
                   header: '',
                   cell: ({ row }: { row: { original: Exam } }) => (
-                    <button
-                      type="button"
-                      className="text-blue-600 hover:text-blue-800"
-                      title="Xem chi tiết"
-                      onClick={() => {
-                        setSelectedExam(row.original);
-                        setOpenDetail(true);
-                      }}
-                    >
-                      <Eye size={18} />
-                    </button>
+                    <div className="flex gap-2 items-center">
+                      <button
+                        type="button"
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Xem chi tiết"
+                        onClick={() => {
+                          setSelectedExamId(row.original.examId);
+                          setOpenDetail(true);
+                        }}
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        className="text-green-600 hover:text-green-800"
+                        title="Sửa lịch thi"
+                        onClick={() => {
+                          setExamDialogMode('edit');
+                          setExamDialogData(row.original as ExamDetail);
+                          setOpenExamDialog(true);
+                        }}
+                      >
+                        <Pencil size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        className="text-red-600 hover:text-red-800"
+                        title="Xóa lịch thi"
+                        onClick={async () => {
+                          if (window.confirm('Bạn có chắc chắn muốn xóa lịch thi này?')) {
+                            try {
+                              await deleteExam(row.original.examId);
+                              toast.success('Xóa lịch thi thành công!');
+                              refetch();
+                            } catch (err: unknown) {
+                              const errorMsg =
+                                err && typeof err === 'object' && 'message' in err
+                                  ? (err as { message?: string }).message
+                                  : '';
+                              toast.error('Xóa lịch thi thất bại! ' + (errorMsg || ''));
+                            }
+                          }
+                        }}
+                      >
+                        <Trash size={18} />
+                      </button>
+                    </div>
                   ),
                 },
               ]}
@@ -253,7 +360,7 @@ export default function LichThi() {
             <ExamDetailModal
               open={openDetail}
               onClose={() => setOpenDetail(false)}
-              exam={selectedExam}
+              examId={selectedExamId}
             />
           </>
         )}

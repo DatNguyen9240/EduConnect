@@ -43,3 +43,40 @@ export const examApi = {
   getExamsByStudent: (studentId: string, params: GetExamParams) =>
     api.get<ExamListResponse>(`/api/v1/exams/by-student/${studentId}`, filterParams(params)),
 };
+
+// Định nghĩa type ExamDetail nếu chưa có
+export type ExamDetail = {
+  examId: number;
+  subjectName: string;
+  subjectCode: string;
+  examType: string;
+  examNote: string;
+  examDate: string;
+  gradeDate: string;
+  room: string;
+  studentId: string;
+  createdBy: string;
+  createdDate: string;
+};
+
+export const getExamDetail = (examId: number | string) => {
+  return api.get<{ data: ExamDetail }>(`/api/v1/exams/${examId}`);
+};
+
+export const deleteExam = (examId: number | string) => {
+  return api.delete(`/api/v1/exams/${examId}`);
+};
+
+export type UpdateExamPayload = {
+  subjectId: number;
+  examType: string;
+  examNote: string;
+  examDate: string;
+  gradeDate: string;
+  room: string;
+  // Thêm các trường khác nếu cần
+};
+
+export const updateExam = (examId: number | string, payload: UpdateExamPayload) => {
+  return api.put(`/api/v1/exams/${examId}`, payload);
+};
