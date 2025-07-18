@@ -202,7 +202,7 @@ export default function StudentManagement() {
                   <SelectContent>
                     <SelectItem value="all">Tất cả lớp</SelectItem>
                     {classOptions.map((cls) => (
-                      <SelectItem key={cls.classID} value={cls.classID.toString()}>
+                      <SelectItem key={cls.classId} value={cls.classId.toString()}>
                         {cls.className}
                       </SelectItem>
                     ))}

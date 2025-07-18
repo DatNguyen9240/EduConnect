@@ -13,7 +13,9 @@ interface ProfileApiResponse {
 }
 
 export const getProfileById = async (userId: string): Promise<Profile> => {
-  const response = await axiosInstance.get<{ data: ProfileApiResponse }>(`/api/v1/profiles/${userId}`);
+  const response = await axiosInstance.get<{ data: ProfileApiResponse }>(
+    `/api/v1/profiles/${userId}`
+  );
   const data = response.data.data;
   return {
     firstName: data?.firstName ?? null,

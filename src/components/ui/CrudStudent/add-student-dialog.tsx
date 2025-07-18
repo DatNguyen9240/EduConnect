@@ -68,8 +68,8 @@ export function AddStudentDialog({ open, onOpenChange, onSuccess }: AddStudentDi
             <SelectValue placeholder="Chọn lớp" />
           </SelectTrigger>
           <SelectContent>
-            {classOptions.map((cls: { classID: string | number; className: string }) => (
-              <SelectItem key={cls.classID} value={cls.classID.toString()}>
+            {classOptions.map((cls: { classId: string | number; className: string }) => (
+              <SelectItem key={cls.classId} value={cls.classId.toString()}>
                 {cls.className}
               </SelectItem>
             ))}

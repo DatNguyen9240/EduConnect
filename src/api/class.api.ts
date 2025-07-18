@@ -82,7 +82,7 @@ export async function getStudentsByClassID(
 }
 
 export async function addStudentsToClass(
-  classId:  number | string,
+  classId: number | string,
   studentIDs: string[]
 ): Promise<AddStudentsToClassResponse> {
   const response = await api.post<AddStudentsToClassResponse>(
