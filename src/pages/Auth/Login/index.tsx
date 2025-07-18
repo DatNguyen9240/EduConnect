@@ -9,12 +9,13 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema, type LoginSchema } from '@/utils/rules';
 import { useMutation } from '@tanstack/react-query';
-import { loginAccount, googleLogin, getParentInfo } from '@/api/auth.api';
+import { loginAccount, googleLogin } from '@/api/auth.api';
 import { isAxiosBadRequestError } from '@/utils/utils';
 import type { ErrorResponse } from '@/types/utils.type';
 import InputComponent from '@/components/common/Input/InputComponent';
 import { useContext } from 'react';
 import { AppContext } from '@/contexts/app.context';
+import { axiosInstance } from '@/lib/axios';
 
 type FormData = LoginSchema;
 
@@ -36,16 +37,21 @@ export default function Login() {
     mutationFn: (body: FormData) => loginAccount(body),
   });
 
+  // Thêm hàm mới lấy role user
+  const getUserRoleInfo = async () => {
+    const res = await axiosInstance.get('/api/v1/auth/users/role');
+    return res.data.data;
+  };
+
   const onSubmit = handleSubmit((data) => {
     loginAccountMutation.mutate(data, {
       onSuccess: async () => {
         try {
-          // Sau khi login thành công, gọi API lấy user info
-          const res = await getParentInfo();
-          setUserInfo(res.data); // userId, role, id, fullName
-          localStorage.setItem('profile', JSON.stringify(res.data));
+          // Sau khi login thành công, gọi API lấy user role info
+          const userRoleInfo = await getUserRoleInfo();
+          setUserInfo(userRoleInfo); // userId, role, id, fullName
+          localStorage.setItem('profile', JSON.stringify(userRoleInfo));
         } catch {
-          // fallback nếu lỗi
           setUserInfo(null);
           localStorage.removeItem('profile');
         }

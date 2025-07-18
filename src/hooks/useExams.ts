@@ -50,18 +50,40 @@ export function useExams(params?: Partial<GetExamParams>) {
   );
 
   // Chọn API endpoint dựa trên role
-  const queryFn = () => {
-    if (isPrincipal) {
-      return examApi.getAllExams(defaultParams);
-    } else {
-      return examApi.getExamsByStudent(currentStudentId || '', defaultParams);
+  const queryFn = async () => {
+    try {
+      if (isPrincipal) {
+        return await examApi.getAllExams(defaultParams);
+      } else {
+        return await examApi.getExamsByStudent(currentStudentId || '', defaultParams);
+      }
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        (error as { response?: { status?: number } }).response?.status === 404
+      ) {
+        // Trả về dữ liệu rỗng nếu không có lịch thi
+        return {
+          data: [],
+          totalCount: 0,
+          pageIndex: defaultParams.pageIndex,
+          pageSize: defaultParams.pageSize,
+          totalPages: 1,
+          success: true,
+          message: 'No exams found',
+          error: null,
+        };
+      }
+      throw error;
     }
   };
 
   return useQuery<ExamListResponse>({
     queryKey: ['exams', isPrincipal ? 'all' : currentStudentId || '', defaultParams],
     queryFn,
-    enabled: !!currentStudentId,
+    enabled: isPrincipal || !!currentStudentId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });

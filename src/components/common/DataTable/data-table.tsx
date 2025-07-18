@@ -140,7 +140,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Không có dữ liệu.
+                  Không có lịch thi trong thời gian này
                 </TableCell>
               </TableRow>
             )}

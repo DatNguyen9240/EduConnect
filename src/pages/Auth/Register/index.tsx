@@ -12,6 +12,10 @@ import { useMutation } from '@tanstack/react-query';
 import { registerAccount } from '@/api/auth.api';
 import { isAxiosBadRequestError } from '@/utils/utils';
 import type { ErrorResponse } from '@/types/utils.type';
+import { useContext } from 'react';
+import { AppContext } from '@/contexts/app.context';
+import { axiosInstance } from '@/lib/axios';
+import { setAccessTokenToLS, setRefreshTokenToLS } from '@/utils/auth';
 
 type FormData = Schema;
 
@@ -19,6 +23,7 @@ export default function Register() {
   const showForm = useShowForm();
   // const { formData, handleChange, handleSubmit } = useRegisterForm();
   const navigate = useNavigate();
+  const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
   const {
     register,
     handleSubmit,
@@ -32,10 +37,45 @@ export default function Register() {
     mutationFn: (body: FormData) => registerAccount(body),
   });
 
+  // Thêm hàm lấy role user
+  const getUserRoleInfo = async () => {
+    const res = await axiosInstance.get('/api/v1/auth/users/role');
+    return res.data.data;
+  };
+
   const onSubmit = handleSubmit((data) => {
     registerAccountMutation.mutate(data, {
-      onSuccess: () => {
-        navigate('/login');
+      onSuccess: async (res) => {
+        // Nếu backend trả về token, refreshToken sau đăng ký
+        type RegisterResponse = {
+          data?: {
+            data?: {
+              token?: string;
+              refreshToken?: string;
+            };
+            token?: string;
+            refreshToken?: string;
+          };
+        };
+        const response = res as RegisterResponse;
+        const token = response?.data?.data?.token || response?.data?.token;
+        const refreshToken = response?.data?.data?.refreshToken || response?.data?.refreshToken;
+        if (token && refreshToken) {
+          setAccessTokenToLS(token);
+          setRefreshTokenToLS(refreshToken);
+          setIsAuthenticated(true);
+          try {
+            const userRoleInfo = await getUserRoleInfo();
+            setUserInfo(userRoleInfo);
+            localStorage.setItem('profile', JSON.stringify(userRoleInfo));
+          } catch {
+            setUserInfo(null);
+            localStorage.removeItem('profile');
+          }
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/login');
+        }
       },
       onError: (error) => {
         if (isAxiosBadRequestError<ErrorResponse<FormData>>(error)) {
