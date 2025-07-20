@@ -13,6 +13,7 @@ import { toast } from 'react-toastify';
 import api from '@/lib/axios';
 import { updateExam } from '@/api/exam.api';
 import { getStudentsByClassID } from '@/api/class.api';
+import type { Subject } from '@/api/subject.api';
 import Select from 'react-select';
 
 export type ExamDetail = {
@@ -30,19 +31,7 @@ export type ExamDetail = {
   createdDate: string;
 };
 
-const SUBJECTS = [
-  { value: 1, label: 'Toán' },
-  { value: 2, label: 'Ngữ Văn' },
-  { value: 3, label: 'Tiếng Anh' },
-  { value: 4, label: 'Vật Lý' },
-  { value: 5, label: 'Hóa Học' },
-  { value: 6, label: 'Sinh Học' },
-  { value: 7, label: 'Lịch Sử' },
-  { value: 8, label: 'Địa Lý' },
-  { value: 9, label: 'Tin Học' },
-  { value: 10, label: 'GDCD' },
-  { value: 11, label: 'Thể Dục' },
-];
+// SUBJECTS sẽ được lấy từ API thay vì hardcode
 
 const EXAM_TYPES = [
   { value: '15p', label: '15 phút' },
@@ -63,6 +52,7 @@ function ExamDialog({
   onClose,
   onSuccess,
   classOptions = [],
+  subjects = [],
 }: {
   mode: 'add' | 'edit';
   exam: ExamDetail | null;
@@ -70,6 +60,7 @@ function ExamDialog({
   onClose: () => void;
   onSuccess: () => void;
   classOptions?: ClassOption[];
+  subjects?: Subject[];
 }) {
   const isEdit = mode === 'edit';
   const { userInfo } = useContext(AppContext);
@@ -78,17 +69,53 @@ function ExamDialog({
   >({
     defaultValues: exam || {},
   });
-  useEffect(() => {
-    reset(exam || {});
-  }, [exam, reset]);
+  // Helper function để format datetime cho input datetime-local
+  const formatDateTimeForInput = (dateTimeString: string) => {
+    if (!dateTimeString) return '';
+    try {
+      const date = new Date(dateTimeString);
+      if (isNaN(date.getTime())) return '';
 
-  // State cho tạo mới: chọn lớp và học sinh
+      // Format thành YYYY-MM-DDTHH:mm (loại bỏ seconds và milliseconds)
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    } catch {
+      return '';
+    }
+  };
+
+  useEffect(() => {
+    if (exam) {
+      // Format datetime trước khi reset form
+      const formattedExam = {
+        ...exam,
+        examDate: formatDateTimeForInput(exam.examDate),
+        gradeDate: formatDateTimeForInput(exam.gradeDate),
+      };
+      reset(formattedExam);
+    } else {
+      reset({});
+    }
+
+    // Nếu là edit và exam có thông tin lớp, tự động chọn lớp
+    if (isEdit && exam) {
+      // Có thể cần thêm logic để lấy classId từ exam nếu có
+      // Hiện tại sẽ để user chọn lại lớp
+    }
+  }, [exam, reset, isEdit]);
+
+  // State cho chọn lớp và học sinh (dùng cho cả add và edit)
   const [classId, setClassId] = useState('');
   const [students, setStudents] = useState<{ studentId: string | number; fullName: string }[]>([]);
   const [studentIds, setStudentIds] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!isEdit && classId) {
+    if (classId) {
       getStudentsByClassID(Number(classId)).then((res) => {
         setStudents(
           (res.data || []).map((stu) => ({
@@ -97,11 +124,11 @@ function ExamDialog({
           }))
         );
       });
-    } else if (!isEdit) {
+    } else {
       setStudents([]);
       setStudentIds([]);
     }
-  }, [classId, isEdit]);
+  }, [classId]);
 
   const [loading, setLoading] = useState(false);
 
@@ -116,6 +143,7 @@ function ExamDialog({
           examDate: values.examDate,
           gradeDate: values.gradeDate,
           room: values.room,
+          studentId: values.studentId,
         };
         await updateExam(exam.examId, payload);
         toast.success('Cập nhật lịch thi thành công!');
@@ -156,26 +184,45 @@ function ExamDialog({
           <DialogTitle>{isEdit ? 'Sửa lịch thi' : 'Tạo lịch thi mới'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {!isEdit && (
-            <>
-              <div>
-                <label className="block font-medium mb-1">Lớp</label>
-                <select
-                  className="w-full border rounded px-3 py-2"
-                  value={classId}
-                  onChange={(e) => setClassId(e.target.value)}
-                  required
-                >
-                  <option value="">Chọn lớp</option>
-                  {classOptions.map((cls) => (
-                    <option key={cls.classId} value={cls.classId}>
-                      {cls.className}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Chọn học sinh</label>
+          {/* Trường chọn lớp (cho cả add và edit) */}
+          <div>
+            <label className="block font-medium mb-1">Lớp</label>
+            <select
+              className="w-full border rounded px-3 py-2"
+              value={classId}
+              onChange={(e) => setClassId(e.target.value)}
+              required
+            >
+              <option value="">Chọn lớp</option>
+              {classOptions.map((cls) => (
+                <option key={cls.classId} value={cls.classId}>
+                  {cls.className}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Trường chọn học sinh (cho cả add và edit) */}
+          <div>
+            <label className="block font-medium mb-1">
+              {isEdit ? 'Học sinh' : 'Chọn học sinh'}
+            </label>
+            {isEdit ? (
+              <select
+                className="w-full border rounded px-3 py-2"
+                {...register('studentId')}
+                defaultValue={exam?.studentId || ''}
+                required
+              >
+                <option value="">Chọn học sinh</option>
+                {students.map((student) => (
+                  <option key={student.studentId} value={student.studentId}>
+                    {student.fullName}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <>
                 <Select
                   isMulti
                   options={students.map((stu) => ({ value: stu.studentId, label: stu.fullName }))}
@@ -190,9 +237,10 @@ function ExamDialog({
                 <div className="text-xs text-gray-500 mt-1">
                   Đã chọn {studentIds.length} học sinh
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
+
           <div>
             <label className="block font-medium mb-1">Môn học</label>
             <select
@@ -201,9 +249,9 @@ function ExamDialog({
               defaultValue={exam?.subjectId || ''}
             >
               <option value="">Chọn môn</option>
-              {SUBJECTS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
+              {subjects.map((s) => (
+                <option key={s.subjectId} value={s.subjectId}>
+                  {s.subjectName}
                 </option>
               ))}
             </select>

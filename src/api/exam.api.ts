@@ -74,6 +74,7 @@ export type UpdateExamPayload = {
   examDate: string;
   gradeDate: string;
   room: string;
+  studentId: string;
   // Thêm các trường khác nếu cần
 };
 

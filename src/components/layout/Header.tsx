@@ -4,6 +4,7 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clearLS } from '@/utils/auth';
 import { AppContext } from '@/contexts/app.context';
+import NotificationSettings from '@/components/NotificationSettings';
 
 interface Profile {
   avatarUrl?: string;
@@ -67,6 +68,9 @@ export default function Header() {
 
         {/* User Info and Settings */}
         <div className="flex items-center">
+          {/* Notification Settings */}
+          <NotificationSettings className="mr-2" />
+
           {/* User Info */}
           <div className="flex items-center mr-4">
             <img

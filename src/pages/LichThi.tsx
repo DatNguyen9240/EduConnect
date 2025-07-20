@@ -22,6 +22,7 @@ import { useQuery } from '@tanstack/react-query';
 import { deleteExam } from '@/api/exam.api';
 import { toast } from 'react-toastify';
 import { useClassList } from '@/hooks/useClassList';
+import { useSubjects } from '@/hooks/useSubjects';
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return '';
@@ -192,6 +193,8 @@ export default function LichThi() {
 
   const { data: classListData } = useClassList();
   const classOptions = classListData?.data?.items || [];
+  const { data: subjectsData } = useSubjects();
+  const subjects = subjectsData || [];
 
   // Xử lý khi đổi filter - memoize để tránh infinite loop
   const handleFilterChange = useCallback(
@@ -276,6 +279,7 @@ export default function LichThi() {
         onClose={() => setOpenExamDialog(false)}
         onSuccess={() => refetch()}
         classOptions={classOptions}
+        subjects={subjects}
       />
       <TaskFilterExam onChange={handleFilterChange} current={filters} />
 
