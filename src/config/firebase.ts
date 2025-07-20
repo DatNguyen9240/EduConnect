@@ -14,14 +14,17 @@ const firebaseConfig = {
 
 // Khởi tạo Firebase app
 const app = initializeApp(firebaseConfig);
+console.log('Firebase app initialized successfully:', app.name);
 
 // Khởi tạo Firebase messaging
 export const messaging = getMessaging(app);
+console.log('Firebase messaging initialized');
 
 // VAPID key cho web push notifications
 // Lấy từ Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
+// ⚠️ Cần thay thế bằng VAPID key mới từ Firebase Console
 const vapidKey =
-  'BHUDdpnWKj3qs6QZwYTJDNQHFhk-6VDvVMCmQvZ0_-JlnRUZJxSm-U1_KxWbwHjVnxZKN5KfGPDMTbIGBEI1Hhc';
+  'BLgnlypmnlwllqH7lU4QauycUeBrLq5XG5m6s2PKH9sYN6ewIMwIGD5LTjDBtd9h3DV6RMRE32qhxfT3rYCwbvY';
 
 // Service worker path
 const swPath = '/firebase-messaging-sw.js';
@@ -30,6 +33,7 @@ const swPath = '/firebase-messaging-sw.js';
 export const requestNotificationPermission = async (): Promise<boolean> => {
   try {
     const permission = await Notification.requestPermission();
+    console.log('Notification permission status:', permission);
     return permission === 'granted';
   } catch (error) {
     console.error('Error requesting notification permission:', error);
@@ -52,37 +56,53 @@ export const getFCMToken = async (): Promise<string | null> => {
     // Kiểm tra service worker
     if ('serviceWorker' in navigator) {
       try {
-        // Kiểm tra xem service worker đã được đăng ký chưa
-        const registration = await navigator.serviceWorker.getRegistration(swPath);
-
-        if (!registration) {
-          // Nếu chưa đăng ký, đăng ký mới
-          await navigator.serviceWorker.register(swPath);
-          console.log('Service Worker registered successfully');
-        } else {
-          console.log('Service Worker already registered');
-        }
+        // Đăng ký service worker mới
+        const registration = await navigator.serviceWorker.register(swPath);
+        console.log('Service Worker registered successfully:', registration);
 
         // Đảm bảo service worker đã active
         const serviceWorker =
           registration?.active || registration?.installing || registration?.waiting;
 
         if (!serviceWorker) {
-          // Đợi service worker active nếu cần
+          console.log('Waiting for service worker to activate...');
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       } catch (error) {
         console.error('Service Worker registration failed:', error);
         return null;
       }
+    } else {
+      console.error('Service Worker not supported in this browser');
+      return null;
     }
 
-    // Lấy FCM token
-    const token = await getToken(messaging, { vapidKey });
-    console.log('FCM Token:', token);
-    return token;
+    console.log('Attempting to get FCM token with VAPID key:', vapidKey.substring(0, 10) + '...');
+
+    try {
+      // Lấy FCM token
+      const token = await getToken(messaging, { vapidKey });
+      console.log('FCM Token obtained successfully:', token);
+      return token;
+    } catch (error: unknown) {
+      console.error('Error getting FCM token:', error);
+
+      // Hiển thị chi tiết lỗi Firebase
+      if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+        const firebaseError = error as { code: string; message: string };
+        console.error(`Firebase error (${firebaseError.code}): ${firebaseError.message}`);
+
+        if (firebaseError.code === 'messaging/permission-blocked') {
+          console.error('User has blocked notifications. Please check browser settings.');
+        } else if (firebaseError.code === 'messaging/token-subscribe-failed') {
+          console.error('Token subscribe failed. Check VAPID key and Firebase configuration.');
+        }
+      }
+
+      return null;
+    }
   } catch (error) {
-    console.error('Error getting FCM token:', error);
+    console.error('General error in getFCMToken:', error);
     return null;
   }
 };
@@ -126,12 +146,13 @@ export const showNotification = (title: string, body: string, data?: Record<stri
       console.log('Notification clicked:', event);
       notification.close();
 
-      // Điều hướng dựa vào data
-      if (data?.url && typeof data.url === 'string') {
+      // Lưu thông tin điều hướng vào localStorage
+      if (data?.type === 'exam_notification' && data?.exam_id) {
+        localStorage.setItem('pendingNavigation', `/lich-thi?examId=${data.exam_id}`);
+      } else if (data?.type === 'class_notification' && data?.class_id) {
+        localStorage.setItem('pendingNavigation', `/class/${data.class_id}`);
+      } else if (data?.url && typeof data.url === 'string') {
         window.open(data.url, '_blank');
-      } else if (data?.examId) {
-        // Nếu là thông báo về lịch thi
-        window.open(`/lich-thi?examId=${data.examId}`, '_self');
       } else {
         // Mặc định focus vào tab hiện tại
         window.focus();

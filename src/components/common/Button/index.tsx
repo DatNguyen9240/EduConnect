@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text' | 'ghost' | 'destructive';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -24,6 +24,8 @@ const getVariantClasses = (variant: ButtonVariant) => {
       return 'text-[#2962FF] hover:bg-[#2962FF]/10';
     case 'ghost':
       return 'hover:bg-gray-100 text-gray-700';
+    case 'destructive':
+      return 'bg-red-600 text-white hover:bg-red-700';
     default:
       return 'bg-[#2962FF] text-white hover:bg-[#1e4ddf]';
   }

@@ -13,6 +13,7 @@ import ParentProfileSelector from './components/ui/ParentProfileSelector';
 import React from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { NotificationProvider } from './contexts/notification.context';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -63,7 +64,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AppProvider>
         <SelectedStudentProvider>
-          <AppGuard />
+          <NotificationProvider>
+            <AppGuard />
+          </NotificationProvider>
         </SelectedStudentProvider>
       </AppProvider>
       <ReactQueryDevtools initialIsOpen={false} />
