@@ -5,6 +5,7 @@ import { ROUTES } from '@constants/routes';
 import type { GoogleUser } from '@/types';
 import { setAccessTokenToLS, setRefreshTokenToLS } from '@/utils/auth';
 import { AppContext } from '@/contexts/app.context';
+import { axiosInstance } from '@/lib/axios';
 
 interface GoogleLoginApiResponse {
   token: string;
@@ -15,7 +16,7 @@ interface GoogleLoginApiResponse {
 export const useGoogleAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useContext(AppContext);
+  const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
 
   const handleGoogleSuccess = async (user: GoogleUser, apiResponse?: GoogleLoginApiResponse) => {
     setIsLoading(true);
@@ -39,13 +40,15 @@ export const useGoogleAuth = () => {
         setAccessTokenToLS(apiResponse.token);
         setRefreshTokenToLS(apiResponse.refreshToken || '');
         setIsAuthenticated(true);
-        // Kiểm tra lại localStorage ngay sau khi lưu
-        const tokenInLS = localStorage.getItem('token');
-        const refreshTokenInLS = localStorage.getItem('refreshToken');
-        console.log('[GoogleAuth] Đã lưu token vào localStorage:', {
-          token: tokenInLS,
-          refreshToken: refreshTokenInLS,
-        });
+        // Lấy role user từ backend
+        try {
+          const res = await axiosInstance.get('/api/v1/auth/users/role');
+          setUserInfo(res.data.data);
+          localStorage.setItem('profile', JSON.stringify(res.data.data));
+        } catch {
+          setUserInfo(null);
+          localStorage.removeItem('profile');
+        }
         toast.success(`Welcome back, ${user.name}!`);
         navigate(ROUTES.HOME);
       } else {

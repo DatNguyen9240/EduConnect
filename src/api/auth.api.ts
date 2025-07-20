@@ -3,7 +3,7 @@ import type { AuthLoginResponse, AuthResponse } from '@/types/auth.type';
 
 export const URL_LOGIN = '/api/v1/auth/login';
 export const URL_REGISTER = '/api/v1/auth/register';
-export const URL_REFRESH_TOKEN = '/api/v1/auth/token/refresh';
+export const URL_REFRESH_TOKEN = '/api/v1/auth/tokens/refresh';
 
 export const registerAccount = (body: {
   email: string;

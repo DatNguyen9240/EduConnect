@@ -4,15 +4,7 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clearLS } from '@/utils/auth';
 import { AppContext } from '@/contexts/app.context';
-import { getAccessTokenFromLS } from '@/utils/auth';
-import { getTokenInfo } from '@/utils/jwt';
-
-interface DecodedToken {
-  avatar_url?: string;
-  avatarUrl?: string;
-  lastName?: string;
-  [key: string]: unknown;
-}
+import NotificationSettings from '@/components/NotificationSettings';
 
 interface Profile {
   avatarUrl?: string;
@@ -41,23 +33,10 @@ export default function Header() {
     // ignore
   }
 
-  // Lấy avatar và lastName từ token nếu có
-  const token = getAccessTokenFromLS();
-  const tokenInfo = (getTokenInfo(token) || {}) as DecodedToken;
-  const avatarUrl =
-    tokenInfo.avatar_url ||
-    tokenInfo.avatarUrl ||
-    profile.avatarUrl ||
-    '/assets/avatar/default.jpg';
+  // Ưu tiên lấy avatar và tên từ context userInfo (profile)
+  const avatarUrl = profile.avatarUrl || '/assets/avatar/default.jpg';
 
-  const displayName =
-    (tokenInfo['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] as
-      | string
-      | undefined) ||
-    tokenInfo.lastName ||
-    profile.lastName ||
-    profile.fullName ||
-    'Người dùng';
+  const displayName = profile.fullName || profile.lastName || 'Người dùng';
 
   return (
     <header className="flex items-center justify-between p-4 bg-white">
@@ -89,6 +68,9 @@ export default function Header() {
 
         {/* User Info and Settings */}
         <div className="flex items-center">
+          {/* Notification Settings */}
+          <NotificationSettings className="mr-2" />
+
           {/* User Info */}
           <div className="flex items-center mr-4">
             <img

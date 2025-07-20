@@ -7,11 +7,12 @@ import { RouterProvider } from 'react-router-dom';
 import { RouterConfig } from '@/routes/RouterConfig';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastContainer } from 'react-toastify';
 import { AppProvider, AppContext } from './contexts/app.context';
 import { SelectedStudentProvider, useSelectedStudent } from './contexts/selected-student.context';
 import ParentProfileSelector from './components/ui/ParentProfileSelector';
 import React from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Create a client
 const queryClient = new QueryClient({
