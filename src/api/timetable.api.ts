@@ -64,10 +64,8 @@ export const getTimetableByClassId = async (
     const formattedEndDate = endDate || nextWeek.toISOString().split('T')[0];
 
     const url = `${API_BASE_URL}/api/v1/timetables?classId=${classId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
-    console.log(`Calling API: ${url}`);
 
     const response = await axios.get(url);
-    console.log('Raw API response:', response);
     return response.data;
   } catch (error) {
     console.error('Error fetching timetable:', error);
@@ -83,9 +81,7 @@ export const getTimetableByClassId = async (
 // Lấy thông tin học sinh theo ID
 export const getStudentById = async (studentId: string): Promise<StudentResponse> => {
   try {
-    console.log(`Calling API: ${API_BASE_URL}/api/v1/students/${studentId}`);
     const response = await axios.get(`${API_BASE_URL}/api/v1/students/${studentId}`);
-    console.log('Raw student API response:', response);
     return response.data;
   } catch (error) {
     console.error('Error fetching student:', error);
@@ -123,10 +119,7 @@ const findStaticItemInfo = (day: string, period: number): Partial<ScheduleItem> 
 export const convertTimetableSlotsToScheduleItems = (
   timetableSlots: TimetableSlot[]
 ): ScheduleItem[] => {
-  console.log('Converting timetable slots:', timetableSlots);
-
   if (!timetableSlots || !Array.isArray(timetableSlots)) {
-    console.error('Invalid timetable slots data:', timetableSlots);
     return [];
   }
 
@@ -152,15 +145,13 @@ export const convertTimetableSlotsToScheduleItems = (
     // Xử lý trường hợp dữ liệu không đúng định dạng
     const dayOfWeek = slot.dayOfWeek || '';
     const mappedDay = dayMapping[dayOfWeek] || dayOfWeek;
-    console.log(`Mapping day: ${dayOfWeek} -> ${mappedDay}`);
 
     // Chuyển đổi thời gian từ định dạng "HH:mm:ss" sang "HH:mm"
     const formatTime = (time: string) => {
       if (!time) return '';
       try {
         return time.substring(0, 5);
-      } catch (e) {
-        console.error('Error formatting time:', e);
+      } catch {
         return time;
       }
     };
@@ -186,7 +177,6 @@ export const convertTimetableSlotsToScheduleItems = (
       status: staticInfo?.status,
     };
 
-    console.log('Converted item:', item);
     return item;
   });
 };

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 export interface ScheduleItem {
   subject: string;
@@ -33,10 +33,6 @@ const slotTimes = [
 const TimeTable: React.FC<TimeTableProps> = ({ data = [] }) => {
   const grid: { [day: string]: ScheduleItem[] } = {};
 
-  useEffect(() => {
-    console.log('TimeTable component received data:', data);
-  }, [data]);
-
   // Initialize empty grid for each day
   days.forEach((day) => {
     grid[day] = Array(maxSlots).fill(null);
@@ -44,24 +40,13 @@ const TimeTable: React.FC<TimeTableProps> = ({ data = [] }) => {
 
   // Populate the grid with the timetable data
   data.forEach((item) => {
-    console.log('Processing item for grid:', item);
     if (item && typeof item.period === 'number' && item.period >= 1 && item.period <= maxSlots) {
       // Check if the day exists in our grid
       if (grid[item.day]) {
-        console.log(`Adding item to grid at day: ${item.day}, period: ${item.period}`);
         grid[item.day][item.period - 1] = item; // Adjusting index to match slots
-      } else {
-        console.warn(`Day "${item.day}" not found in grid. Available days:`, Object.keys(grid));
       }
-    } else {
-      console.warn('Invalid item or period:', item);
     }
   });
-
-  // Log the final grid for debugging
-  useEffect(() => {
-    console.log('Final grid:', grid);
-  }, [data]);
 
   return (
     <div className="flex justify-center items-start py-6 px-4">

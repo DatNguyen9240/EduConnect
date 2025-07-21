@@ -105,8 +105,7 @@ const ThoiKhoaBieuPage = () => {
       } else {
         setScheduleItems([]);
       }
-    } catch (err) {
-      console.error('Lỗi khi lấy thời khóa biểu:', err);
+    } catch {
       setError('Đã xảy ra lỗi khi tải thời khóa biểu. Vui lòng thử lại sau.');
       setScheduleItems([]);
     } finally {
@@ -147,8 +146,7 @@ const ThoiKhoaBieuPage = () => {
       } else {
         setScheduleItems([]);
       }
-    } catch (err) {
-      console.error('Lỗi khi lấy thông tin học sinh:', err);
+    } catch {
       setError('Đã xảy ra lỗi khi tải thông tin học sinh. Vui lòng thử lại sau.');
       setScheduleItems([]);
     }
