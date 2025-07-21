@@ -29,7 +29,7 @@ export const loginAccount = (body: { email: string; password: string }) => {
 // Google Login API
 export const googleLogin = (googleToken: string) => {
   return api.post<AuthLoginResponse>(
-    'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/v1/auth/logins/google',
+    'https://educonnectbe-98kw.onrender.com/api/v1/auth/logins/google',
     { googleToken }
   );
 };
@@ -45,7 +45,5 @@ export const getParentInfo = () => {
       fullName: string;
     };
     error: unknown;
-  }>(
-    'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/v1/auth/users/role'
-  );
+  }>('https://educonnectbe-98kw.onrender.com/api/v1/auth/users/role');
 };

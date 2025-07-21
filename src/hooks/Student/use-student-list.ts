@@ -28,7 +28,7 @@ const fetchStudents = async ({
   ascending = true,
 }: UseStudentListParams): Promise<StudentResponse> => {
   const response: AxiosResponse<StudentResponse> = await axios.get(
-    `/api/Student/Students?pageIndex=${pageIndex}&pageSize=${pageSize}&sortBy=${sortBy}&ascending=${ascending}`
+    `/api/v1/students?pageIndex=${pageIndex}&pageSize=${pageSize}&sortBy=${sortBy}&ascending=${ascending}`
   );
   return response.data;
 };
