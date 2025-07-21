@@ -3,11 +3,10 @@ import { useShowForm } from '@/hooks/useLoginForm';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { ROUTES } from '@constants/routes';
 import { ASSETS } from '@constants/assets';
-import { Button } from '@components/common/Button';
 import { GoogleLogin } from '@react-oauth/google';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { loginSchema, type LoginSchema } from '@/utils/rules';
+import { loginSchema } from '@/utils/rules';
 import { useMutation } from '@tanstack/react-query';
 import { loginAccount, googleLogin } from '@/api/auth.api';
 import { isAxiosBadRequestError } from '@/utils/utils';
@@ -16,8 +15,13 @@ import InputComponent from '@/components/common/Input/InputComponent';
 import { useContext } from 'react';
 import { AppContext } from '@/contexts/app.context';
 import { axiosInstance } from '@/lib/axios';
+import { saveLoginInfo } from '@/utils/auth';
 
-type FormData = LoginSchema;
+interface FormData {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
 
 export default function Login() {
   const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
@@ -47,6 +51,9 @@ export default function Login() {
     loginAccountMutation.mutate(data, {
       onSuccess: async () => {
         try {
+          // Lưu thông tin đăng nhập nếu người dùng chọn "Ghi nhớ đăng nhập"
+          saveLoginInfo(data.email, data.password, data.rememberMe || false);
+
           // Sau khi login thành công, gọi API lấy user role info
           const userRoleInfo = await getUserRoleInfo();
           setUserInfo(userRoleInfo); // userId, role, id, fullName
@@ -183,14 +190,28 @@ export default function Login() {
               <Link to={ROUTES.FORGOT_PASSWORD}>Quên mật khẩu?</Link>
             </div>
 
-            <div className="mb-4 flex items-center">
-              <input type="checkbox" className="mr-2 accent-[#2962FF] rounded" />
-              <span className="text-sm text-gray-700">Lưu đăng nhập</span>
+            <div className="mt-4">
+              <button
+                type="submit"
+                className="w-full bg-[#2962FF] text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                disabled={loginAccountMutation.isPending}
+              >
+                {loginAccountMutation.isPending ? 'Đang đăng nhập...' : 'Đăng nhập'}
+              </button>
             </div>
 
-            <Button type="submit" fullWidth size="lg">
-              Đăng nhập
-            </Button>
+            {/* Checkbox Ghi nhớ đăng nhập */}
+            <div className="mt-4 flex items-center">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                {...register('rememberMe')}
+              />
+              <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-600">
+                Ghi nhớ đăng nhập
+              </label>
+            </div>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
