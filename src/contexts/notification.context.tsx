@@ -10,6 +10,8 @@ import {
 import { registerFirebaseToken, deactivateFirebaseToken } from '@/api/notification.api';
 import { AppContext } from './app.context';
 import { NotificationContext, type NotificationPayload } from './notification-context';
+import { useQueryClient } from '@tanstack/react-query';
+import type { Notification } from '@/types/notification.type';
 
 export { NotificationContext };
 
@@ -20,90 +22,151 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   const [deviceToken, setDeviceToken] = useState<string | null>(null);
   const { isAuthenticated } = useContext(AppContext);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+
+  // Theo dõi messageId để tránh xử lý trùng lặp
+  const [processedMessageIds] = useState<Set<string>>(new Set());
+
+  // Hàm lưu thông báo vào localStorage
+  const saveNotificationToLocalStorage = (notification: Notification) => {
+    try {
+      // Lấy danh sách thông báo hiện có
+      const storedNotifications = localStorage.getItem('educonnect_notifications');
+      let notifications: Notification[] = [];
+
+      if (storedNotifications) {
+        notifications = JSON.parse(storedNotifications);
+      }
+
+      // Kiểm tra xem thông báo đã tồn tại chưa (dựa vào messageId hoặc nội dung)
+      const exists = notifications.some(
+        (n) =>
+          (notification.data?.messageId && n.data?.messageId === notification.data.messageId) ||
+          (n.title === notification.title && n.body === notification.body)
+      );
+
+      if (!exists) {
+        // Thêm thông báo mới vào đầu danh sách
+        notifications.unshift(notification);
+
+        // Giới hạn số lượng thông báo lưu trữ (tối đa 100)
+        if (notifications.length > 100) {
+          notifications = notifications.slice(0, 100);
+        }
+
+        // Lưu lại vào localStorage
+        localStorage.setItem('educonnect_notifications', JSON.stringify(notifications));
+      }
+    } catch (error) {
+      console.error('Error saving notification to localStorage:', error);
+    }
+  };
+
+  // Kiểm tra xem token đã được đăng ký chưa
+  const checkTokenRegistration = useCallback((): boolean => {
+    const storageKey = 'educonnect_fcm_token_registered';
+    return localStorage.getItem(storageKey) === 'true';
+  }, []);
+
+  // Đánh dấu token đã được đăng ký
+  const markTokenAsRegistered = useCallback((token: string): void => {
+    const storageKey = 'educonnect_fcm_token_registered';
+    localStorage.setItem(storageKey, 'true');
+
+    // Lưu token đã đăng ký
+    localStorage.setItem('educonnect_fcm_token', token);
+
+    setIsTokenRegistered(true);
+  }, []);
 
   // Đăng ký token với backend
-  const registerDeviceToken = useCallback(async (): Promise<boolean> => {
-    try {
-      if (!isAuthenticated) {
-        console.log('User not authenticated, skipping token registration');
-        return false;
-      }
+  const registerDeviceToken = useCallback(
+    async (forceRegister: boolean = false): Promise<boolean> => {
+      try {
+        if (!isAuthenticated) {
+          return false;
+        }
 
-      console.log('Getting FCM token...');
-      const fcmToken = await getFCMToken();
+        // Kiểm tra xem token đã được đăng ký trước đó chưa
+        const isAlreadyRegistered = checkTokenRegistration();
+        if (isAlreadyRegistered && !forceRegister) {
+          setIsTokenRegistered(true);
 
-      if (!fcmToken) {
-        console.log('Failed to get FCM token, using fallback approach');
+          // Khôi phục token từ localStorage
+          const savedToken = localStorage.getItem('educonnect_fcm_token');
+          if (savedToken) {
+            setDeviceToken(savedToken);
+          }
 
-        // Nếu không lấy được token, vẫn đánh dấu là có quyền để có thể hiển thị thông báo local
-        if (Notification.permission === 'granted') {
-          setHasPermission(true);
-          // Không đăng ký với backend nhưng vẫn cho phép thông báo local
           return true;
         }
-        return false;
-      }
 
-      console.log('FCM token obtained, registering with backend...');
-      setDeviceToken(fcmToken);
+        const fcmToken = await getFCMToken();
 
-      // Lấy ID thiết bị
-      const deviceId = getDeviceId();
+        if (!fcmToken) {
+          // Nếu không lấy được token, vẫn đánh dấu là có quyền để có thể hiển thị thông báo local
+          if (Notification.permission === 'granted') {
+            setHasPermission(true);
+            // Không đăng ký với backend nhưng vẫn cho phép thông báo local
+            return true;
+          }
+          return false;
+        }
 
-      try {
-        // Đăng ký token với backend
-        const response = await registerFirebaseToken({
-          fcmToken,
-          deviceType: getDeviceType(),
-          deviceId,
-        });
+        setDeviceToken(fcmToken);
 
-        if (response.success) {
-          console.log('FCM token registered with backend');
-          setIsTokenRegistered(true);
-          return true;
-        } else {
-          console.error('Failed to register FCM token with backend:', response.message);
+        // Lấy ID thiết bị
+        const deviceId = getDeviceId();
+
+        try {
+          // Đăng ký token với backend
+          const requestData = {
+            fcmToken,
+            deviceType: getDeviceType(),
+            deviceId,
+          };
+
+          const response = await registerFirebaseToken(requestData);
+
+          if (response.success) {
+            markTokenAsRegistered(fcmToken);
+            return true;
+          } else {
+            // Vẫn đánh dấu là có quyền để có thể hiển thị thông báo local
+            if (Notification.permission === 'granted') {
+              setHasPermission(true);
+            }
+            return true; // Trả về true để vẫn cho phép thông báo local
+          }
+        } catch (error) {
+          console.error('Error registering FCM token with backend:', error);
           // Vẫn đánh dấu là có quyền để có thể hiển thị thông báo local
           if (Notification.permission === 'granted') {
             setHasPermission(true);
+            return true; // Trả về true để vẫn cho phép thông báo local
           }
-          return true; // Trả về true để vẫn cho phép thông báo local
+          return false;
         }
       } catch (error) {
-        console.error('Error registering FCM token with backend:', error);
+        console.error('Error registering device token:', error);
+
         // Vẫn đánh dấu là có quyền để có thể hiển thị thông báo local
         if (Notification.permission === 'granted') {
           setHasPermission(true);
-          return true; // Trả về true để vẫn cho phép thông báo local
+          return true;
         }
         return false;
       }
-    } catch (error) {
-      console.error('Error registering device token:', error);
-
-      // Vẫn đánh dấu là có quyền để có thể hiển thị thông báo local
-      if (Notification.permission === 'granted') {
-        setHasPermission(true);
-        return true;
-      }
-      return false;
-    }
-  }, [isAuthenticated]);
+    },
+    [isAuthenticated, checkTokenRegistration, markTokenAsRegistered]
+  );
 
   // Kiểm tra quyền và lấy token khi component mount
   useEffect(() => {
     const checkPermission = async () => {
       try {
-        console.log('Checking notification permission...');
         const permission = await requestNotificationPermission();
         setHasPermission(permission);
-
-        if (permission) {
-          console.log('Notification permission granted');
-        } else {
-          console.log('Notification permission not granted');
-        }
 
         return permission;
       } catch (error) {
@@ -115,52 +178,139 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     if (!isInitialized) {
       checkPermission().then((permission) => {
         if (permission && isAuthenticated) {
-          console.log('User is authenticated, registering device token...');
-          registerDeviceToken().catch((err) => {
-            console.error('Error in initial token registration:', err);
-          });
+          // Kiểm tra xem token đã được đăng ký chưa
+          const isAlreadyRegistered = checkTokenRegistration();
+          if (isAlreadyRegistered) {
+            setIsTokenRegistered(true);
+
+            // Khôi phục token từ localStorage
+            const savedToken = localStorage.getItem('educonnect_fcm_token');
+            if (savedToken) {
+              setDeviceToken(savedToken);
+            }
+          } else {
+            registerDeviceToken().catch((err) => {
+              console.error('Error in initial token registration:', err);
+            });
+          }
         }
         setIsInitialized(true);
       });
     }
-  }, [isAuthenticated, isInitialized, registerDeviceToken]);
+  }, [isAuthenticated, isInitialized, registerDeviceToken, checkTokenRegistration]);
+
+  // Xử lý khi đăng nhập/đăng xuất
+  useEffect(() => {
+    if (isAuthenticated && isInitialized) {
+      // Kiểm tra xem token đã được đăng ký chưa
+      const isAlreadyRegistered = checkTokenRegistration();
+      if (!isAlreadyRegistered) {
+        registerDeviceToken().catch((err) => {
+          console.error('Error registering token after login:', err);
+        });
+      }
+    } else if (!isAuthenticated && isInitialized) {
+      // Khi đăng xuất, xóa thông tin token đã đăng ký
+      localStorage.removeItem('educonnect_fcm_token_registered');
+      localStorage.removeItem('educonnect_fcm_token');
+      setIsTokenRegistered(false);
+      setDeviceToken(null);
+    }
+  }, [isAuthenticated, isInitialized, registerDeviceToken, checkTokenRegistration]);
 
   // Xử lý điều hướng dựa trên loại thông báo
   const handleNotificationNavigation = (payload: MessagePayload) => {
     if (!payload.data) return;
 
-    const data = payload.data;
-    const type = data.type;
-    const exam_id = data.exam_id;
-    const class_id = data.class_id;
+    // Dữ liệu thông báo đã sẵn có nhưng không cần thực hiện điều hướng tại đây
+    // Điều hướng sẽ được xử lý bởi useNotificationNavigation hook
+  };
 
-    // Thay vì lưu vào localStorage, chỉ log thông tin
-    if (type === 'exam_notification' && exam_id) {
-      console.log('Notification navigation: exam notification', exam_id);
-      // Điều hướng sẽ được xử lý bởi useNotificationNavigation hook
-    } else if (type === 'class_notification' && class_id) {
-      console.log('Notification navigation: class notification', class_id);
-      // Điều hướng sẽ được xử lý bởi useNotificationNavigation hook
+  // Thêm thông báo vào danh sách thông báo
+  const addNotificationToList = (payload: MessagePayload) => {
+    if (!payload.notification) return;
+
+    // Kiểm tra messageId để tránh xử lý trùng lặp
+    const messageId = payload.messageId || `msg-${Date.now()}`;
+
+    if (processedMessageIds.has(messageId)) {
+      return;
     }
+
+    // Đánh dấu đã xử lý messageId này
+    processedMessageIds.add(messageId);
+
+    // Lấy dữ liệu từ cache
+    const cachedData = queryClient.getQueryData<{ data: Notification[] }>(['notifications']);
+
+    if (!cachedData) {
+      // Nếu chưa có dữ liệu trong cache, tạo mới
+      queryClient.setQueryData(['notifications'], {
+        data: [],
+      });
+    }
+
+    // Tạo thông báo mới
+    const newNotification: Notification = {
+      id: `fcm-${Date.now()}`,
+      title: payload.notification.title || 'Thông báo mới',
+      body: payload.notification.body || 'Bạn có thông báo mới',
+      type: determineNotificationType(payload.data || {}),
+      read: false,
+      timestamp: new Date().toISOString(),
+      data: payload.data ? { ...payload.data, messageId } : { messageId },
+    };
+
+    // Lưu vào localStorage
+    saveNotificationToLocalStorage(newNotification);
+
+    // Cập nhật cache
+    queryClient.setQueryData<{ data: Notification[] }>(['notifications'], (oldData) => {
+      const currentData = oldData || { data: [] };
+      const newData = {
+        ...currentData,
+        data: [newNotification, ...(currentData.data || [])],
+      };
+      return newData;
+    });
+  };
+
+  // Xác định loại thông báo dựa vào data
+  const determineNotificationType = (data: Record<string, unknown>): Notification['type'] => {
+    if (!data) return 'system';
+
+    if (data.type === 'exam_notification' || data.exam_id) {
+      return 'exam';
+    }
+
+    if (data.type === 'class_notification' || data.class_id) {
+      return 'class';
+    }
+
+    if (data.type === 'grade_notification') {
+      return 'grade';
+    }
+
+    return 'system';
   };
 
   // Đăng ký lắng nghe thông báo khi ứng dụng đang mở
   useEffect(() => {
     if (!messaging) {
-      console.warn('Firebase messaging is not available');
       return;
     }
 
     try {
-      console.log('Setting up foreground message listener...');
       const unsubscribe = onMessage(messaging, (payload) => {
-        console.log('Received foreground message:', payload);
         setLastNotification(payload as unknown as NotificationPayload);
 
         // Hiển thị thông báo ngay cả khi app đang mở
         if (payload.notification) {
           const { title, body } = payload.notification;
           showNotification(title || 'Thông báo mới', body || 'Bạn có thông báo mới', payload.data);
+
+          // Thêm thông báo vào danh sách thông báo
+          addNotificationToList(payload);
         }
 
         // Xử lý điều hướng nếu cần
@@ -168,7 +318,6 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       });
 
       return () => {
-        console.log('Cleaning up message listener');
         if (unsubscribe) {
           unsubscribe();
         }
@@ -176,22 +325,41 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     } catch (error) {
       console.error('Error setting up message listener:', error);
     }
-  }, []);
+  }, [queryClient, processedMessageIds]);
 
   // Hiển thị thông báo kiểm tra
   const showTestNotification = () => {
-    showNotification(
-      'Thông báo kiểm tra',
-      `Đây là thông báo kiểm tra được gửi lúc ${new Date().toLocaleTimeString()}`,
-      { type: 'test_notification' }
-    );
+    // Tạo nội dung thông báo
+    const title = 'Thông báo kiểm tra';
+    const body = `Đây là thông báo kiểm tra được gửi lúc ${new Date().toLocaleTimeString()}`;
+    const data = {
+      type: 'test_notification',
+      timestamp: new Date().toISOString(),
+    };
+
+    // Hiển thị thông báo
+    showNotification(title, body, data);
+
+    // Tạo MessagePayload giả lập để thêm vào danh sách thông báo
+    const mockPayload: MessagePayload = {
+      notification: {
+        title,
+        body,
+      },
+      data,
+      from: '',
+      messageId: `test-${Date.now()}`,
+      collapseKey: '',
+    };
+
+    // Thêm thông báo kiểm tra vào danh sách thông báo
+    addNotificationToList(mockPayload);
   };
 
   // Hủy đăng ký token với backend
   const unregisterDeviceToken = async (): Promise<boolean> => {
     try {
       if (!deviceToken) {
-        console.log('No device token to unregister');
         return false;
       }
 
@@ -202,9 +370,13 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       const response = await deactivateFirebaseToken(deviceId);
 
       if (response.success) {
-        console.log('FCM token unregistered with backend');
         setIsTokenRegistered(false);
         setDeviceToken(null);
+
+        // Xóa thông tin token đã đăng ký
+        localStorage.removeItem('educonnect_fcm_token_registered');
+        localStorage.removeItem('educonnect_fcm_token');
+
         return true;
       } else {
         console.error('Failed to unregister FCM token with backend:', response.message);
@@ -245,7 +417,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         hasPermission,
         isTokenRegistered,
         lastNotification,
-        registerDeviceToken,
+        registerDeviceToken: () => registerDeviceToken(true), // Cho phép force register khi gọi từ bên ngoài
         unregisterDeviceToken,
         showTestNotification,
       }}

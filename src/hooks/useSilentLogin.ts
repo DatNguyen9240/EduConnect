@@ -1,72 +1,88 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { AppContext } from '@/contexts/app.context';
-import { loginAccount } from '@/api/auth.api';
-import { getEmailFromLS, getPasswordFromLS } from '@/utils/auth';
-import { axiosInstance } from '@/lib/axios';
+import { getAccessTokenFromLS, getRefreshTokenFromLS } from '@/utils/auth';
+import axiosInstance from '@/lib/axios';
 
-/**
- * Hook để thực hiện silent login khi refresh token thất bại
- * Chỉ hoạt động nếu người dùng đã lưu thông tin đăng nhập
- */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const useSilentLogin = () => {
-  const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
-  const [isLoading, setIsLoading] = useState(false);
+  const { setIsAuthenticated, setUserInfo, isAuthenticated } = useContext(AppContext);
 
-  const silentLogin = async (): Promise<boolean> => {
-    const email = getEmailFromLS();
-    const password = getPasswordFromLS();
-
-    // Nếu không có thông tin đăng nhập được lưu, không thể silent login
-    if (!email || !password) {
-      console.log('Không thể silent login: Không có thông tin đăng nhập được lưu');
-      return false;
-    }
-
-    setIsLoading(true);
+  const silentLogin = async () => {
     try {
-      console.log('Đang thực hiện silent login...');
-      const response = await loginAccount({ email, password });
+      // Kiểm tra xem có token trong localStorage không
+      const token = getAccessTokenFromLS();
+      const refreshToken = getRefreshTokenFromLS();
 
-      if (response.success) {
-        // Lưu token vào localStorage
-        // Lấy thông tin user
-        try {
-          // Gọi API lấy thông tin user
-          const userInfoResponse = await axiosInstance.get('/api/v1/auth/users/role');
-
-          if (userInfoResponse.data.success) {
-            const userInfo = {
-              userId: userInfoResponse.data.data.userId || '',
-              role: userInfoResponse.data.data.role || '',
-              id: userInfoResponse.data.data.id || '',
-              fullName: userInfoResponse.data.data.fullName || '',
-            };
-
-            setUserInfo(userInfo);
-            localStorage.setItem('profile', JSON.stringify(userInfo));
-          }
-        } catch (error) {
-          console.error('Lỗi khi lấy thông tin user sau silent login:', error);
-        }
-
-        setIsAuthenticated(true);
-        console.log('Silent login thành công');
-        return true;
+      if (!token || !refreshToken) {
+        console.log('No tokens found in localStorage');
+        return;
       }
 
-      return false;
+      // Thử gọi API để lấy thông tin người dùng
+      try {
+        // Gọi API để kiểm tra token và lấy thông tin user
+        const response: any = await axiosInstance.post('/api/v1/auth/refresh-token', {
+          refreshToken,
+        });
+
+        if (response.success) {
+          console.log('Silent login successful');
+
+          // Lưu token mới vào localStorage
+          localStorage.setItem('access_token', response.data.token);
+          localStorage.setItem('refresh_token', response.data.refreshToken);
+
+          // Lấy thông tin user từ API
+          try {
+            const userResponse: any = await axiosInstance.get('/api/v1/auth/users/role');
+
+            if (userResponse.success) {
+              // Lưu thông tin user vào context và localStorage
+              const userData = userResponse.data;
+              setUserInfo(userData);
+              localStorage.setItem('profile', JSON.stringify(userData));
+              setIsAuthenticated(true);
+            }
+          } catch (error) {
+            console.error('Error fetching user info:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Silent login failed:', error);
+        // Xóa token nếu refresh token không hợp lệ
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('profile');
+        setIsAuthenticated(false);
+      }
     } catch (error) {
-      console.error('Silent login thất bại:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
+      console.error('Error in silent login:', error);
     }
   };
 
-  return {
-    silentLogin,
-    isLoading,
+  const logout = () => {
+    // Xóa token và thông tin người dùng
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('profile');
+
+    // Xóa thông tin đăng ký FCM token
+    localStorage.removeItem('educonnect_fcm_token_registered');
+    localStorage.removeItem('educonnect_fcm_token');
+
+    setIsAuthenticated(false);
+
+    // Thay vì sử dụng navigate, chuyển hướng bằng window.location
+    window.location.href = '/login';
   };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      silentLogin();
+    }
+  }, []);
+
+  return { silentLogin, logout };
 };
 
 export default useSilentLogin;
