@@ -1,6 +1,6 @@
 'use client';
 
-import type React from 'react';
+import React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -27,9 +27,9 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
     fullName: student?.fullName || '',
     dateOfBirth: student?.dateOfBirth || '',
     gender: student?.gender || '',
-    classID: student?.classID ? String(student.classID) : '',
+    classId: student?.classId ? String(student.classId) : '',
     className: student?.className || '',
-    parentID: student?.parentID || '',
+    parentId: student?.parentId || '',
     parentName: student?.parentName || '',
     parentPhone: student?.parentPhone || '',
     address: student?.address || '',
@@ -39,7 +39,7 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.studentId || !formData.classID || !formData.parentName) {
+    if (!formData.fullName || !formData.studentId || !formData.classId || !formData.parentName) {
       toast({
         title: 'Lỗi',
         description: VALIDATION_MESSAGES.REQUIRED_FIELDS,
@@ -62,7 +62,7 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
             <Input
               id="studentId"
               value={formData.studentId}
-              onChange={(e) => setFormData((prev) => ({ ...prev, studentID: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, studentId: e.target.value }))}
               placeholder="Nhập họ"
             />
           </div>
@@ -83,12 +83,12 @@ export function StudentForm({ student, onSubmit, onCancel, classes }: StudentFor
           <div className="grid gap-2">
             <SimpleLabel required>Lớp</SimpleLabel>
             <SimpleSelect
-              value={formData.classID}
+              value={formData.classId}
               onValueChange={(value) => {
                 const selectedClass = classes.find((c) => c.id === value);
                 setFormData((prev) => ({
                   ...prev,
-                  classID: value,
+                  classId: value,
                   className: selectedClass?.name || '',
                 }));
               }}

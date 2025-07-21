@@ -16,9 +16,9 @@ export function useStudents() {
     const lastName = nameParts.slice(1).join(' ') || '';
     const newStudent: Student = {
       ...formData,
-      classID: formData.classID ? String(formData.classID) : '',
+      classId: formData.classId ? String(formData.classId) : '',
       studentId: studentId,
-      accountID: `ACC_${studentId}`,
+      accountId: `ACC_${studentId}`,
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: null,
@@ -44,7 +44,7 @@ export function useStudents() {
           ? {
               ...student,
               ...formData,
-              classID: formData.classID ? String(formData.classID) : '',
+              classId: formData.classId ? String(formData.classId) : '',
               updatedAt: new Date().toISOString(),
               firstName,
               lastName,

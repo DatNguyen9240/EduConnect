@@ -33,7 +33,7 @@ export const formatDate = (dateString: string): string => {
 };
 
 export const getStudentsByClass = (students: Student[], classId: string): Student[] => {
-  return students.filter((student) => student.classID === classId);
+  return students.filter((student) => student.classId === classId);
 };
 
 export const getStudentsByGrade = (
@@ -42,7 +42,7 @@ export const getStudentsByGrade = (
   classes: { id: string; grade: number }[]
 ): Student[] => {
   const classesInGrade = classes.filter((cls) => cls.grade === grade).map((cls) => cls.id);
-  return students.filter((student) => classesInGrade.includes(student.classID));
+  return students.filter((student) => classesInGrade.includes(student.classId));
 };
 
 export const getStudentStats = (students: Student[], classes: { id: string; grade: number }[]) => {
