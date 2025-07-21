@@ -1,24 +1,15 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import TimeTable from '@/components/common/TimeTable';
 import { useSelectedStudent } from '@/contexts/selected-student.context';
 import { AppContext } from '@/contexts/app.context';
-import type { ScheduleItem } from '@/components/common/TimeTable';
-import {
-  getTimetableByClassId,
-  getStudentById,
-  convertTimetableSlotsToScheduleItems,
-} from '@/api/timetable.api';
+import { useContext } from 'react';
+import { useTimetable } from '@/hooks/useTimetable';
 
 const ThoiKhoaBieuPage = () => {
   const { selectedStudent } = useSelectedStudent();
-  const { userInfo, isParent, isStudent } = useContext(AppContext);
-  const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [studentName, setStudentName] = useState('');
-  const [className, setClassName] = useState('');
-
-  // Thêm state cho việc chọn tuần
+  const { isParent } = useContext(AppContext);
+  
+  // State cho việc chọn tuần
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
   const [availableWeeks, setAvailableWeeks] = useState<{ start: Date; end: Date; label: string }[]>(
     []
@@ -73,129 +64,26 @@ const ThoiKhoaBieuPage = () => {
     setSelectedWeek(currentWeekStart);
   }, []);
 
-  // Lấy thời khóa biểu từ API
-  const fetchTimetable = async (classId: string) => {
-    setIsLoading(true);
-    setError(null);
+  // Lấy ngày đầu tuần và cuối tuần từ selectedWeek
+  const startDate = selectedWeek
+    ? getStartOfWeek(selectedWeek).toISOString().split('T')[0]
+    : undefined;
+  const endDate = selectedWeek
+    ? getEndOfWeek(getStartOfWeek(selectedWeek)).toISOString().split('T')[0]
+    : undefined;
 
-    // Lấy ngày đầu tuần và cuối tuần từ selectedWeek
-    const startDate = getStartOfWeek(selectedWeek);
-    const endDate = getEndOfWeek(startDate);
-
-    // Format ngày tháng theo định dạng YYYY-MM-DD
-    const formattedStartDate = startDate.toISOString().split('T')[0];
-    const formattedEndDate = endDate.toISOString().split('T')[0];
-
-    try {
-      const timetableResponse = await getTimetableByClassId(
-        classId,
-        formattedStartDate,
-        formattedEndDate
-      );
-
-      if (timetableResponse.success && timetableResponse.data.length > 0) {
-        const timetableData = timetableResponse.data[0];
-
-        if (timetableData.slots && timetableData.slots.length > 0) {
-          const convertedData = convertTimetableSlotsToScheduleItems(timetableData.slots);
-          setScheduleItems(convertedData);
-        } else {
-          setScheduleItems([]);
-        }
-      } else {
-        setScheduleItems([]);
-      }
-    } catch {
-      setError('Đã xảy ra lỗi khi tải thời khóa biểu. Vui lòng thử lại sau.');
-      setScheduleItems([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Sử dụng hook useTimetable với React Query
+  const { scheduleItems, isLoading, error, studentName, className } = useTimetable(
+    startDate,
+    endDate
+  );
 
   // Xử lý khi thay đổi tuần
   const handleWeekChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedIndex = parseInt(e.target.value, 10);
     const selectedWeekData = availableWeeks[selectedIndex];
     setSelectedWeek(selectedWeekData.start);
-
-    // Nếu đã có classId, gọi lại API để lấy dữ liệu cho tuần mới
-    if (selectedStudent?.classId) {
-      fetchTimetable(selectedStudent.classId);
-    } else if (isStudent() && userInfo?.id) {
-      // Nếu là học sinh, cần lấy lại thông tin học sinh để có classId
-      loadStudentData(userInfo.id);
-    }
   };
-
-  // Hàm lấy thông tin học sinh
-  const loadStudentData = async (studentId: string) => {
-    try {
-      const studentResponse = await getStudentById(studentId);
-
-      if (studentResponse.success) {
-        const student = studentResponse.data;
-        setStudentName(student.fullName);
-        setClassName(student.className);
-
-        if (student.classId) {
-          fetchTimetable(student.classId);
-        } else {
-          setScheduleItems([]);
-        }
-      } else {
-        setScheduleItems([]);
-      }
-    } catch {
-      setError('Đã xảy ra lỗi khi tải thông tin học sinh. Vui lòng thử lại sau.');
-      setScheduleItems([]);
-    }
-  };
-
-  // Lấy thông tin học sinh và thời khóa biểu
-  useEffect(() => {
-    const loadData = async () => {
-      if (isParent()) {
-        // Nếu là phụ huynh, lấy thông tin từ selectedStudent
-        if (selectedStudent) {
-          setStudentName(selectedStudent.fullName);
-          setClassName(selectedStudent.className);
-
-          if (selectedStudent.classId) {
-            fetchTimetable(selectedStudent.classId);
-          } else {
-            setScheduleItems([]);
-          }
-        } else {
-          setScheduleItems([]);
-        }
-      } else if (isStudent()) {
-        // Nếu là học sinh, lấy thông tin từ userInfo
-        const studentId = userInfo?.id;
-
-        if (studentId) {
-          loadStudentData(studentId);
-        } else {
-          setScheduleItems([]);
-        }
-      } else {
-        setScheduleItems([]);
-      }
-    };
-
-    loadData();
-  }, [selectedStudent, userInfo, isParent, isStudent]);
-
-  // Cập nhật lại dữ liệu khi thay đổi selectedWeek
-  useEffect(() => {
-    if (selectedWeek && (selectedStudent?.classId || (isStudent() && userInfo?.id))) {
-      if (selectedStudent?.classId) {
-        fetchTimetable(selectedStudent.classId);
-      } else if (isStudent() && userInfo?.id) {
-        loadStudentData(userInfo.id);
-      }
-    }
-  }, [selectedWeek]);
 
   // Hiển thị thông báo khi chưa chọn học sinh (đối với phụ huynh)
   if (isParent() && !selectedStudent) {
@@ -267,7 +155,9 @@ const ThoiKhoaBieuPage = () => {
 
       {/* Hiển thị lỗi */}
       {error && (
-        <div className="bg-red-100 text-red-700 p-4 rounded-md mb-6 text-center">{error}</div>
+        <div className="bg-red-100 text-red-700 p-4 rounded-md mb-6 text-center">
+          {error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thời khóa biểu'}
+        </div>
       )}
 
       {/* TimeTable */}
