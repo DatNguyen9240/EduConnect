@@ -25,7 +25,7 @@ const SoDauBai = lazy(() => import('@/pages/SoDauBai'));
 const ThongKeBaoCao = lazy(() => import('@/pages/ThongKeBaoCao'));
 const QuanLyHocTap = lazy(() => import('@/pages/QuanLyHocTap'));
 const HocSinh = lazy(() => import('@/pages/StudentManagement'));
-const QuanTriThongTin = lazy(() => import('@/pages/QuanTriThongTin'));
+const ThoiKhoaBieu = lazy(() => import('@/pages/ThoiKhoaBieu'));
 const AdminDashboard = lazy(() => import('@/pages/AdminDashBoard/admin-dashboard'));
 const ChatPage = lazy(() => import('@/pages/ChatPage'));
 const NotificationsPage = lazy(() => import('@/pages/Notifications'));
@@ -82,7 +82,7 @@ export const routeMenuConfig = [
     path: '/thoi-khoa-bieu',
     label: 'Thời khóa biểu',
     icon: BarChart3,
-    element: <QuanTriThongTin />,
+    element: <ThoiKhoaBieu />,
     showInMenu: true,
     badge: null,
   },
@@ -132,14 +132,6 @@ export const routeMenuConfig = [
     label: 'Học sinh',
     icon: null,
     element: <HocSinh />,
-    showInMenu: false,
-    badge: null,
-  },
-  {
-    path: '/quan-tri-thong-tin',
-    label: 'Quản trị thông tin',
-    icon: null,
-    element: <QuanTriThongTin />,
     showInMenu: false,
     badge: null,
   },

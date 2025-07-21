@@ -14,11 +14,9 @@ const firebaseConfig = {
 
 // Khởi tạo Firebase app
 const app = initializeApp(firebaseConfig);
-console.log('Firebase app initialized successfully:', app.name);
 
 // Khởi tạo Firebase messaging
 export const messaging = getMessaging(app);
-console.log('Firebase messaging initialized');
 
 // VAPID key cho web push notifications
 // Lấy từ Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
@@ -33,7 +31,6 @@ const swPath = '/firebase-messaging-sw.js';
 export const requestNotificationPermission = async (): Promise<boolean> => {
   try {
     const permission = await Notification.requestPermission();
-    console.log('Notification permission status:', permission);
     return permission === 'granted';
   } catch (error) {
     console.error('Error requesting notification permission:', error);
@@ -48,7 +45,6 @@ export const getFCMToken = async (): Promise<string | null> => {
     if (Notification.permission !== 'granted') {
       const granted = await requestNotificationPermission();
       if (!granted) {
-        console.log('Notification permission denied');
         return null;
       }
     }
@@ -58,14 +54,12 @@ export const getFCMToken = async (): Promise<string | null> => {
       try {
         // Đăng ký service worker mới
         const registration = await navigator.serviceWorker.register(swPath);
-        console.log('Service Worker registered successfully:', registration);
 
         // Đảm bảo service worker đã active
         const serviceWorker =
           registration?.active || registration?.installing || registration?.waiting;
 
         if (!serviceWorker) {
-          console.log('Waiting for service worker to activate...');
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       } catch (error) {
@@ -73,16 +67,12 @@ export const getFCMToken = async (): Promise<string | null> => {
         return null;
       }
     } else {
-      console.error('Service Worker not supported in this browser');
       return null;
     }
-
-    console.log('Attempting to get FCM token with VAPID key:', vapidKey.substring(0, 10) + '...');
 
     try {
       // Lấy FCM token
       const token = await getToken(messaging, { vapidKey });
-      console.log('FCM Token obtained successfully:', token);
       return token;
     } catch (error: unknown) {
       console.error('Error getting FCM token:', error);
@@ -114,7 +104,6 @@ export const onMessageListener = () => {
     try {
       // Đăng ký listener
       onMessage(messaging, (payload) => {
-        console.log('Message received:', payload);
         resolve(payload);
       });
     } catch (error) {
@@ -124,14 +113,44 @@ export const onMessageListener = () => {
   });
 };
 
+// Biến để theo dõi thông báo đã hiển thị
+const displayedNotifications = new Set<string>();
+
 // Hàm tạo notification khi app đang mở
 export const showNotification = (title: string, body: string, data?: Record<string, unknown>) => {
   if (Notification.permission !== 'granted') {
-    console.warn('Notification permission not granted');
     return;
   }
 
+  // Tạo ID duy nhất cho thông báo này
+  const notificationId = `${title}-${body}-${Date.now()}`;
+
+  // Kiểm tra xem thông báo này đã hiển thị chưa
+  if (displayedNotifications.has(notificationId)) {
+    return;
+  }
+
+  // Thêm vào danh sách đã hiển thị
+  displayedNotifications.add(notificationId);
+
+  // Xóa ID thông báo cũ sau 10 giây để tránh set quá lớn
+  setTimeout(() => {
+    displayedNotifications.delete(notificationId);
+  }, 10000);
+
   try {
+    // Không hiển thị thông báo khi ứng dụng đang mở, chỉ thêm vào danh sách thông báo
+    // Thông báo sẽ được hiển thị trong UI của ứng dụng
+
+    // Chỉ trả về thông tin thông báo mà không hiển thị
+    return {
+      title,
+      body,
+      data,
+      close: () => {},
+    };
+
+    /* Đã vô hiệu hóa code hiển thị thông báo trình duyệt
     const notification = new Notification(title, {
       body,
       icon: '/assets/logo/logo.png', // Sửa path icon chính xác
@@ -165,6 +184,7 @@ export const showNotification = (title: string, body: string, data?: Record<stri
     }, 8000);
 
     return notification;
+    */
   } catch (error) {
     console.error('Error showing notification:', error);
     return null;

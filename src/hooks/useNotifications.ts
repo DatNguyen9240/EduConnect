@@ -2,79 +2,75 @@ import type { Notification } from '@/types/notification.type';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
+// Hàm lưu thông báo vào localStorage
+const saveNotificationsToLocalStorage = (notifications: Notification[]) => {
+  try {
+    localStorage.setItem('educonnect_notifications', JSON.stringify(notifications));
+  } catch (error) {
+    console.error('Error saving notifications to localStorage:', error);
+  }
+};
+
+// Hàm lấy thông báo từ localStorage
+const getNotificationsFromLocalStorage = (): Notification[] => {
+  try {
+    const storedNotifications = localStorage.getItem('educonnect_notifications');
+    if (storedNotifications) {
+      return JSON.parse(storedNotifications);
+    }
+  } catch (error) {
+    console.error('Error loading notifications from localStorage:', error);
+  }
+  return [];
+};
+
 // Các API calls
 const fetchNotifications = async (): Promise<{ data: Notification[] }> => {
   // Trong thực tế, đây sẽ là API call đến backend
-  // return api.get<{ data: Notification[] }>('/api/v1/notifications');
+  // const response = await api.get<{ data: Notification[] }>('/api/v1/notifications');
 
-  // Dữ liệu mẫu
-  return {
-    data: [
-      {
-        id: '1',
-        title: 'Lịch thi học kỳ 2',
-        body: 'Lịch thi học kỳ 2 năm học 2023-2024 đã được cập nhật. Vui lòng kiểm tra.',
-        type: 'exam',
-        read: false,
-        timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 phút trước
-        data: { exam_id: '123' },
-      },
-      {
-        id: '2',
-        title: 'Thông báo lớp học',
-        body: 'Lớp Toán sẽ nghỉ học vào ngày 15/05/2024. Buổi học sẽ được bù vào tuần sau.',
-        type: 'class',
-        read: true,
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 giờ trước
-        data: { class_id: '456' },
-      },
-      {
-        id: '3',
-        title: 'Điểm kiểm tra giữa kỳ',
-        body: 'Điểm kiểm tra giữa kỳ môn Vật lý đã được cập nhật. Xem ngay!',
-        type: 'grade',
-        read: false,
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 ngày trước
-      },
-      {
-        id: '4',
-        title: 'Cập nhật hệ thống',
-        body: 'Hệ thống EduConnect vừa được cập nhật với nhiều tính năng mới.',
-        type: 'system',
-        read: true,
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 ngày trước
-      },
-      {
-        id: '5',
-        title: 'Lịch thi cuối kỳ',
-        body: 'Lịch thi cuối kỳ năm học 2023-2024 đã được cập nhật. Vui lòng kiểm tra.',
-        type: 'exam',
-        read: false,
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(), // 5 ngày trước
-        data: { exam_id: '789' },
-      },
-    ],
-  };
+  // Trước khi trả về dữ liệu từ API, kết hợp với dữ liệu từ localStorage
+  // Nếu API trả về dữ liệu, chúng ta sẽ cập nhật localStorage
+  // return response;
+
+  // Tạm thời, chỉ trả về dữ liệu từ localStorage
+  const localNotifications = getNotificationsFromLocalStorage();
+  return { data: localNotifications };
 };
 
 const markAsRead = async (id: string): Promise<void> => {
   // Trong thực tế, đây sẽ là API call đến backend
-  // return api.put(`/api/v1/notifications/${id}/read`);
-  console.log(`Marking notification ${id} as read`);
+  // await api.put(`/api/v1/notifications/${id}/read`);
+
+  // Cập nhật localStorage
+  const notifications = getNotificationsFromLocalStorage();
+  const updatedNotifications = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
+  saveNotificationsToLocalStorage(updatedNotifications);
+
   return Promise.resolve();
 };
 
 const markAllAsRead = async (): Promise<void> => {
   // Trong thực tế, đây sẽ là API call đến backend
-  // return api.put('/api/v1/notifications/read-all');
-  console.log('Marking all notifications as read');
+  // await api.put('/api/v1/notifications/read-all');
+
+  // Cập nhật localStorage
+  const notifications = getNotificationsFromLocalStorage();
+  const updatedNotifications = notifications.map((n) => ({ ...n, read: true }));
+  saveNotificationsToLocalStorage(updatedNotifications);
+
   return Promise.resolve();
 };
 
 const deleteNotification = async (id: string): Promise<void> => {
   // Trong thực tế, đây sẽ là API call đến backend
-  // return api.delete(`/api/v1/notifications/${id}`);
-  console.log(`Deleting notification ${id}`);
+  // await api.delete(`/api/v1/notifications/${id}`);
+
+  // Cập nhật localStorage
+  const notifications = getNotificationsFromLocalStorage();
+  const updatedNotifications = notifications.filter((n) => n.id !== id);
+  saveNotificationsToLocalStorage(updatedNotifications);
+
   return Promise.resolve();
 };
 
@@ -92,6 +88,30 @@ export const useNotifications = () => {
   const notifications = data?.data || [];
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // Thêm thông báo mới
+  const addNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+      read: false,
+    };
+
+    // Cập nhật cache
+    queryClient.setQueryData<{ data: Notification[] }>(['notifications'], (oldData) => {
+      const currentData = oldData || { data: [] };
+      const newData = {
+        ...currentData,
+        data: [newNotification, ...(currentData.data || [])],
+      };
+
+      // Lưu vào localStorage
+      saveNotificationsToLocalStorage(newData.data);
+
+      return newData;
+    });
+  };
+
   // Mutation để đánh dấu đã đọc
   const markAsReadMutation = useMutation({
     mutationFn: markAsRead,
@@ -101,9 +121,13 @@ export const useNotifications = () => {
       const previousData = queryClient.getQueryData<{ data: Notification[] }>(['notifications']);
 
       if (previousData) {
-        queryClient.setQueryData(['notifications'], {
+        const updatedData = {
           data: previousData.data.map((n) => (n.id === id ? { ...n, read: true } : n)),
-        });
+        };
+        queryClient.setQueryData(['notifications'], updatedData);
+
+        // Lưu vào localStorage
+        saveNotificationsToLocalStorage(updatedData.data);
       }
 
       return { previousData };
@@ -129,9 +153,13 @@ export const useNotifications = () => {
       const previousData = queryClient.getQueryData<{ data: Notification[] }>(['notifications']);
 
       if (previousData) {
-        queryClient.setQueryData(['notifications'], {
+        const updatedData = {
           data: previousData.data.map((n) => ({ ...n, read: true })),
-        });
+        };
+        queryClient.setQueryData(['notifications'], updatedData);
+
+        // Lưu vào localStorage
+        saveNotificationsToLocalStorage(updatedData.data);
       }
 
       return { previousData };
@@ -157,9 +185,13 @@ export const useNotifications = () => {
       const previousData = queryClient.getQueryData<{ data: Notification[] }>(['notifications']);
 
       if (previousData) {
-        queryClient.setQueryData(['notifications'], {
+        const updatedData = {
           data: previousData.data.filter((n) => n.id !== id),
-        });
+        };
+        queryClient.setQueryData(['notifications'], updatedData);
+
+        // Lưu vào localStorage
+        saveNotificationsToLocalStorage(updatedData.data);
       }
 
       return { previousData };
@@ -175,6 +207,17 @@ export const useNotifications = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
+
+  // Xóa tất cả thông báo
+  const clearAllNotifications = () => {
+    // Cập nhật cache
+    queryClient.setQueryData(['notifications'], { data: [] });
+
+    // Xóa khỏi localStorage
+    saveNotificationsToLocalStorage([]);
+
+    toast.success('Đã xóa tất cả thông báo');
+  };
 
   // Xử lý đánh dấu đã đọc
   const handleMarkAsRead = (id: string) => {
@@ -197,9 +240,11 @@ export const useNotifications = () => {
     isLoading,
     error,
     refetch,
+    addNotification,
     markAsRead: handleMarkAsRead,
     markAllAsRead: handleMarkAllAsRead,
     deleteNotification: handleDeleteNotification,
+    clearAllNotifications,
     isMarkingAsRead: markAsReadMutation.isPending,
     isMarkingAllAsRead: markAllAsReadMutation.isPending,
     isDeleting: deleteNotificationMutation.isPending,

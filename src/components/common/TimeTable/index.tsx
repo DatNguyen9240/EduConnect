@@ -41,7 +41,10 @@ const TimeTable: React.FC<TimeTableProps> = ({ data = [] }) => {
   // Populate the grid with the timetable data
   data.forEach((item) => {
     if (item && typeof item.period === 'number' && item.period >= 1 && item.period <= maxSlots) {
-      grid[item.day][item.period - 1] = item; // Adjusting index to match slots
+      // Check if the day exists in our grid
+      if (grid[item.day]) {
+        grid[item.day][item.period - 1] = item; // Adjusting index to match slots
+      }
     }
   });
 

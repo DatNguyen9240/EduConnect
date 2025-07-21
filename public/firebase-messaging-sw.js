@@ -14,16 +14,46 @@ const firebaseConfig = {
 };
 
 // Khởi tạo Firebase
-console.log('Initializing Firebase in Service Worker');
 firebase.initializeApp(firebaseConfig);
 
 // Khởi tạo messaging
 const messaging = firebase.messaging();
-console.log('Firebase Messaging initialized in Service Worker');
+
+// Theo dõi thông báo đã hiển thị để tránh trùng lặp
+const displayedNotifications = new Map();
+
+// Kiểm tra trùng lặp thông báo
+const isNotificationDuplicate = (payload) => {
+  // Tạo ID duy nhất cho thông báo này dựa trên nội dung
+  const notificationId = `${payload.notification?.title || ''}-${payload.notification?.body || ''}-${JSON.stringify(payload.data || {})}`;
+  
+  // Kiểm tra xem thông báo này đã hiển thị gần đây chưa
+  const lastDisplayed = displayedNotifications.get(notificationId);
+  const now = Date.now();
+  
+  if (lastDisplayed && (now - lastDisplayed) < 10000) { // 10 giây
+    return true;
+  }
+  
+  // Lưu thời gian hiển thị
+  displayedNotifications.set(notificationId, now);
+  
+  // Giới hạn kích thước Map
+  if (displayedNotifications.size > 100) {
+    // Xóa mục cũ nhất
+    const oldestKey = displayedNotifications.keys().next().value;
+    displayedNotifications.delete(oldestKey);
+  }
+  
+  return false;
+};
 
 // Xử lý background message
 messaging.onBackgroundMessage((payload) => {
-  console.log('Background message received:', payload);
+  // Kiểm tra trùng lặp
+  if (isNotificationDuplicate(payload)) {
+    return;
+  }
 
   const notificationTitle = payload.notification?.title || 'EduConnect';
   const notificationOptions = {
@@ -31,6 +61,7 @@ messaging.onBackgroundMessage((payload) => {
     icon: '/assets/logo/logo.png', // Path icon chính xác
     badge: '/assets/logo/logo.png',
     data: payload.data || {},
+    tag: `educonnect-${Date.now()}`, // Thêm tag để tránh trùng lặp
     requireInteraction: true,
     actions: [
       {
@@ -52,8 +83,6 @@ messaging.onBackgroundMessage((payload) => {
 
 // Xử lý khi click vào notification
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification clicked:', event);
-
   event.notification.close();
   
   // Lấy dữ liệu từ thông báo
@@ -108,17 +137,19 @@ self.addEventListener('notificationclick', (event) => {
 
 // Xử lý khi notification đóng
 self.addEventListener('notificationclose', (event) => {
-  console.log('Notification closed:', event);
+  // Không cần làm gì đặc biệt khi đóng thông báo
 });
 
 // Xử lý push event (cho các trường hợp khác)
 self.addEventListener('push', (event) => {
-  console.log('Push event received:', event);
-
   if (event.data) {
     try {
       const data = event.data.json();
-      console.log('Push data:', data);
+      
+      // Kiểm tra trùng lặp
+      if (isNotificationDuplicate(data)) {
+        return;
+      }
       
       const notificationTitle = data.notification?.title || 'EduConnect';
       const notificationOptions = {
@@ -126,6 +157,7 @@ self.addEventListener('push', (event) => {
         icon: '/assets/logo/logo.png',
         badge: '/assets/logo/logo.png',
         data: data.data || {},
+        tag: `educonnect-${Date.now()}`, // Thêm tag để tránh trùng lặp
         requireInteraction: true
       };
 

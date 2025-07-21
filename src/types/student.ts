@@ -1,8 +1,8 @@
 export interface Student {
   studentId: string;
-  accountID: string;
-  parentID: string;
-  classID: string;
+  accountId: string;
+  parentId: string;
+  classId: string;
   fullName: string;
   email: string;
   firstName: string;
@@ -24,9 +24,9 @@ export type StudentFormData = {
   fullName: string;
   dateOfBirth: string;
   gender: string;
-  classID: string;
+  classId: string;
   className: string;
-  parentID: string;
+  parentId: string;
   parentName: string;
   parentPhone: string;
   address: string;

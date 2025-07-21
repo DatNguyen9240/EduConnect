@@ -30,14 +30,47 @@ export interface ApiResponse<T> {
   error?: string | string[];
 }
 
+// Interface cho Axios error
+interface AxiosErrorResponse {
+  response?: {
+    status?: number;
+    data?: unknown;
+  };
+  message?: string;
+}
+
 // Đăng ký hoặc cập nhật FCM token
-export const registerFirebaseToken = async (
-  request: FirebaseTokenRequest
-): Promise<ApiResponse<FirebaseTokenResponse>> => {
+export const registerFirebaseToken = async (request: {
+  fcmToken: string;
+  deviceType: string;
+  deviceId?: string;
+  [key: string]: unknown;
+}): Promise<ApiResponse<FirebaseTokenResponse>> => {
   try {
-    return await api.post<ApiResponse<FirebaseTokenResponse>>('/api/v1/firebase-tokens', request);
+    // Không cần chuyển đổi tên trường nữa, sử dụng trực tiếp request
+    const response = await api.post<ApiResponse<FirebaseTokenResponse>>(
+      '/api/v1/firebase-tokens',
+      request
+    );
+
+    return response;
   } catch (error) {
     console.error('Error registering Firebase token:', error);
+
+    // Log chi tiết lỗi
+    if (error && typeof error === 'object') {
+      if ('response' in error) {
+        // Axios error
+        const axiosError = error as AxiosErrorResponse;
+        console.error('API error response:', {
+          status: axiosError.response?.status,
+          data: axiosError.response?.data,
+        });
+      } else if ('message' in error) {
+        console.error('Error message:', (error as { message: string }).message);
+      }
+    }
+
     // Trả về response giả để tránh lỗi
     return {
       success: false,
