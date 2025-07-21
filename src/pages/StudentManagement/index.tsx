@@ -64,6 +64,7 @@ export default function StudentManagement() {
     ascending: true,
   });
 
+  console.log('studentResponse hahahahahah', studentResponse);
   const {
     data: classStudentResponse,
     isLoading: isClassStudentLoading,
@@ -98,9 +99,10 @@ export default function StudentManagement() {
 
   const filteredStudents = students.filter(
     (student) =>
-      (selectedClass === 'all' || String(student.classID) === selectedClass) &&
+      student.classId != null && // Ẩn học sinh nếu classId là null
+      (selectedClass === 'all' || String(student.classId) === selectedClass) &&
       (student.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.studentID.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.className?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.parentName?.toLowerCase().includes(searchTerm.toLowerCase()))
   );

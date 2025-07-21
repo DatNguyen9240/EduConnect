@@ -75,9 +75,7 @@ export async function getClassList(
 export async function getStudentsByClassID(
   classId: number | string
 ): Promise<StudentsByClassResponse> {
-  const response = await api.get<StudentsByClassResponse>(
-    `/api/v1/class-management/classes/${classId}/students`
-  );
+  const response = await api.get<StudentsByClassResponse>(`/api/v1/classes/${classId}/students`);
   return response;
 }
 
@@ -86,7 +84,7 @@ export async function addStudentsToClass(
   studentIDs: string[]
 ): Promise<AddStudentsToClassResponse> {
   const response = await api.post<AddStudentsToClassResponse>(
-    `/api/v1/class-management/classes/${classId}/students`,
+    `/api/v1/classes/${classId}/students`,
     { studentIDs }
   );
   return response;
@@ -96,18 +94,15 @@ export async function removeStudentFromClass(
   classId: number | string,
   studentIDs: string[]
 ): Promise<RemoveStudentFromClassResponse> {
-  return await api.delete<RemoveStudentFromClassResponse>(
-    `/api/v1/class-management/classes/${classId}/students`,
-    { data: { studentIDs } }
-  );
+  return await api.delete<RemoveStudentFromClassResponse>(`/api/v1/classes/${classId}/students`, {
+    data: { studentIDs },
+  });
 }
 
 export async function removeStudent(studentId: number | string): Promise<RemoveStudentResponse> {
-  return await api.delete<RemoveStudentResponse>(
-    `/api/v1/class-management/students/${studentId}/class`
-  );
+  return await api.delete<RemoveStudentResponse>(`/api/v1/classes/students/${studentId}/class`);
 }
 
 export async function getUnassignedStudents(): Promise<UnassignedStudentsResponse> {
-  return await api.get<UnassignedStudentsResponse>('/api/v1/class-management/students/unassigned');
+  return await api.get<UnassignedStudentsResponse>('api/v1/classes/students?assigned=false');
 }
