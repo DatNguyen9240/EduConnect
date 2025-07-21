@@ -14,10 +14,12 @@ const firebaseConfig = {
 };
 
 // Khởi tạo Firebase
+console.log('Initializing Firebase in Service Worker');
 firebase.initializeApp(firebaseConfig);
 
 // Khởi tạo messaging
 const messaging = firebase.messaging();
+console.log('Firebase Messaging initialized in Service Worker');
 
 // Xử lý background message
 messaging.onBackgroundMessage((payload) => {
@@ -53,31 +55,54 @@ self.addEventListener('notificationclick', (event) => {
   console.log('Notification clicked:', event);
 
   event.notification.close();
+  
+  // Lấy dữ liệu từ thông báo
+  const data = event.notification.data || {};
+  const { type, exam_id, class_id } = data;
+  
+  // Xác định URL cần điều hướng
+  let navigateUrl = '/';
+  
+  if (event.action === 'open' || !event.action) {
+    switch (type) {
+      case 'exam_notification':
+        if (exam_id) {
+          navigateUrl = `/lich-thi?examId=${exam_id}`;
+        }
+        break;
+      case 'class_notification':
+        if (class_id) {
+          navigateUrl = `/class/${class_id}`;
+        }
+        break;
+      default:
+        navigateUrl = '/';
+    }
 
-  if (event.action === 'open') {
-    // Mở app hoặc tab mới
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  } else if (event.action === 'close') {
-    // Chỉ đóng notification
-    event.notification.close();
-  } else {
-    // Click vào notification chính
+    // Lưu thông tin điều hướng vào localStorage để được xử lý sau khi app mở
     event.waitUntil(
       clients.matchAll({ type: 'window' }).then((clientList) => {
         // Tìm tab đang mở
         for (const client of clientList) {
-          if (client.url.includes('/') && 'focus' in client) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            // Nếu đã có tab mở, lưu thông tin điều hướng và focus vào tab đó
+            client.postMessage({
+              type: 'NOTIFICATION_CLICK',
+              pendingNavigation: navigateUrl
+            });
             return client.focus();
           }
         }
-        // Nếu không tìm thấy tab nào, mở tab mới
+        
+        // Nếu không tìm thấy tab nào, mở tab mới với URL đích
         if (clients.openWindow) {
-          return clients.openWindow('/');
+          return clients.openWindow(navigateUrl);
         }
       })
     );
+  } else if (event.action === 'close') {
+    // Chỉ đóng notification
+    event.notification.close();
   }
 });
 
@@ -91,18 +116,24 @@ self.addEventListener('push', (event) => {
   console.log('Push event received:', event);
 
   if (event.data) {
-    const data = event.data.json();
-    const notificationTitle = data.notification?.title || 'EduConnect';
-    const notificationOptions = {
-      body: data.notification?.body || 'Bạn có thông báo mới',
-      icon: '/assets/logo/logo.png',
-      badge: '/assets/logo/logo.png',
-      data: data.data || {},
-      requireInteraction: true
-    };
+    try {
+      const data = event.data.json();
+      console.log('Push data:', data);
+      
+      const notificationTitle = data.notification?.title || 'EduConnect';
+      const notificationOptions = {
+        body: data.notification?.body || 'Bạn có thông báo mới',
+        icon: '/assets/logo/logo.png',
+        badge: '/assets/logo/logo.png',
+        data: data.data || {},
+        requireInteraction: true
+      };
 
-    event.waitUntil(
-      self.registration.showNotification(notificationTitle, notificationOptions)
-    );
+      event.waitUntil(
+        self.registration.showNotification(notificationTitle, notificationOptions)
+      );
+    } catch (error) {
+      console.error('Error processing push event:', error);
+    }
   }
 }); 

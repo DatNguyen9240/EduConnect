@@ -34,18 +34,46 @@ export interface ApiResponse<T> {
 export const registerFirebaseToken = async (
   request: FirebaseTokenRequest
 ): Promise<ApiResponse<FirebaseTokenResponse>> => {
-  return api.post<ApiResponse<FirebaseTokenResponse>>('/api/v1/firebase-tokens', request);
+  try {
+    return await api.post<ApiResponse<FirebaseTokenResponse>>('/api/v1/firebase-tokens', request);
+  } catch (error) {
+    console.error('Error registering Firebase token:', error);
+    // Trả về response giả để tránh lỗi
+    return {
+      success: false,
+      message: 'Failed to register Firebase token due to authentication issues',
+      error: ['Authentication error'],
+    };
+  }
 };
 
 // Cập nhật FCM token
 export const updateFirebaseToken = async (
   request: UpdateFirebaseTokenRequest
 ): Promise<ApiResponse<string>> => {
-  return api.put<ApiResponse<string>>('/api/v1/firebase-tokens', request);
+  try {
+    return await api.put<ApiResponse<string>>('/api/v1/firebase-tokens', request);
+  } catch (error) {
+    console.error('Error updating Firebase token:', error);
+    return {
+      success: false,
+      message: 'Failed to update Firebase token',
+      error: ['Request failed'],
+    };
+  }
 };
 
 // Hủy kích hoạt FCM token
 export const deactivateFirebaseToken = async (deviceId?: string): Promise<ApiResponse<string>> => {
-  const params = deviceId ? { deviceId } : {};
-  return api.delete<ApiResponse<string>>('/api/v1/firebase-tokens', { params });
+  try {
+    const params = deviceId ? { deviceId } : {};
+    return await api.delete<ApiResponse<string>>('/api/v1/firebase-tokens', { params });
+  } catch (error) {
+    console.error('Error deactivating Firebase token:', error);
+    return {
+      success: false,
+      message: 'Failed to deactivate Firebase token',
+      error: ['Request failed'],
+    };
+  }
 };

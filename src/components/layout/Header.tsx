@@ -4,7 +4,8 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clearLS } from '@/utils/auth';
 import { AppContext } from '@/contexts/app.context';
-import NotificationSettings from '@/components/NotificationSettings';
+import NotificationDropdown from '@/components/NotificationDropdown';
+import useNotifications from '@/hooks/useNotifications';
 
 interface Profile {
   avatarUrl?: string;
@@ -17,12 +18,17 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, isLoading } = useNotifications();
 
   const handleLogout = () => {
     clearLS();
     setIsAuthenticated(false);
     setUserInfo(null);
     navigate('/');
+  };
+
+  const handleViewAllNotifications = () => {
+    navigate('/notifications');
   };
 
   // Lấy profile từ localStorage
@@ -68,8 +74,16 @@ export default function Header() {
 
         {/* User Info and Settings */}
         <div className="flex items-center">
-          {/* Notification Settings */}
-          <NotificationSettings className="mr-2" />
+          {/* Notification Dropdown */}
+          <NotificationDropdown
+            notifications={notifications.slice(0, 5)}
+            unreadCount={unreadCount}
+            onMarkAsRead={markAsRead}
+            onMarkAllAsRead={markAllAsRead}
+            onViewAll={handleViewAllNotifications}
+            loading={isLoading}
+            className="mr-2"
+          />
 
           {/* User Info */}
           <div className="flex items-center mr-4">
@@ -116,6 +130,18 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                 >
                   {settingsMenu.profile.label}
+                </Link>
+                <Link
+                  to="/notifications"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Thông báo
+                  {unreadCount > 0 && (
+                    <span className="ml-2 inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-red-100 text-red-800 text-xs font-medium">
+                      {unreadCount}
+                    </span>
+                  )}
                 </Link>
                 <div className="border-t border-gray-100 my-1"></div>
                 <button

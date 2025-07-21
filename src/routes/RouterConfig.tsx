@@ -11,6 +11,7 @@ import {
   BarChart3,
   Settings,
   BarChart,
+  Bell,
 } from 'lucide-react';
 import LichThi from '@/pages/LichThi';
 import { AppContext } from '@/contexts/app.context';
@@ -27,6 +28,7 @@ const HocSinh = lazy(() => import('@/pages/StudentManagement'));
 const QuanTriThongTin = lazy(() => import('@/pages/QuanTriThongTin'));
 const AdminDashboard = lazy(() => import('@/pages/AdminDashBoard/admin-dashboard'));
 const ChatPage = lazy(() => import('@/pages/ChatPage'));
+const NotificationsPage = lazy(() => import('@/pages/Notifications'));
 
 export const routeMenuConfig = [
   {
@@ -50,6 +52,14 @@ export const routeMenuConfig = [
     label: 'Profile',
     icon: Users,
     element: <ProfilePage />,
+    showInMenu: false,
+    badge: null,
+  },
+  {
+    path: '/notifications',
+    label: 'Thông báo',
+    icon: Bell,
+    element: <NotificationsPage />,
     showInMenu: false,
     badge: null,
   },

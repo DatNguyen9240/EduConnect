@@ -10,15 +10,43 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppProvider, AppContext } from './contexts/app.context';
 import { SelectedStudentProvider, useSelectedStudent } from './contexts/selected-student.context';
 import ParentProfileSelector from './components/ui/ParentProfileSelector';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { NotificationProvider } from './contexts/notification.context';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GOOGLE_AUTH_CONFIG } from './constants/googleAuth';
+import useSilentLogin from './hooks/useSilentLogin';
+
+// Component để xử lý silent login
+const SilentLoginHandler = () => {
+  const { silentLogin } = useSilentLogin();
+
+  useEffect(() => {
+    // Xử lý sự kiện silent login
+    const handleSilentLoginEvent = async () => {
+      console.log('Silent login event received');
+      await silentLogin();
+    };
+
+    // Đăng ký listener
+    window.addEventListener('silent-login-required', handleSilentLoginEvent);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('silent-login-required', handleSilentLoginEvent);
+    };
+  }, [silentLogin]);
+
+  return null; // Component này không render gì cả
+};
 
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      retry: 1,
     },
   },
 });
@@ -60,14 +88,19 @@ function AppGuard() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppProvider>
-        <SelectedStudentProvider>
-          <AppGuard />
-        </SelectedStudentProvider>
-      </AppProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <GoogleOAuthProvider clientId={GOOGLE_AUTH_CONFIG.CLIENT_ID}>
+      <QueryClientProvider client={queryClient}>
+        <AppProvider>
+          <SelectedStudentProvider>
+            <NotificationProvider>
+              <SilentLoginHandler />
+              <AppGuard />
+            </NotificationProvider>
+          </SelectedStudentProvider>
+        </AppProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </GoogleOAuthProvider>
   );
 }
 
