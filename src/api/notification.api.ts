@@ -115,7 +115,7 @@ export const deactivateFirebaseToken = async (deviceId?: string): Promise<ApiRes
 export const fetchNotificationsFromApi = async (pageIndex = 0, pageSize = 20) => {
   try {
     // api.get wrapper: api.get<T>(url: string, params?: QueryParams)
-    const data = await api.get('/api/Notifications/notifications', { pageIndex, pageSize });
+    const data = await api.get('/api/Notifications', { pageIndex, pageSize });
     return data;
   } catch (error) {
     console.error('Error fetching notifications:', error);
