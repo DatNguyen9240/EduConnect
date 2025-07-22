@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { onMessage } from 'firebase/messaging';
-import type { MessagePayload } from 'firebase/messaging';
 import {
   messaging,
   requestNotificationPermission,
@@ -11,7 +10,6 @@ import { registerFirebaseToken, deactivateFirebaseToken } from '@/api/notificati
 import { AppContext } from './app.context';
 import { NotificationContext, type NotificationPayload } from './notification-context';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Notification } from '@/types/notification.type';
 
 export { NotificationContext };
 
@@ -26,41 +24,6 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
 
   // Theo dõi messageId để tránh xử lý trùng lặp
   const [processedMessageIds] = useState<Set<string>>(new Set());
-
-  // Hàm lưu thông báo vào localStorage
-  const saveNotificationToLocalStorage = (notification: Notification) => {
-    try {
-      // Lấy danh sách thông báo hiện có
-      const storedNotifications = localStorage.getItem('educonnect_notifications');
-      let notifications: Notification[] = [];
-
-      if (storedNotifications) {
-        notifications = JSON.parse(storedNotifications);
-      }
-
-      // Kiểm tra xem thông báo đã tồn tại chưa (dựa vào messageId hoặc nội dung)
-      const exists = notifications.some(
-        (n) =>
-          (notification.data?.messageId && n.data?.messageId === notification.data.messageId) ||
-          (n.title === notification.title && n.body === notification.body)
-      );
-
-      if (!exists) {
-        // Thêm thông báo mới vào đầu danh sách
-        notifications.unshift(notification);
-
-        // Giới hạn số lượng thông báo lưu trữ (tối đa 100)
-        if (notifications.length > 100) {
-          notifications = notifications.slice(0, 100);
-        }
-
-        // Lưu lại vào localStorage
-        localStorage.setItem('educonnect_notifications', JSON.stringify(notifications));
-      }
-    } catch (error) {
-      console.error('Error saving notification to localStorage:', error);
-    }
-  };
 
   // Kiểm tra xem token đã được đăng ký chưa
   const checkTokenRegistration = useCallback((): boolean => {
@@ -219,80 +182,80 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   }, [isAuthenticated, isInitialized, registerDeviceToken, checkTokenRegistration]);
 
   // Xử lý điều hướng dựa trên loại thông báo
-  const handleNotificationNavigation = (payload: MessagePayload) => {
-    if (!payload.data) return;
+  // const handleNotificationNavigation = (payload: MessagePayload) => {
+  //   if (!payload.data) return;
 
-    // Dữ liệu thông báo đã sẵn có nhưng không cần thực hiện điều hướng tại đây
-    // Điều hướng sẽ được xử lý bởi useNotificationNavigation hook
-  };
+  //   // Dữ liệu thông báo đã sẵn có nhưng không cần thực hiện điều hướng tại đây
+  //   // Điều hướng sẽ được xử lý bởi useNotificationNavigation hook
+  // };
 
-  // Thêm thông báo vào danh sách thông báo
-  const addNotificationToList = (payload: MessagePayload) => {
-    if (!payload.notification) return;
+  // Thêm thông báo vào danh sách thông báo (KHÔNG cập nhật cache React Query, KHÔNG lưu localStorage)
+  // const addNotificationToList = (payload: MessagePayload) => {
+  //   if (!payload.notification) return;
 
-    // Kiểm tra messageId để tránh xử lý trùng lặp
-    const messageId = payload.messageId || `msg-${Date.now()}`;
+  //   // Kiểm tra messageId để tránh xử lý trùng lặp
+  //   const messageId = payload.messageId || `msg-${Date.now()}`;
 
-    if (processedMessageIds.has(messageId)) {
-      return;
-    }
+  //   if (processedMessageIds.has(messageId)) {
+  //     return;
+  //   }
 
-    // Đánh dấu đã xử lý messageId này
-    processedMessageIds.add(messageId);
+  //   // Đánh dấu đã xử lý messageId này
+  //   processedMessageIds.add(messageId);
 
-    // Lấy dữ liệu từ cache
-    const cachedData = queryClient.getQueryData<{ data: Notification[] }>(['notifications']);
+  //   // Lấy dữ liệu từ cache
+  //   const cachedData = queryClient.getQueryData<{ data: Notification[] }>(['notifications']);
 
-    if (!cachedData) {
-      // Nếu chưa có dữ liệu trong cache, tạo mới
-      queryClient.setQueryData(['notifications'], {
-        data: [],
-      });
-    }
+  //   if (!cachedData) {
+  //     // Nếu chưa có dữ liệu trong cache, tạo mới
+  //     queryClient.setQueryData(['notifications'], {
+  //       data: [],
+  //     });
+  //   }
 
-    // Tạo thông báo mới
-    const newNotification: Notification = {
-      id: `fcm-${Date.now()}`,
-      title: payload.notification.title || 'Thông báo mới',
-      body: payload.notification.body || 'Bạn có thông báo mới',
-      type: determineNotificationType(payload.data || {}),
-      read: false,
-      timestamp: new Date().toISOString(),
-      data: payload.data ? { ...payload.data, messageId } : { messageId },
-    };
+  //   // Tạo thông báo mới
+  //   const newNotification: Notification = {
+  //     id: `fcm-${Date.now()}`,
+  //     title: payload.notification.title || 'Thông báo mới',
+  //     body: payload.notification.body || 'Bạn có thông báo mới',
+  //     type: determineNotificationType(payload.data || {}),
+  //     read: false,
+  //     timestamp: new Date().toISOString(),
+  //     data: payload.data ? { ...payload.data, messageId } : { messageId },
+  //   };
 
-    // Lưu vào localStorage
-    saveNotificationToLocalStorage(newNotification);
+  //   // Lưu vào localStorage
+  //   saveNotificationToLocalStorage(newNotification);
 
-    // Cập nhật cache
-    queryClient.setQueryData<{ data: Notification[] }>(['notifications'], (oldData) => {
-      const currentData = oldData || { data: [] };
-      const newData = {
-        ...currentData,
-        data: [newNotification, ...(currentData.data || [])],
-      };
-      return newData;
-    });
-  };
+  //   // Cập nhật cache
+  //   queryClient.setQueryData<{ data: Notification[] }>(['notifications'], (oldData) => {
+  //     const currentData = oldData || { data: [] };
+  //     const newData = {
+  //       ...currentData,
+  //       data: [newNotification, ...(currentData.data || [])],
+  //     };
+  //     return newData;
+  //   });
+  // };
 
   // Xác định loại thông báo dựa vào data
-  const determineNotificationType = (data: Record<string, unknown>): Notification['type'] => {
-    if (!data) return 'system';
+  // const determineNotificationType = (data: Record<string, unknown>): Notification['type'] => {
+  //   if (!data) return 'system';
 
-    if (data.type === 'exam_notification' || data.exam_id) {
-      return 'exam';
-    }
+  //   if (data.type === 'exam_notification' || data.exam_id) {
+  //     return 'exam';
+  //   }
 
-    if (data.type === 'class_notification' || data.class_id) {
-      return 'class';
-    }
+  //   if (data.type === 'class_notification' || data.class_id) {
+  //     return 'class';
+  //   }
 
-    if (data.type === 'grade_notification') {
-      return 'grade';
-    }
+  //   if (data.type === 'grade_notification') {
+  //     return 'grade';
+  //   }
 
-    return 'system';
-  };
+  //   return 'system';
+  // };
 
   // Đăng ký lắng nghe thông báo khi ứng dụng đang mở
   useEffect(() => {
@@ -304,17 +267,14 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       const unsubscribe = onMessage(messaging, (payload) => {
         setLastNotification(payload as unknown as NotificationPayload);
 
-        // Hiển thị thông báo ngay cả khi app đang mở
+        // Hiển thị notification ngay cả khi app đang mở
         if (payload.notification) {
           const { title, body } = payload.notification;
           showNotification(title || 'Thông báo mới', body || 'Bạn có thông báo mới', payload.data);
-
-          // Thêm thông báo vào danh sách thông báo
-          addNotificationToList(payload);
         }
 
-        // Xử lý điều hướng nếu cần
-        handleNotificationNavigation(payload);
+        // Không thêm notification vào cache FE nữa
+        // handleNotificationNavigation(payload);
       });
 
       return () => {
@@ -341,19 +301,19 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     showNotification(title, body, data);
 
     // Tạo MessagePayload giả lập để thêm vào danh sách thông báo
-    const mockPayload: MessagePayload = {
-      notification: {
-        title,
-        body,
-      },
-      data,
-      from: '',
-      messageId: `test-${Date.now()}`,
-      collapseKey: '',
-    };
+    // const mockPayload: MessagePayload = {
+    //   notification: {
+    //     title,
+    //     body,
+    //   },
+    //   data,
+    //   from: '',
+    //   messageId: `test-${Date.now()}`,
+    //   collapseKey: '',
+    // };
 
     // Thêm thông báo kiểm tra vào danh sách thông báo
-    addNotificationToList(mockPayload);
+    // addNotificationToList(mockPayload); // Đã loại bỏ logic cập nhật cache và localStorage
   };
 
   // Hủy đăng ký token với backend

@@ -1,8 +1,6 @@
 import type { ScheduleItem } from '@/components/common/TimeTable';
-import axios from 'axios';
+import { axiosInstance } from '@/lib/axios';
 import { timetableData } from '@/data/timetableData';
-
-const API_BASE_URL = 'https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net';
 
 export interface TimetableSlot {
   timetableSlotId: number;
@@ -26,7 +24,7 @@ export interface Timetable {
 export interface TimetableResponse {
   success: boolean;
   message: string;
-  data: Timetable[];
+  data: Timetable[] | Timetable;
   error: null | string[];
 }
 
@@ -63,9 +61,14 @@ export const getTimetableByClassId = async (
     const formattedStartDate = startDate || today.toISOString().split('T')[0];
     const formattedEndDate = endDate || nextWeek.toISOString().split('T')[0];
 
-    const url = `${API_BASE_URL}/api/v1/timetables?classId=${classId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+    const response = await axiosInstance.get(`/api/v1/timetables`, {
+      params: {
+        classId,
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      },
+    });
 
-    const response = await axios.get(url);
     return response.data;
   } catch (error) {
     console.error('Error fetching timetable:', error);
@@ -78,10 +81,48 @@ export const getTimetableByClassId = async (
   }
 };
 
+// Lấy thời khóa biểu của giáo viên
+export const getTeacherTimetable = async (
+  teacherId: string,
+  startDate?: string,
+  endDate?: string
+): Promise<TimetableResponse> => {
+  try {
+    // Nếu không có startDate và endDate, sử dụng ngày hiện tại và ngày sau 7 ngày
+    const today = new Date();
+    const nextWeek = new Date();
+    nextWeek.setDate(today.getDate() + 7);
+
+    const formattedStartDate = startDate || today.toISOString().split('T')[0];
+    const formattedEndDate = endDate || nextWeek.toISOString().split('T')[0];
+
+    // Tạo URL với query parameters nếu có
+    const params =
+      startDate || endDate
+        ? {
+            startDate: formattedStartDate,
+            endDate: formattedEndDate,
+          }
+        : {};
+
+    const response = await axiosInstance.get(`/api/v1/teachers/${teacherId}/timetable`, { params });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching teacher timetable:', error);
+    return {
+      success: false,
+      message: 'Failed to fetch teacher timetable',
+      data: [],
+      error: ['API request failed'],
+    };
+  }
+};
+
 // Lấy thông tin học sinh theo ID
 export const getStudentById = async (studentId: string): Promise<StudentResponse> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/students/${studentId}`);
+    const response = await axiosInstance.get(`/api/v1/students/${studentId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching student:', error);
@@ -139,6 +180,23 @@ export const convertTimetableSlotsToScheduleItems = (
     Friday: 'Thứ 6',
     Saturday: 'Thứ 7',
     Sunday: 'Chủ nhật',
+    // Thêm các định dạng khác có thể có
+    'Thứ 2': 'Thứ 2',
+    'Thứ 3': 'Thứ 3',
+    'Thứ 4': 'Thứ 4',
+    'Thứ 5': 'Thứ 5',
+    'Thứ 6': 'Thứ 6',
+    'Thứ 7': 'Thứ 7',
+    'Chủ nhật': 'Chủ nhật',
+    // Thêm định dạng số
+    '2': 'Thứ 2',
+    '3': 'Thứ 3',
+    '4': 'Thứ 4',
+    '5': 'Thứ 5',
+    '6': 'Thứ 6',
+    '7': 'Thứ 7',
+    '8': 'Chủ nhật',
+    CN: 'Chủ nhật',
   };
 
   return timetableSlots.map((slot) => {

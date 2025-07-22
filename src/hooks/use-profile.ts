@@ -1,56 +1,65 @@
-'use client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getProfileById, updateProfileById } from '@/api/profile.api';
+import { useContext } from 'react';
+import { AppContext } from '@/contexts/app.context';
+import { toast } from 'react-toastify';
+import type { Profile } from '@/types/profile';
+import axios from 'axios';
 
-import { useEffect, useState, useContext } from 'react';
-import type { Profile } from '../types/profile';
-import { getProfileById } from '../api/profile.api';
-import { AppContext } from '../contexts/app.context';
+interface ErrorResponse {
+  error?: string[];
+}
 
 export const useProfile = () => {
   const { userInfo } = useContext(AppContext);
-  const userId = userInfo?.userId;
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const userId = userInfo?.userId || '';
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!userId) return;
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const profileData = await getProfileById(userId);
-        setProfile(profileData);
-      } catch (err) {
-        setError('Failed to load profile data');
-        console.error('Profile fetch error:', err);
-      } finally {
-        setLoading(false);
+  // Query để lấy thông tin profile
+  const {
+    data: profile,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: () => getProfileById(userId),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5, // 5 phút
+  });
+
+  // Mutation để cập nhật profile
+  const updateProfileMutation = useMutation({
+    mutationFn: (formData: FormData) => updateProfileById(userId, formData),
+    onSuccess: (data) => {
+      if (data.success) {
+        // Cập nhật cache với dữ liệu mới
+        queryClient.setQueryData<Profile>(['profile', userId], data.data);
+        toast.success('Cập nhật thông tin thành công');
+      } else {
+        toast.error(data.error?.[0] || 'Cập nhật thất bại');
       }
-    };
-
-    fetchProfile();
-  }, [userId]);
-
-  // Method to update profile
-  const updateProfile = async (userId: string /*, updates: Partial<Profile> */) => {
-    try {
-      setLoading(true);
-      // TODO: Gọi API cập nhật profile với updates khi có
-      const updatedProfile = await getProfileById(userId);
-      setProfile(updatedProfile);
-      return updatedProfile;
-    } catch (err) {
-      setError('Failed to update profile');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        toast.error(error.message || 'Cập nhật thất bại');
+      } else if (axios.isAxiosError(error) && error.response?.data) {
+        const errorData = error.response.data as ErrorResponse;
+        toast.error(errorData.error?.[0] || 'Cập nhật thất bại');
+      } else {
+        toast.error('Cập nhật thất bại');
+      }
+    },
+  });
 
   return {
     profile,
-    loading,
+    isLoading,
     error,
-    setProfile,
-    updateProfile,
+    refetch,
+    updateProfile: (formData: FormData) => updateProfileMutation.mutate(formData),
+    isUpdating: updateProfileMutation.isPending,
   };
 };
+
+export default useProfile;

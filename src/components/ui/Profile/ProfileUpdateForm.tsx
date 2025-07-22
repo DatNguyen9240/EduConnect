@@ -1,13 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { updateProfileById } from '../../../api/profile.api';
-import type { UpdateProfileResponse } from '../../../api/profile.api';
-import { useProfileContext } from '../../../contexts/profile.context';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import type { AxiosError } from 'axios';
-import { AppContext } from '../../../contexts/app.context';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { parseISO, format } from 'date-fns';
+import { useProfile } from '@/hooks/use-profile';
 
 interface ProfileUpdateFormProps {
   onSuccess?: () => void;
@@ -20,9 +16,8 @@ const labelClass = 'block font-medium mb-1 text-gray-700';
 const buttonClass = 'px-5 py-2 rounded-lg font-semibold transition focus:outline-none';
 
 const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCancel }) => {
-  const { profile } = useProfileContext();
-  const { userInfo } = useContext(AppContext);
-  const userId = userInfo?.userId || '';
+  const { profile, updateProfile, isUpdating } = useProfile();
+
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -32,7 +27,6 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCanc
     avatarFile: undefined as File | undefined,
     avatarPreview: '',
   });
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -75,7 +69,7 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCanc
     e.preventDefault();
     if (!validate()) return;
     if (!profile) return;
-    setSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append('FirstName', form.firstName);
@@ -89,22 +83,15 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCanc
       if (form.avatarFile) {
         formData.append('AvatarFile', form.avatarFile);
       }
-      for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-      const res: UpdateProfileResponse = await updateProfileById(userId, formData);
-      if (res.success) {
-        toast.success('Cập nhật thành công!');
-        if (onSuccess) onSuccess();
-      } else {
-        toast.error(res.error?.[0] || 'Cập nhật thất bại');
-      }
+
+      // Sử dụng mutation từ hook useProfile
+      await updateProfile(formData);
+
+      // Nếu không có lỗi, gọi callback onSuccess
+      if (onSuccess) onSuccess();
     } catch (err) {
-      const error = err as AxiosError<UpdateProfileResponse>;
-      const errorMsg = error.response?.data?.error?.[0] || 'Cập nhật thất bại';
-      toast.error(errorMsg);
-    } finally {
-      setSubmitting(false);
+      // Lỗi đã được xử lý trong hook useProfile
+      console.error('Error updating profile:', err);
     }
   };
 
@@ -192,16 +179,16 @@ const ProfileUpdateForm: React.FC<ProfileUpdateFormProps> = ({ onSuccess, onCanc
           type="button"
           className={`${buttonClass} bg-gray-200 text-gray-700 hover:bg-gray-300`}
           onClick={onCancel}
-          disabled={submitting}
+          disabled={isUpdating}
         >
           Hủy
         </button>
         <button
           type="submit"
           className={`${buttonClass} bg-blue-500 text-white hover:bg-blue-600 shadow`}
-          disabled={submitting}
+          disabled={isUpdating}
         >
-          {submitting ? 'Đang cập nhật...' : 'Cập nhật'}
+          {isUpdating ? 'Đang cập nhật...' : 'Cập nhật'}
         </button>
       </div>
     </form>
