@@ -1,4 +1,3 @@
-import ChatWidget from '@/components/ChatWitget';
 import { Link } from 'react-router-dom';
 
 export default function Home() {
@@ -29,8 +28,6 @@ export default function Home() {
       <div className="mt-12 text-sm text-gray-500">
         © 2025 FPT EduConnect – Powered by Group SWD392
       </div>
-
-      <ChatWidget />
     </div>
   );
 }

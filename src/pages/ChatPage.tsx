@@ -29,6 +29,23 @@ interface Message {
   avatar: string;
 }
 
+// Hàm tách JSON feedback từ text bot trả về
+function extractContent(text: string): string {
+  const match = text.match(/({[\s\S]+})/);
+  if (match) {
+    try {
+      const feedback = JSON.parse(match[1]);
+      if (feedback.Content) {
+        return feedback.Content;
+      }
+      return text;
+    } catch {
+      return text;
+    }
+  }
+  return text;
+}
+
 export default function ChatPage() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -45,7 +62,7 @@ export default function ChatPage() {
             history.map((msg: ChatHistoryResponse['data']['messages'][number], idx: number) => ({
               id: idx + '-' + msg.role,
               sender: msg.role,
-              content: msg.message,
+              content: extractContent(msg.message), // chỉ lấy Content nếu có
               timestamp: new Date(msg.timestamp).toLocaleTimeString(),
               isOwn: msg.role === 'user',
               avatar: msg.role === 'user' ? '/assets/avatar/default.jpg' : '/assets/avatar/bot.png',
@@ -83,7 +100,7 @@ export default function ChatPage() {
         const botMsg: Message = {
           id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() + '-bot',
           sender: 'bot',
-          content: res.data.message,
+          content: extractContent(res.data.message), // chỉ lấy Content nếu có
           timestamp: new Date().toLocaleTimeString(),
           isOwn: false,
           avatar: '/assets/avatar/bot.png',
@@ -240,8 +257,8 @@ export default function ChatPage() {
         </div>
 
         {/* Messages */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+        <ScrollArea className="flex-1 p-4 overflow-y-auto h-full">
+          <div className="space-y-4 ">
             {loading && <div className="text-xs text-gray-400">Bot đang trả lời...</div>}
             {messages.map((msg) => (
               <div

@@ -23,7 +23,6 @@ const Login = lazy(() => import('@/pages/Auth/Login'));
 const Register = lazy(() => import('@/pages/Auth/Register'));
 const SoDauBai = lazy(() => import('@/pages/SoDauBai'));
 const ThongKeBaoCao = lazy(() => import('@/pages/ThongKeBaoCao'));
-const QuanLyHocTap = lazy(() => import('@/pages/QuanLyHocTap'));
 const HocSinh = lazy(() => import('@/pages/StudentManagement'));
 const ThoiKhoaBieu = lazy(() => import('@/pages/ThoiKhoaBieu'));
 const AdminDashboard = lazy(() => import('@/pages/AdminDashBoard/admin-dashboard'));
@@ -119,14 +118,7 @@ export const routeMenuConfig = [
     showInMenu: false,
     badge: null,
   },
-  {
-    path: '/quan-ly-hoc-tap',
-    label: 'Quản lý học tập',
-    icon: null,
-    element: <QuanLyHocTap />,
-    showInMenu: false,
-    badge: null,
-  },
+
   {
     path: '/hoc-sinh',
     label: 'Học sinh',
