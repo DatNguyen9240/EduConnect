@@ -14,8 +14,8 @@ export const Input: React.FC<InputProps> = ({
   ...props
 }) => {
   return (
-    <div className={`mb-4 ${containerClassName}`}>
-      <label htmlFor={props.id} className="block text-sm font-medium text-gray-700 mb-1">
+    <div className={`${containerClassName}`}>
+      <label htmlFor={props.id} className="block text-sm font-medium text-gray-700">
         {label}
       </label>
       <input
