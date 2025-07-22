@@ -131,7 +131,6 @@ function ExamDialog({
   }, [classId]);
 
   const [loading, setLoading] = useState(false);
-
   const onSubmit = async (values: ExamDetail & { classId?: string; studentIds?: string[] }) => {
     setLoading(true);
     try {
