@@ -3,15 +3,24 @@ import NotificationList from '@/components/NotificationList';
 import useNotifications from '@/hooks/useNotifications';
 import { Button } from '@/components/common/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Filter, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Bell, Filter, Trash2, Info, X } from 'lucide-react';
 import type { Notification } from '@/types/notification.type';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/common/Dialog';
 
 const NotificationsPage: React.FC = () => {
   const { notifications, isLoading, markAsRead, markAllAsRead, deleteNotification } =
     useNotifications();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Lọc thông báo dựa vào tab đang active
   const filteredNotifications = notifications.filter((notification) => {
@@ -22,36 +31,94 @@ const NotificationsPage: React.FC = () => {
 
   // Xử lý khi click vào thông báo
   const handleNotificationClick = (notification: Notification) => {
-    // Đánh dấu đã đọc
     if (!notification.read) {
       markAsRead(notification.id);
     }
-
-    // Điều hướng dựa vào loại thông báo
-    if (notification.data) {
-      switch (notification.type) {
-        case 'exam':
-          if (notification.data.exam_id) {
-            navigate(`/lich-thi?examId=${notification.data.exam_id}`);
-          }
-          break;
-        case 'class':
-          if (notification.data.class_id) {
-            navigate(`/class/${notification.data.class_id}`);
-          }
-          break;
-        default:
-          // Mặc định không làm gì
-          break;
-      }
-    }
+    setSelectedNotification(notification);
+    setModalOpen(true);
   };
 
   // Đếm số lượng thông báo chưa đọc
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // Format thời gian đẹp
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('vi-VN', { hour12: false });
+  };
+
+  // Hiển thị nội dung notification, hỗ trợ markdown cơ bản (in đậm, xuống dòng)
+  const renderContent = (notification: Notification & { content?: string }) => {
+    const body =
+      notification.content && notification.content.trim().length > 0
+        ? notification.content
+        : notification.body;
+    if (!body) return null;
+    const html = body
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br />')
+      .replace(/\r/g, '');
+    return (
+      <div
+        className="prose prose-sm max-w-none text-gray-800 bg-gray-50 rounded p-3 border"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    );
+  };
+
+  // Render chi tiết notification
+  const renderNotificationDetail = () => {
+    if (!selectedNotification) return null;
+    const { title, type, timestamp } = selectedNotification;
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Info className="h-6 w-6 text-blue-500" />
+          <span className="text-lg font-bold text-blue-700">Chi tiết thông báo</span>
+        </div>
+        <div>
+          <div className="text-xl font-semibold text-gray-900 mb-1">{title}</div>
+          <div className="text-sm text-gray-500 mb-2">
+            Loại: <span className="capitalize font-medium text-blue-600">{type}</span>
+          </div>
+          <div className="text-xs text-gray-400 mb-2">Thời gian: {formatTime(timestamp)}</div>
+          {renderContent(selectedNotification)}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto py-6 px-4">
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Thông báo chi tiết</DialogTitle>
+            <DialogDescription>
+              Xem chi tiết nội dung và thông tin liên quan đến thông báo.
+            </DialogDescription>
+          </DialogHeader>
+          {renderNotificationDetail()}
+          <DialogFooter>
+            {!selectedNotification?.read && (
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (selectedNotification) markAsRead(selectedNotification.id);
+                  setModalOpen(false);
+                }}
+              >
+                Đánh dấu đã đọc
+              </Button>
+            )}
+            <DialogClose asChild>
+              <Button variant="outline">
+                <X className="h-4 w-4 mr-1" /> Đóng
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Bell className="h-6 w-6" />

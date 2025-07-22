@@ -7,8 +7,12 @@ import { GradeChart } from './grade-chart';
 import { UpcomingAssignments } from './upcoming-assignments';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StudentPerformance } from './student-performance';
+import { useFeedbacks } from '@/hooks/useFeedbacks';
+import TeacherList from './teacher-list';
 
 export default function AdminDashboard() {
+  const { data: feedbackData, isLoading: feedbackLoading, error: feedbackError } = useFeedbacks();
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Main Content */}
@@ -99,6 +103,53 @@ export default function AdminDashboard() {
 
             {/* Student Performance Table */}
             <StudentPerformance />
+
+            {/* Feedback Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+              {/* Feedback Section */}
+              <Card className="shadow-md">
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold text-indigo-700">
+                    Phản hồi từ phụ huynh
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {feedbackLoading ? (
+                    <div>Đang tải phản hồi...</div>
+                  ) : feedbackError ? (
+                    <div className="text-red-500">Lỗi khi tải phản hồi</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {feedbackData?.data && feedbackData.data.length > 0 ? (
+                        feedbackData.data.map((fb) => (
+                          <div key={fb.feedbackId} className="border-b pb-2 mb-2">
+                            <div className="font-semibold text-blue-700">{fb.parentName}</div>
+                            <div className="text-gray-800 mb-1">{fb.content}</div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(fb.dateTime).toLocaleString('vi-VN')}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-gray-500 italic">Không có phản hồi nào.</div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Teacher List Section */}
+              <Card className="shadow-md">
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold text-indigo-700">
+                    Danh sách giáo viên
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TeacherList />
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </main>
       </div>

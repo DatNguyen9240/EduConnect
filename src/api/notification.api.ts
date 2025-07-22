@@ -110,3 +110,20 @@ export const deactivateFirebaseToken = async (deviceId?: string): Promise<ApiRes
     };
   }
 };
+
+// Lấy danh sách notification từ API mới
+export const fetchNotificationsFromApi = async (pageIndex = 0, pageSize = 20) => {
+  try {
+    // api.get wrapper: api.get<T>(url: string, params?: QueryParams)
+    const data = await api.get('/api/Notifications', { pageIndex, pageSize });
+    return data;
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    return {
+      success: false,
+      message: 'Failed to fetch notifications',
+      data: [],
+      error: ['Request failed'],
+    };
+  }
+};

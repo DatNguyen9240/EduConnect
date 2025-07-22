@@ -1,5 +1,6 @@
 import { getAccessTokenFromLS } from '@/utils/auth';
 import { createContext, useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Sửa interface UserInfo cho đúng backend
 export interface UserInfo {
@@ -44,13 +45,20 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const profile = localStorage.getItem('profile');
     return profile ? JSON.parse(profile) : null;
   });
+  const queryClient = useQueryClient();
 
-  // Khi logout thì clear userInfo
+  // Khi logout hoặc refreshToken hết hạn thì clear toàn bộ cache
   useEffect(() => {
     if (!isAuthenticated) {
       setUserInfo(null);
+      queryClient.clear();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, queryClient]);
+
+  // Khi userInfo thay đổi (login/logout/chuyển account), clear cache notification
+  useEffect(() => {
+    queryClient.removeQueries({ queryKey: ['notifications'] });
+  }, [userInfo?.id, queryClient]);
 
   // Helper functions
   const hasRole = (role: string): boolean => {

@@ -1,19 +1,19 @@
-'use client';
-
 import React, { useState } from 'react';
-import { ProfileProvider, useProfileContext } from '../contexts/profile.context';
 import UserProfileCard from '@components/ui/Profile/user-profile-card';
 import ProfileUpdateForm from '@components/ui/Profile/ProfileUpdateForm';
+import { useProfile } from '@/hooks/use-profile';
 
-const ProfilePageInner: React.FC = () => {
-  const { profile, loading, fetchProfile } = useProfileContext();
+const ProfilePage: React.FC = () => {
+  const { profile, isLoading } = useProfile();
   const [editing, setEditing] = useState(false);
 
-  if (loading || !profile) {
+  if (isLoading || !profile) {
     return (
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md mt-8">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Profile Information</h2>
-        <p>Loading profile...</p>
+        <div className="flex justify-center items-center py-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
       </div>
     );
   }
@@ -47,10 +47,7 @@ const ProfilePageInner: React.FC = () => {
             </button>
             <h3 className="text-xl font-bold mb-4">Cập nhật thông tin cá nhân</h3>
             <ProfileUpdateForm
-              onSuccess={async () => {
-                await fetchProfile();
-                setEditing(false);
-              }}
+              onSuccess={() => setEditing(false)}
               onCancel={() => setEditing(false)}
             />
           </div>
@@ -59,11 +56,5 @@ const ProfilePageInner: React.FC = () => {
     </div>
   );
 };
-
-const ProfilePage: React.FC = () => (
-  <ProfileProvider>
-    <ProfilePageInner />
-  </ProfileProvider>
-);
 
 export default ProfilePage;
