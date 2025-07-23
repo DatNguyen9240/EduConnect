@@ -5,6 +5,7 @@ import {
   getStudentById,
   convertTimetableSlotsToScheduleItems,
   getTeacherTimetable,
+  getAttendanceByStudentId,
 } from '@/api/timetable.api';
 import type { TimetableSlot } from '@/api/timetable.api';
 import { useSelectedStudent } from '@/contexts/selected-student.context';
@@ -37,7 +38,17 @@ export const useTimetable = (startDate?: string, endDate?: string) => {
     queryFn: async () => {
       if (!classId) throw new Error('Không có mã lớp');
 
+      // Lấy thời khóa biểu
       const response = await getTimetableByClassId(classId, startDate, endDate);
+      // Lấy attendance nếu là học sinh hoặc phụ huynh
+      let attendanceList: { timetableSlotID: number; status: number }[] = [];
+      if (isStudent() && userInfo?.id) {
+        const attRes = await getAttendanceByStudentId(userInfo.id);
+        if (attRes.success && Array.isArray(attRes.data)) attendanceList = attRes.data;
+      } else if (isParent() && selectedStudent?.studentId) {
+        const attRes = await getAttendanceByStudentId(selectedStudent.studentId);
+        if (attRes.success && Array.isArray(attRes.data)) attendanceList = attRes.data;
+      }
 
       if (response.success) {
         let timetableData;
@@ -54,7 +65,10 @@ export const useTimetable = (startDate?: string, endDate?: string) => {
           timetableData = response.data;
         }
 
-        const items = convertTimetableSlotsToScheduleItems(timetableData.slots || []);
+        const items = convertTimetableSlotsToScheduleItems(
+          timetableData.slots || [],
+          attendanceList
+        );
         return {
           timetableInfo: timetableData,
           scheduleItems: items,

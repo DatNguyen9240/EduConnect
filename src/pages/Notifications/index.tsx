@@ -44,6 +44,7 @@ const NotificationsPage: React.FC = () => {
   // Format thời gian đẹp
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
+    date.setHours(date.getHours() + 7); // Cộng thêm 7 tiếng cho GMT+7
     return date.toLocaleString('vi-VN', { hour12: false });
   };
 
@@ -100,17 +101,6 @@ const NotificationsPage: React.FC = () => {
           </DialogHeader>
           {renderNotificationDetail()}
           <DialogFooter>
-            {!selectedNotification?.read && (
-              <Button
-                variant="primary"
-                onClick={() => {
-                  if (selectedNotification) markAsRead(selectedNotification.id);
-                  setModalOpen(false);
-                }}
-              >
-                Đánh dấu đã đọc
-              </Button>
-            )}
             <DialogClose asChild>
               <Button variant="outline">
                 <X className="h-4 w-4 mr-1" /> Đóng

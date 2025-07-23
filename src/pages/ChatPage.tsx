@@ -29,19 +29,12 @@ interface Message {
   avatar: string;
 }
 
-// Hàm tách JSON feedback từ text bot trả về
+// Hàm tách phần text markdown trước JSON
 function extractContent(text: string): string {
-  const match = text.match(/({[\s\S]+})/);
-  if (match) {
-    try {
-      const feedback = JSON.parse(match[1]);
-      if (feedback.Content) {
-        return feedback.Content;
-      }
-      return text;
-    } catch {
-      return text;
-    }
+  // Nếu có JSON phía sau, chỉ lấy phần trước dấu { đầu tiên
+  const idx = text.indexOf('{');
+  if (idx > 0) {
+    return text.slice(0, idx).trim();
   }
   return text;
 }

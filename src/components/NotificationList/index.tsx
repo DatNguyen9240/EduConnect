@@ -42,6 +42,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
   // Format thời gian
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
+    date.setHours(date.getHours() + 7); // Cộng thêm 7 tiếng cho GMT+7
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
