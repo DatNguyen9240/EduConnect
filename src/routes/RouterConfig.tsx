@@ -85,14 +85,7 @@ export const routeMenuConfig = [
     showInMenu: true,
     badge: null,
   },
-  {
-    path: '/giao-vien',
-    label: 'Teacher',
-    icon: Users,
-    element: <div>Teacher page</div>,
-    showInMenu: true,
-    badge: null,
-  },
+
   {
     path: '/cai-dat',
     label: 'Settings',

@@ -9,17 +9,16 @@ export const useStudentDetail = (studentId: string | undefined) => {
     queryFn: async () => {
       if (!studentId) throw new Error('Student ID is required');
       try {
-        const response: AxiosResponse = await axios.get(`/api/Student/${studentId}`);
+        const response: AxiosResponse = await axios.get(`/api/v1/students/${studentId}`);
         const data = response.data;
-        console.log('Raw API Response:', data);
 
-        // Nếu response là object student (có studentID) thì trả về luôn
-        if (data && data.studentID) {
+        // Nếu response là object student (có studentID) thì trả về
+        if (data && data.studentId) {
           return data as Student;
         }
 
         // Nếu response là dạng cũ (bọc trong data) thì trả về data
-        if (data && data.data && data.data.studentID) {
+        if (data && data.data && data.data.studentId) {
           return data.data as Student;
         }
 

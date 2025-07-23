@@ -127,3 +127,19 @@ export const fetchNotificationsFromApi = async (pageIndex = 0, pageSize = 20) =>
     };
   }
 };
+
+// Đánh dấu thông báo đã đọc
+export const markNotificationAsRead = async (ids: string[]): Promise<ApiResponse<null>> => {
+  try {
+    const response = await api.post<ApiResponse<null>>('/api/Notifications/mark-read', ids);
+    return response;
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    return {
+      success: false,
+      message: 'Failed to mark notification as read',
+      data: null,
+      error: ['Request failed'],
+    };
+  }
+};

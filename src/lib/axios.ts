@@ -319,7 +319,7 @@ export async function handleRefreshToken(): Promise<string> {
 type QueryParams = Record<string, string | number | boolean>;
 
 // Type for request body
-type RequestBody = Record<string, unknown>;
+type RequestBody = Record<string, unknown> | unknown[];
 
 // Wrapper methods for common HTTP requests
 const api = {

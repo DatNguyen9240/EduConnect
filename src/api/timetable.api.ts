@@ -143,6 +143,22 @@ export const getStudentById = async (studentId: string): Promise<StudentResponse
   }
 };
 
+// Lấy điểm danh theo studentId
+export const getAttendanceByStudentId = async (studentId: string) => {
+  try {
+    const response = await axiosInstance.get(`/api/v1/attendances/student/${studentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching attendance:', error);
+    return {
+      success: false,
+      message: 'Failed to fetch attendance',
+      data: [],
+      error: ['API request failed'],
+    };
+  }
+};
+
 // Tìm kiếm thông tin bổ sung từ dữ liệu tĩnh
 const findStaticItemInfo = (day: string, period: number): Partial<ScheduleItem> | null => {
   const staticItem = timetableData.find((item) => item.day === day && item.period === period);
@@ -156,9 +172,10 @@ const findStaticItemInfo = (day: string, period: number): Partial<ScheduleItem> 
   return null;
 };
 
-// Chuyển đổi dữ liệu từ API sang định dạng hiển thị
+// Chuyển đổi dữ liệu từ API sang định dạng hiển thị, có thể nhận thêm attendance
 export const convertTimetableSlotsToScheduleItems = (
-  timetableSlots: TimetableSlot[]
+  timetableSlots: TimetableSlot[],
+  attendanceList?: { timetableSlotID: number; status: number }[]
 ): ScheduleItem[] => {
   if (!timetableSlots || !Array.isArray(timetableSlots)) {
     return [];
@@ -221,6 +238,17 @@ export const convertTimetableSlotsToScheduleItems = (
     // Tìm thông tin bổ sung từ dữ liệu tĩnh
     const staticInfo = findStaticItemInfo(mappedDay, slot.period);
 
+    // Mapping status từ attendance nếu có
+    let status = staticInfo?.status;
+    if (attendanceList) {
+      const att = attendanceList.find((a) => a.timetableSlotID === slot.timetableSlotId);
+      if (att) {
+        if (att.status === 1) status = 'attended';
+        else if (att.status === 2) status = 'absent';
+        else status = 'notyet';
+      }
+    }
+
     // Tạo item với dữ liệu từ API và bổ sung từ dữ liệu tĩnh
     const item: ScheduleItem = {
       subject: slot.subjectName || 'Không có tên môn học',
@@ -232,7 +260,7 @@ export const convertTimetableSlotsToScheduleItems = (
       location: staticInfo?.location || slot.room || 'NVH',
       roomNote: staticInfo?.roomNote || `Phòng ${slot.room || 'chưa cập nhật'}`,
       time: timeString,
-      status: staticInfo?.status,
+      status,
     };
 
     return item;

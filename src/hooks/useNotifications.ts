@@ -1,7 +1,7 @@
 import type { Notification } from '@/types/notification.type';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { fetchNotificationsFromApi } from '@/api/notification.api';
+import { fetchNotificationsFromApi, markNotificationAsRead } from '@/api/notification.api';
 import { useContext } from 'react';
 import { AppContext } from '@/contexts/app.context';
 
@@ -61,17 +61,22 @@ export const useNotifications = () => {
   // Hiện tại chỉ cập nhật cache để UI phản hồi nhanh
 
   // Đánh dấu đã đọc
-  const markAsRead = (id: string) => {
-    queryClient.setQueryData<{ data: Notification[] }>(
-      ['notifications', userInfo?.id],
-      (oldData) => {
-        if (!oldData) return oldData;
-        return {
-          data: oldData.data.map((n) => (n.id === id ? { ...n, read: true } : n)),
-        };
-      }
-    );
-    // TODO: Gọi API cập nhật trạng thái read nếu backend hỗ trợ
+  const markAsRead = async (id: string) => {
+    // Gọi API đánh dấu đã đọc
+    const res = await markNotificationAsRead([id]);
+    if (res.success) {
+      queryClient.setQueryData<{ data: Notification[] }>(
+        ['notifications', userInfo?.id],
+        (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            data: oldData.data.map((n) => (n.id === id ? { ...n, read: true } : n)),
+          };
+        }
+      );
+    } else {
+      toast.error('Đánh dấu đã đọc thất bại!');
+    }
   };
 
   // Đánh dấu tất cả đã đọc
