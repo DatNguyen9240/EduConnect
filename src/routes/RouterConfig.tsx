@@ -24,7 +24,7 @@ const Register = lazy(() => import('@/pages/Auth/Register'));
 const SoDauBai = lazy(() => import('@/pages/SoDauBai'));
 const ThongKeBaoCao = lazy(() => import('@/pages/ThongKeBaoCao'));
 const HocSinh = lazy(() => import('@/pages/StudentManagement'));
-const ThoiKhoaBieu = lazy(() => import('@/pages/ThoiKhoaBieu'));
+const ThoiKhoaBieuTabsPage = lazy(() => import('@/pages/ThoiKhoaBieuTabsPage'));
 const AdminDashboard = lazy(() => import('@/pages/AdminDashBoard/admin-dashboard'));
 const ChatPage = lazy(() => import('@/pages/ChatPage'));
 const NotificationsPage = lazy(() => import('@/pages/Notifications'));
@@ -81,7 +81,7 @@ export const routeMenuConfig = [
     path: '/thoi-khoa-bieu',
     label: 'Thời khóa biểu',
     icon: BarChart3,
-    element: <ThoiKhoaBieu />,
+    element: <ThoiKhoaBieuTabsPage />,
     showInMenu: true,
     badge: null,
   },

@@ -60,7 +60,7 @@ export const updateProfileById = async (
   }
 };
 
-export const getStudentsByParentId = (parentId: string, params?: Record<string, unknown>) => {
+export const getStudentsByParentId = async (parentId: string, params?: Record<string, unknown>) => {
   return axiosInstance.get<{
     totalCount: number;
     pageIndex: number;
@@ -70,8 +70,7 @@ export const getStudentsByParentId = (parentId: string, params?: Record<string, 
     message: string;
     data: unknown[];
     error: unknown;
-  }>(
-    `https://educonnectswd-buh0fbdfabcqfehm.australiaeast-01.azurewebsites.net/api/v1/parents/${parentId}/students`,
-    params
-  );
+  }>(`/api/v1/parents/${parentId}/students`, {
+    params,
+  });
 };
