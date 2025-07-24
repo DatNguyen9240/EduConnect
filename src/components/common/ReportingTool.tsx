@@ -48,6 +48,11 @@ const ReportingTool: React.FC = () => {
       await updatePrompt(promptId, data);
       alert('Cập nhật prompt thành công!');
       setEditPrompt(null);
+      // Fetch lại danh sách prompts sau khi cập nhật thành công
+      if (accountId) {
+        const data = await fetchPrompts(accountId);
+        setPrompts(data);
+      }
     } catch {
       alert('Cập nhật prompt thất bại!');
     } finally {
@@ -63,7 +68,8 @@ const ReportingTool: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
-  const [chatBotMessage, setChatBotMessage] = useState<string | null>(null);
+  // Mảng lưu tất cả các tin nhắn AI trả ra, mỗi lần trả ra sẽ thêm vào mảng và render tiếp xuống dòng
+  const [chatBotMessages, setChatBotMessages] = useState<string[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
@@ -103,12 +109,11 @@ const ReportingTool: React.FC = () => {
   // Khi nhấn vào nút prompt, gửi promptText lên chat API và hiển thị kết quả
   const handlePromptClick = async (item: PromptItem) => {
     setChatLoading(true);
-    setChatBotMessage(null);
     try {
       const message = await sendPromptToBot(item.promptText);
-      setChatBotMessage(message);
+      setChatBotMessages((prev) => [...prev, message]);
     } catch {
-      setChatBotMessage('Lỗi khi gửi yêu cầu tới bot.');
+      setChatBotMessages((prev) => [...prev, 'Lỗi khi gửi yêu cầu tới bot.']);
     } finally {
       setChatLoading(false);
     }
@@ -146,7 +151,7 @@ const ReportingTool: React.FC = () => {
     setType('');
     setStatus('active');
     setResult(null);
-    setChatBotMessage(null);
+    // Xoá dòng setChatBotMessage vì không còn dùng state này
   };
 
   return (
@@ -269,10 +274,26 @@ const ReportingTool: React.FC = () => {
           ))}
         </div>
 
-        {/* Hiển thị kết quả chat bot nếu có */}
-        {chatBotMessage && (
+        {/* Hiển thị tất cả các tin nhắn AI trả ra, mỗi lần trả ra sẽ hiện tiếp xuống dòng */}
+        {chatBotMessages.length > 0 && (
           <div className="mb-4 p-4 border rounded bg-gray-50 text-gray-800">
-            <strong>Bot:</strong> {chatBotMessage}
+            <strong>Bot:</strong>
+            <div className="mt-2 flex flex-col gap-2">
+              {chatBotMessages.map((msg, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span>{msg}</span>
+                  <button
+                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                    onClick={() => {
+                      setShowReportModal(true);
+                      setReportContent(msg);
+                    }}
+                  >
+                    Lưu báo cáo
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {chatLoading && <div className="mb-4 text-blue-600">Đang lấy phản hồi từ bot...</div>}
