@@ -1,39 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
 import { AppContext } from '@/contexts/app.context';
-import { getAccessTokenFromLS } from '@/utils/auth';
-
-type PromptPayload = {
-  title: string;
-  promptText: string;
-  type: string;
-  status: string;
-};
-
-type PromptItem = {
-  promptId: number;
-  accountId: string;
-  title: string;
-  promptText: string;
-  type: string;
-  status: string;
-  isDeleted: boolean;
-  createdAt: string;
-  updatedAt: string | null;
-  createdByName: string;
-  createdByEmail: string;
-};
+import {
+  fetchPrompts,
+  createPrompt,
+  updatePrompt,
+  deletePrompt,
+  sendPromptToBot,
+  saveReport,
+} from '@/api/reporttool.api';
+import type { PromptPayload, PromptItem } from '@/api/reporttool.api';
 
 const ReportingTool: React.FC = () => {
   // Hàm xóa prompt
   const handleDeletePrompt = async (promptId: number) => {
     if (!window.confirm('Bạn có chắc muốn xóa prompt này?')) return;
     try {
-      await axios.delete(`https://educonnectbe-98kw.onrender.com/api/v1/prompts/${promptId}`, {
-        headers: {
-          Authorization: `Bearer ${getAccessTokenFromLS()}`,
-        },
-      });
+      await deletePrompt(promptId);
       alert('Xóa prompt thành công!');
       setPrompts(prompts.filter((p) => p.promptId !== promptId));
     } catch {
@@ -63,15 +45,7 @@ const ReportingTool: React.FC = () => {
   const handleUpdatePrompt = async (promptId: number, data: PromptPayload) => {
     setEditLoading(true);
     try {
-      await axios.put(
-        `https://educonnectbe-98kw.onrender.com/api/v1/prompts/${promptId}`,
-        { promptId, ...data },
-        {
-          headers: {
-            Authorization: `Bearer ${getAccessTokenFromLS()}`,
-          },
-        }
-      );
+      await updatePrompt(promptId, data);
       alert('Cập nhật prompt thành công!');
       setEditPrompt(null);
     } catch {
@@ -99,22 +73,15 @@ const ReportingTool: React.FC = () => {
   // Fetch prompts khi mount
   useEffect(() => {
     if (!accountId) return;
-    const fetchPrompts = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(
-          `https://educonnectbe-98kw.onrender.com/api/v1/prompts/account/${accountId}?pageIndex=0&pageSize=10&sortBy=CreatedAt&ascending=false`,
-          {
-            headers: {
-              Authorization: `Bearer ${getAccessTokenFromLS()}`,
-            },
-          }
-        );
-        setPrompts(res.data.data || []);
+        const data = await fetchPrompts(accountId);
+        setPrompts(data);
       } catch {
         setPrompts([]);
       }
     };
-    fetchPrompts();
+    fetchData();
   }, [accountId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,13 +90,9 @@ const ReportingTool: React.FC = () => {
     setResult(null);
     try {
       const payload: PromptPayload = { title, promptText, type, status };
-      await axios.post('https://educonnectbe-98kw.onrender.com/api/v1/prompts', payload, {
-        headers: {
-          Authorization: `Bearer ${getAccessTokenFromLS()}`,
-        },
-      });
+      await createPrompt(payload);
       setResult('Tạo prompt thành công!');
-    } catch (err: any) {
+    } catch {
       setResult('Tạo prompt thất bại!');
     } finally {
       setLoading(false);
@@ -142,16 +105,8 @@ const ReportingTool: React.FC = () => {
     setChatLoading(true);
     setChatBotMessage(null);
     try {
-      const res = await axios.post(
-        'https://educonnectbe-98kw.onrender.com/api/v1/chats/messages',
-        { message: item.promptText },
-        {
-          headers: {
-            Authorization: `Bearer ${getAccessTokenFromLS()}`,
-          },
-        }
-      );
-      setChatBotMessage(res.data?.data?.message || 'Không có phản hồi từ bot.');
+      const message = await sendPromptToBot(item.promptText);
+      setChatBotMessage(message);
     } catch {
       setChatBotMessage('Lỗi khi gửi yêu cầu tới bot.');
     } finally {
@@ -163,16 +118,8 @@ const ReportingTool: React.FC = () => {
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await axios.post(
-        'https://educonnectbe-98kw.onrender.com/api/v1/chats/messages',
-        { message: promptText },
-        {
-          headers: {
-            Authorization: `Bearer ${getAccessTokenFromLS()}`,
-          },
-        }
-      );
-      setTestResult(res.data?.data?.message || 'Không có phản hồi từ bot.');
+      const message = await sendPromptToBot(promptText);
+      setTestResult(message);
     } catch {
       setTestResult('Lỗi khi gửi yêu cầu tới bot.');
     } finally {
@@ -181,17 +128,8 @@ const ReportingTool: React.FC = () => {
   };
 
   const handleSaveReport = async () => {
-    // Giả sử API lưu báo cáo là /api/v1/reports
     try {
-      await axios.post(
-        'https://educonnectbe-98kw.onrender.com/api/v1/reports',
-        { content: reportContent, promptText },
-        {
-          headers: {
-            Authorization: `Bearer ${getAccessTokenFromLS()}`,
-          },
-        }
-      );
+      await saveReport(reportContent || '', promptText);
       setShowReportModal(false);
       setReportContent(null);
       alert('Lưu báo cáo thành công!');
