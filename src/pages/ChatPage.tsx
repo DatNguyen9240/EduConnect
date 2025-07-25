@@ -179,6 +179,283 @@ function renderTableContent(content: string): React.ReactNode | null {
   return null;
 }
 
+// Định nghĩa type cho dữ liệu bảng điểm
+interface StudentGrade {
+  SubjectName: string;
+  Semester: string;
+  Scores: Array<{
+    GradeType: string;
+    Score: number;
+    Evaluation?: string | null;
+  }>;
+  AverageScore: number;
+}
+interface StudentInfo {
+  StudentId: string;
+  StudentName: string;
+  DateOfBirth?: string;
+  ClassName?: string;
+}
+interface Student {
+  StudentInfo: StudentInfo;
+  Grades: StudentGrade[];
+  AttendanceRecords?: AttendanceRecord[];
+}
+interface GradeData {
+  Students: Student[];
+}
+// Điểm danh
+interface AttendanceRecord {
+  SubjectName: string;
+  DayOfWeek: string;
+  StartTime: string;
+  EndTime: string;
+  Status: string;
+  Room: string;
+}
+interface AttendanceData {
+  Students: Array<{
+    AttendanceRecords: AttendanceRecord[];
+  }>;
+}
+// Báo cáo
+interface StudentNote {
+  StudentId: string;
+  StudentName: string;
+  NoteType: string;
+  Points: number | null;
+  Description: string;
+  CreatedAt: string;
+}
+interface ReportInfo {
+  ReportId: number;
+  LessonDate: string;
+  SubjectName: string;
+  ClassName: string;
+  TotalStudents: number;
+  AbsentStudents: number;
+  Remarks: string;
+  CreatedAt: string;
+}
+interface Report {
+  ReportInfo: ReportInfo;
+  StudentNotes: StudentNote[];
+}
+interface ReportData {
+  Reports: Report[];
+}
+
+function extractJsonFromBotReply(reply: string): Record<string, unknown> | null {
+  const jsonStart = reply.indexOf('{');
+  if (jsonStart === -1) return null;
+  try {
+    const jsonString = reply.slice(jsonStart).trim();
+    return JSON.parse(jsonString);
+  } catch {
+    return null;
+  }
+}
+
+const StudentGradeTable = ({ data }: { data: GradeData }) => {
+  if (!data || !data.Students || !data.Students[0]) return null;
+  const grades = data.Students[0].Grades;
+  return (
+    <table className="w-full border-collapse text-left my-4">
+      <thead>
+        <tr className="bg-blue-50">
+          <th className="border border-gray-300 px-2 py-1">MÔN HỌC</th>
+          <th className="border border-gray-300 px-2 py-1">HỌC KỲ</th>
+          <th className="border border-gray-300 px-2 py-1">LOẠI ĐIỂM</th>
+          <th className="border border-gray-300 px-2 py-1">ĐIỂM SỐ</th>
+          <th className="border border-gray-300 px-2 py-1">ĐÁNH GIÁ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {grades.length === 0 ? (
+          <tr>
+            <td colSpan={5} className="text-center text-gray-500 py-4">
+              Không có dữ liệu điểm cho học sinh này
+            </td>
+          </tr>
+        ) : (
+          grades.map((g: StudentGrade, i: number) => (
+            <React.Fragment key={i}>
+              <tr className="bg-blue-50 font-semibold text-blue-900">
+                <td className="border border-gray-300 px-2 py-1">{g.SubjectName}</td>
+                <td className="border border-gray-300 px-2 py-1">{g.Semester}</td>
+                <td className="border border-gray-300 px-2 py-1">TB môn</td>
+                <td className="border border-gray-300 px-2 py-1">
+                  {Number(g.AverageScore).toFixed(2)}
+                </td>
+                <td className="border border-gray-300 px-2 py-1"></td>
+              </tr>
+              {g.Scores.map((s: StudentGrade['Scores'][number], j: number) => (
+                <tr key={j} className="bg-white text-gray-700">
+                  <td className="border border-gray-300 px-2 py-1 pl-6 text-gray-500">
+                    <span className="mr-1">↳</span>
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1"></td>
+                  <td className="border border-gray-300 px-2 py-1">{s.GradeType}</td>
+                  <td className="border border-gray-300 px-2 py-1">{s.Score}</td>
+                  <td className="border border-gray-300 px-2 py-1">{s.Evaluation || ''}</td>
+                </tr>
+              ))}
+            </React.Fragment>
+          ))
+        )}
+      </tbody>
+    </table>
+  );
+};
+
+const AttendanceTable = ({ data }: { data: AttendanceData }) => {
+  if (!data || !data.Students || !data.Students[0]) return null;
+  const records = data.Students[0].AttendanceRecords;
+  return (
+    <table className="w-full border-collapse text-left my-4">
+      <thead>
+        <tr className="bg-blue-50">
+          <th className="border px-2 py-1">Môn học</th>
+          <th className="border px-2 py-1">Thứ</th>
+          <th className="border px-2 py-1">Thời gian</th>
+          <th className="border px-2 py-1">Trạng thái</th>
+          <th className="border px-2 py-1">Phòng</th>
+        </tr>
+      </thead>
+      <tbody>
+        {records.map((r: AttendanceRecord, i: number) => (
+          <tr key={i}>
+            <td className="border px-2 py-1">{r.SubjectName}</td>
+            <td className="border px-2 py-1">{r.DayOfWeek}</td>
+            <td className="border px-2 py-1">
+              {r.StartTime}-{r.EndTime}
+            </td>
+            <td className="border px-2 py-1">{r.Status}</td>
+            <td className="border px-2 py-1">{r.Room}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};
+
+const ReportTable = ({ data }: { data: ReportData }) => {
+  if (!data || !data.Reports) return <div>Không có báo cáo nào.</div>;
+  if (data.Reports.length === 0) return <div>Không có báo cáo nào.</div>;
+  return (
+    <table className="w-full border-collapse text-left my-4">
+      <thead>
+        <tr className="bg-blue-50">
+          <th className="border px-2 py-1">Ngày học</th>
+          <th className="border px-2 py-1">Môn học</th>
+          <th className="border px-2 py-1">Lớp</th>
+          <th className="border px-2 py-1">Sĩ số</th>
+          <th className="border px-2 py-1">Vắng</th>
+          <th className="border px-2 py-1">Nhận xét</th>
+          <th className="border px-2 py-1">Ngày tạo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.Reports.map((report: Report, i: number) => (
+          <React.Fragment key={i}>
+            <tr className="bg-blue-50 font-semibold text-blue-900">
+              <td className="border px-2 py-1">{report.ReportInfo.LessonDate}</td>
+              <td className="border px-2 py-1">{report.ReportInfo.SubjectName}</td>
+              <td className="border px-2 py-1">{report.ReportInfo.ClassName}</td>
+              <td className="border px-2 py-1">{report.ReportInfo.TotalStudents}</td>
+              <td className="border px-2 py-1">{report.ReportInfo.AbsentStudents}</td>
+              <td className="border px-2 py-1">{report.ReportInfo.Remarks}</td>
+              <td className="border px-2 py-1">{report.ReportInfo.CreatedAt}</td>
+            </tr>
+            {report.StudentNotes && report.StudentNotes.length > 0 && (
+              <tr>
+                <td colSpan={7} className="p-0">
+                  <table className="w-full border-collapse text-left bg-white">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border px-2 py-1">Mã HS</th>
+                        <th className="border px-2 py-1">Tên học sinh</th>
+                        <th className="border px-2 py-1">Loại ghi chú</th>
+                        <th className="border px-2 py-1">Điểm</th>
+                        <th className="border px-2 py-1">Mô tả</th>
+                        <th className="border px-2 py-1">Ngày tạo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {report.StudentNotes.map((note: StudentNote, j: number) => (
+                        <tr key={j}>
+                          <td className="border px-2 py-1">{note.StudentId}</td>
+                          <td className="border px-2 py-1">{note.StudentName}</td>
+                          <td className="border px-2 py-1">{note.NoteType}</td>
+                          <td className="border px-2 py-1">
+                            {note.Points !== null ? note.Points : '-'}
+                          </td>
+                          <td className="border px-2 py-1">{note.Description}</td>
+                          <td className="border px-2 py-1">{note.CreatedAt}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            )}
+          </React.Fragment>
+        ))}
+      </tbody>
+    </table>
+  );
+};
+
+function isGradeData(obj: unknown): obj is GradeData {
+  if (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'Students' in obj &&
+    Array.isArray((obj as { [key: string]: unknown }).Students)
+  ) {
+    const students = (obj as { [key: string]: unknown }).Students as unknown[];
+    return students.length > 0 && (students[0] as { [key: string]: unknown }).Grades !== undefined;
+  }
+  return false;
+}
+function isAttendanceData(obj: unknown): obj is AttendanceData {
+  if (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'Students' in obj &&
+    Array.isArray((obj as { [key: string]: unknown }).Students)
+  ) {
+    const students = (obj as { [key: string]: unknown }).Students as unknown[];
+    return (
+      students.length > 0 &&
+      (students[0] as { [key: string]: unknown }).AttendanceRecords !== undefined
+    );
+  }
+  return false;
+}
+function isReportData(obj: unknown): obj is ReportData {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'Reports' in obj &&
+    Array.isArray((obj as { [key: string]: unknown }).Reports)
+  );
+}
+
+function renderBotDataTable(jsonData: unknown) {
+  if (!jsonData) return null;
+  if (isGradeData(jsonData)) {
+    return <StudentGradeTable data={jsonData} />;
+  }
+  if (isAttendanceData(jsonData)) {
+    return <AttendanceTable data={jsonData} />;
+  }
+  if (isReportData(jsonData)) {
+    return <ReportTable data={jsonData} />;
+  }
+  return null;
+}
+
 export default function ChatPage() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -221,7 +498,8 @@ export default function ChatPage() {
           history.map((msg: ChatHistoryResponse['data']['messages'][number], idx: number) => ({
             id: idx + '-' + msg.role,
             sender: msg.role,
-            content: extractContent(msg.message),
+            // Nếu là bot thì giữ nguyên content, nếu là user thì extractContent
+            content: msg.role === 'bot' ? msg.message : extractContent(msg.message),
             timestamp: new Date(msg.timestamp).toLocaleTimeString(),
             isOwn: msg.role === 'user',
             avatar: msg.role === 'user' ? '/assets/avatar/default.jpg' : '/assets/avatar/bot.png',
@@ -403,14 +681,13 @@ export default function ChatPage() {
         const botMsg: Message = {
           id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() + '-bot',
           sender: 'bot',
-          content: extractContent(res.data.message), // chỉ lấy Content nếu có
+          content: res.data.message, // Giữ nguyên content bot trả về
           timestamp: new Date().toLocaleTimeString(),
           isOwn: false,
           avatar: '/assets/avatar/bot.png',
         };
         setMessages((prev) => {
           const all = [...prev, botMsg];
-          //   console.log("All messages after bot:", all);
           return all;
         });
       }
@@ -563,57 +840,71 @@ export default function ChatPage() {
         <ScrollArea className="flex-1 p-4 overflow-y-auto h-full">
           <div className="space-y-4 ">
             {loading && <div className="text-xs text-gray-400">Bot đang trả lời...</div>}
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-3 ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
-              >
-                {!msg.isOwn && (
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={msg.avatar || '/placeholder.svg'} />
-                    <AvatarFallback>Bot</AvatarFallback>
-                  </Avatar>
-                )}
-                <div className={`max-w-xs lg:max-w-md ${msg.isOwn ? 'order-first' : ''}`}>
-                  {renderTableContent(msg.content) ? (
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden my-2 border border-blue-200">
-                      <div className="bg-blue-50 px-3 py-2 border-b border-blue-200">
-                        <h3 className="text-sm font-medium text-blue-700">Thông tin điểm danh</h3>
-                      </div>
-                      {renderTableContent(msg.content)}
-                    </div>
-                  ) : (
-                    <div
-                      className={`px-4 py-2 rounded-2xl w-fit ${
-                        msg.isOwn ? 'bg-gray-100 text-gray-900' : 'bg-indigo-500 text-white'
-                      }`}
-                    >
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                    </div>
+            {messages.map((msg) => {
+              const isBot = msg.sender === 'bot';
+              let jsonData: Record<string, unknown> | null = null;
+              if (isBot) {
+                jsonData = extractJsonFromBotReply(msg.content);
+              }
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex gap-3 ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
+                >
+                  {!msg.isOwn && (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={msg.avatar || '/placeholder.svg'} />
+                      <AvatarFallback>Bot</AvatarFallback>
+                    </Avatar>
                   )}
-                  {msg.timestamp && (
-                    <div
-                      className={`flex items-center gap-1 mt-1 ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <span className="text-xs text-gray-500">{msg.timestamp}</span>
-                      {msg.isOwn && (
-                        <div className="w-4 h-4 text-green-500">
-                          <svg viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
-                          </svg>
+                  <div className={`max-w-xs lg:max-w-md ${msg.isOwn ? 'order-first' : ''}`}>
+                    {isBot && jsonData ? (
+                      <div className="bg-white rounded-lg shadow-md overflow-hidden my-2 border border-blue-200">
+                        <div className="bg-blue-50 px-3 py-2 border-b border-blue-200">
+                          <h3 className="text-sm font-medium text-blue-700">DỮ LIỆU CHI TIẾT</h3>
                         </div>
-                      )}
-                    </div>
+                        {renderBotDataTable(jsonData)}
+                      </div>
+                    ) : renderTableContent(msg.content) ? (
+                      <div className="bg-white rounded-lg shadow-md overflow-hidden my-2 border border-blue-200">
+                        <div className="bg-blue-50 px-3 py-2 border-b border-blue-200">
+                          <h3 className="text-sm font-medium text-blue-700">Thông tin bảng</h3>
+                        </div>
+                        {renderTableContent(msg.content)}
+                      </div>
+                    ) : (
+                      <div
+                        className={`px-4 py-2 rounded-2xl w-fit ${
+                          msg.isOwn ? 'bg-gray-100 text-gray-900' : 'bg-indigo-500 text-white'
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                    )}
+                    {msg.timestamp && (
+                      <div
+                        className={`flex items-center gap-1 mt-1 ${msg.isOwn ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <span className="text-xs text-gray-500">{msg.timestamp}</span>
+                        {msg.isOwn && (
+                          <div className="w-4 h-4 text-green-500">
+                            <svg viewBox="0 0 16 16" fill="currentColor">
+                              <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {msg.isOwn && (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={msg.avatar || '/placeholder.svg'} />
+                      <AvatarFallback>FR</AvatarFallback>
+                    </Avatar>
                   )}
                 </div>
-                {msg.isOwn && (
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={msg.avatar || '/placeholder.svg'} />
-                    <AvatarFallback>FR</AvatarFallback>
-                  </Avatar>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </ScrollArea>
 
