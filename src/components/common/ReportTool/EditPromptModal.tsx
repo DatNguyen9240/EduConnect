@@ -32,74 +32,61 @@ const EditPromptModal: React.FC<EditPromptModalProps> = ({
 }) => {
   if (!editPrompt) return null;
   return (
-    <div className="fixed left-0 top-0 w-full h-full flex items-center justify-center z-50 bg-black bg-opacity-30">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 min-w-[350px] max-w-[600px] w-full flex flex-col items-center">
-        <div className="flex flex-col items-center mb-4">
-          <div className="bg-blue-100 rounded-full p-3 mb-2">
-            <svg width="36" height="36" fill="none" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" fill="#3b82f6" />
-              <path d="M12 8v4" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-              <path d="M12 16h.01" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </div>
-          <h3 className="text-2xl font-bold text-blue-700 mb-1">Cập nhật Prompt</h3>
-          <p className="text-gray-600 text-center text-base">
-            Bạn có thể chỉnh sửa thông tin prompt bên dưới và nhấn lưu để cập nhật.
-          </p>
-        </div>
+    <div className="fixed left-0 top-0 w-full h-full flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 min-w-[350px]">
+        <h3 className="text-lg font-semibold mb-2">Cập nhật Prompt</h3>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleUpdatePrompt(editPrompt!.promptId, {
+            handleUpdatePrompt(editPrompt.promptId, {
               title: editTitle,
               promptText: editPromptText,
               type: editType,
               status: editStatus,
             });
           }}
-          className="space-y-4 w-full"
+          className="space-y-3"
         >
           <input
-            className="w-full border border-blue-200 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            className="w-full border rounded px-3 py-2"
             placeholder="Tiêu đề"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             required
           />
           <textarea
-            className="w-full border border-blue-200 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            className="w-full border rounded px-3 py-2"
             placeholder="Prompt Text"
             value={editPromptText}
             onChange={(e) => setEditPromptText(e.target.value)}
             required
-            rows={4}
           />
           <input
-            className="w-full border border-blue-200 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            className="w-full border rounded px-3 py-2"
             placeholder="Type"
             value={editType}
             onChange={(e) => setEditType(e.target.value)}
             required
           />
           <select
-            className="w-full border border-blue-200 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            className="w-full border rounded px-3 py-2"
             value={editStatus}
             onChange={(e) => setEditStatus(e.target.value)}
           >
             <option value="active">active</option>
             <option value="inactive">inactive</option>
           </select>
-          <div className="flex gap-4 justify-end w-full mt-2">
+          <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-lg shadow transition-all duration-150"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               disabled={editLoading}
             >
               {editLoading ? 'Đang lưu...' : 'Lưu cập nhật'}
             </button>
             <button
               type="button"
-              className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-6 py-2 rounded-lg shadow transition-all duration-150"
+              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
               onClick={() => setEditPrompt(null)}
             >
               Đóng
