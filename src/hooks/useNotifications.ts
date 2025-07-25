@@ -52,6 +52,7 @@ export const useNotifications = () => {
     },
     staleTime: 1000 * 60 * 5, // 5 phút
     enabled: !!userInfo?.id,
+    refetchInterval: 10000, // 10 giây polling notification realtime
   });
 
   const notifications = data?.data || [];
