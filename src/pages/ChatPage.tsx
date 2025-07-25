@@ -861,8 +861,21 @@ export default function ChatPage() {
                     {isBot && jsonData ? (
                       <div className="bg-white rounded-lg shadow-md overflow-hidden my-2 border border-blue-200">
                         <div className="bg-blue-50 px-3 py-2 border-b border-blue-200">
-                          <h3 className="text-sm font-medium text-blue-700">DỮ LIỆU CHI TIẾT</h3>
+                          {/* Hiển thị phần text trước JSON nếu có */}
+                          {(() => {
+                            const idx = msg.content.indexOf('{');
+                            if (idx > 0) {
+                              const textPart = msg.content.slice(0, idx).trim();
+                              if (textPart) {
+                                return (
+                                  <h3 className="text-sm font-medium text-blue-700">{textPart}</h3>
+                                );
+                              }
+                            }
+                            return null;
+                          })()}
                         </div>
+
                         {renderBotDataTable(jsonData)}
                       </div>
                     ) : renderTableContent(msg.content) ? (
