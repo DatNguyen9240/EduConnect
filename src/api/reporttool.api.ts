@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { axiosInstance } from '../lib/axios';
 import { getAccessTokenFromLS } from '@/utils/auth';
 
 export type PromptPayload = {
@@ -23,8 +23,8 @@ export type PromptItem = {
 };
 
 export const fetchPrompts = async (accountId: string) => {
-  const res = await axios.get(
-    `https://educonnectbe-98kw.onrender.com/api/v1/prompts/account/${accountId}?pageIndex=0&pageSize=10&sortBy=CreatedAt&ascending=false`,
+  const res = await axiosInstance.get(
+    `/api/v1/prompts/account/${accountId}?pageIndex=0&pageSize=10&sortBy=CreatedAt&ascending=false`,
     {
       headers: {
         Authorization: `Bearer ${getAccessTokenFromLS()}`,
@@ -35,7 +35,7 @@ export const fetchPrompts = async (accountId: string) => {
 };
 
 export const createPrompt = async (payload: PromptPayload) => {
-  await axios.post('https://educonnectbe-98kw.onrender.com/api/v1/prompts', payload, {
+  await axiosInstance.post('/api/v1/prompts', payload, {
     headers: {
       Authorization: `Bearer ${getAccessTokenFromLS()}`,
     },
@@ -43,8 +43,8 @@ export const createPrompt = async (payload: PromptPayload) => {
 };
 
 export const updatePrompt = async (promptId: number, data: PromptPayload) => {
-  await axios.put(
-    `https://educonnectbe-98kw.onrender.com/api/v1/prompts/${promptId}`,
+  await axiosInstance.put(
+    `/api/v1/prompts/${promptId}`,
     { promptId, ...data },
     {
       headers: {
@@ -55,7 +55,7 @@ export const updatePrompt = async (promptId: number, data: PromptPayload) => {
 };
 
 export const deletePrompt = async (promptId: number) => {
-  await axios.delete(`https://educonnectbe-98kw.onrender.com/api/v1/prompts/${promptId}`, {
+  await axiosInstance.delete(`/api/v1/prompts/${promptId}`, {
     headers: {
       Authorization: `Bearer ${getAccessTokenFromLS()}`,
     },
@@ -63,8 +63,8 @@ export const deletePrompt = async (promptId: number) => {
 };
 
 export const sendPromptToBot = async (promptText: string) => {
-  const res = await axios.post(
-    'https://educonnectbe-98kw.onrender.com/api/v1/chats/messages',
+  const res = await axiosInstance.post(
+    '/api/v1/chats/messages',
     { message: promptText },
     {
       headers: {
@@ -75,10 +75,22 @@ export const sendPromptToBot = async (promptText: string) => {
   return res.data?.data?.message || 'Không có phản hồi từ bot.';
 };
 
-export const saveReport = async (content: string, promptText: string) => {
-  await axios.post(
-    'https://educonnectbe-98kw.onrender.com/api/v1/reports',
-    { content, promptText },
+export const saveReport = async (
+  accountId: string,
+  reportType: string,
+  content: string,
+  status: string,
+  createdBy: string
+) => {
+  await axiosInstance.post(
+    '/api/Report',
+    {
+      accountId,
+      reportType,
+      content,
+      status,
+      createdBy,
+    },
     {
       headers: {
         Authorization: `Bearer ${getAccessTokenFromLS()}`,

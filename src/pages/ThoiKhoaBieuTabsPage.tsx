@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import ThoiKhoaBieuPage from './ThoiKhoaBieu';
 // Sửa lại import cho đúng export default
-import ReportingTool from '@/components/common/ReportingTool';
+import ReportingTool from '@/components/common/ReportTool';
 
 const ThoiKhoaBieuTabsPage = () => {
   const [activeTab, setActiveTab] = useState<'timetable' | 'feedback'>('timetable');
