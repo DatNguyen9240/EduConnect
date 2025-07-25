@@ -6,6 +6,7 @@ import { clearLS } from '@/utils/auth';
 import { AppContext } from '@/contexts/app.context';
 import NotificationDropdown from '@/components/NotificationDropdown';
 import useNotifications from '@/hooks/useNotifications';
+import { deactivateFirebaseToken } from '@/api/notification.api';
 
 interface Profile {
   avatarUrl?: string;
@@ -20,8 +21,26 @@ export default function Header() {
   const { setIsAuthenticated, setUserInfo } = useContext(AppContext);
   const { notifications, unreadCount, markAsRead, markAllAsRead, isLoading } = useNotifications();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Lấy deviceId từ localStorage để xóa firebase token
+    const deviceId = localStorage.getItem('educonnect_device_id');
+
+    // Nếu có deviceId, gọi API để xóa token
+    if (deviceId) {
+      try {
+        await deactivateFirebaseToken(deviceId);
+      } catch (error) {
+        console.error('Error deactivating firebase token:', error);
+      }
+    }
+
+    // Tiếp tục xử lý đăng xuất như bình thường
     clearLS();
+    // Xóa thêm educonnect_device_id từ localStorage
+    localStorage.removeItem('educonnect_device_id');
+    localStorage.removeItem('educonnect_fcm_token');
+    localStorage.removeItem('educonnect_fcm_token_registered');
+
     setIsAuthenticated(false);
     setUserInfo(null);
     navigate('/');

@@ -1,4 +1,4 @@
-import { axiosInstance } from '../lib/axios';
+import api from '../lib/axios';
 import type { Profile } from '../types/profile';
 import type { AxiosError } from 'axios';
 
@@ -13,10 +13,8 @@ interface ProfileApiResponse {
 }
 
 export const getProfileById = async (userId: string): Promise<Profile> => {
-  const response = await axiosInstance.get<{ data: ProfileApiResponse }>(
-    `/api/v1/profiles/${userId}`
-  );
-  const data = response.data.data;
+  const response = await api.get<{ data: ProfileApiResponse }>(`/api/v1/profiles/${userId}`);
+  const data = response.data;
   return {
     firstName: data?.firstName ?? null,
     lastName: data?.lastName ?? null,
@@ -47,11 +45,12 @@ export const updateProfileById = async (
   formData: FormData
 ): Promise<UpdateProfileResponse> => {
   try {
-    const response = await axiosInstance.put<UpdateProfileResponse>(
+    // api.put không hỗ trợ FormData, nên vẫn dùng axiosInstance cho trường hợp này
+    const response = await api.put<UpdateProfileResponse>(
       `/api/v1/profiles/${userId}`,
-      formData
+      formData as unknown as Record<string, unknown>
     );
-    return response.data;
+    return response;
   } catch (error) {
     if ((error as AxiosError<UpdateProfileResponse>).response?.data) {
       return (error as AxiosError<UpdateProfileResponse>).response!.data;
@@ -60,8 +59,8 @@ export const updateProfileById = async (
   }
 };
 
-export const getStudentsByParentId = async (parentId: string, params?: Record<string, unknown>) => {
-  return axiosInstance.get<{
+export const getStudentsByParentId = (parentId: string, params?: Record<string, unknown>) => {
+  return api.get<{
     totalCount: number;
     pageIndex: number;
     pageSize: number;
@@ -70,7 +69,8 @@ export const getStudentsByParentId = async (parentId: string, params?: Record<st
     message: string;
     data: unknown[];
     error: unknown;
-  }>(`/api/v1/parents/${parentId}/students`, {
-    params,
-  });
+  }>(
+    `/api/v1/parents/${parentId}/students`,
+    params as Record<string, string | number | boolean> | undefined
+  );
 };

@@ -18,7 +18,11 @@ export default function TeacherList() {
         data.data.map((teacher: Teacher) => (
           <div key={teacher.teacherId} className="flex items-center gap-4 border-b pb-2 mb-2">
             <img
-              src={teacher.avatarUrl}
+              src={
+                teacher.avatarUrl && teacher.avatarUrl.trim() !== ''
+                  ? teacher.avatarUrl
+                  : '/assets/avatar/default.jpg'
+              }
               alt={teacher.fullName}
               className="w-10 h-10 rounded-full object-cover border"
               onError={(e) => (e.currentTarget.src = '/assets/avatar/default.jpg')}

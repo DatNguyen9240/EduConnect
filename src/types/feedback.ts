@@ -4,6 +4,7 @@ export interface Feedback {
   parentName: string;
   content: string;
   dateTime: string;
+  createdAt?: string;
   target: string;
   isDeleted: boolean;
 }

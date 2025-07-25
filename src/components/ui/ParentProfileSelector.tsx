@@ -36,7 +36,7 @@ export default function ParentProfileSelector({
         sortBy: 'FullName',
         ascending: true,
       }).then((res) => {
-        setStudents(res.data.data as Student[]);
+        setStudents(res.data as Student[]);
         setLoadingStudents(false);
       });
     }

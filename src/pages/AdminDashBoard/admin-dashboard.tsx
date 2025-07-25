@@ -9,9 +9,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StudentPerformance } from './student-performance';
 import { useFeedbacks } from '@/hooks/useFeedbacks';
 import TeacherList from './teacher-list';
+import { useState } from 'react';
 
 export default function AdminDashboard() {
-  const { data: feedbackData, isLoading: feedbackLoading, error: feedbackError } = useFeedbacks();
+  // State phân trang phản hồi phụ huynh
+  const [parentPageIndex, setParentPageIndex] = useState(0);
+  const [parentPageSize] = useState(10);
+
+  // Lấy feedbacks cho card phụ huynh
+  const {
+    data: feedbackData,
+    isLoading: feedbackLoading,
+    error: feedbackError,
+  } = useFeedbacks({
+    pageIndex: parentPageIndex,
+    pageSize: parentPageSize,
+    sortBy: 'DateTime',
+    ascending: false,
+  });
+  // Hàm xử lý phân trang
+  const handleParentNextPage = () => {
+    if (feedbackData?.totalPages && parentPageIndex < feedbackData.totalPages - 1) {
+      setParentPageIndex(parentPageIndex + 1);
+    }
+  };
+  const handleParentPrevPage = () => {
+    if (parentPageIndex > 0) {
+      setParentPageIndex(parentPageIndex - 1);
+    }
+  };
+
+  // Tính tổng số trang dựa vào API response
+  const totalPages = feedbackData?.totalPages || 1;
+  const currentPage = (feedbackData?.pageIndex ?? parentPageIndex) + 1;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -126,13 +156,35 @@ export default function AdminDashboard() {
                             <div className="font-semibold text-blue-700">{fb.parentName}</div>
                             <div className="text-gray-800 mb-1">{fb.content}</div>
                             <div className="text-xs text-gray-500">
-                              {new Date(fb.dateTime).toLocaleString('vi-VN')}
+                              {fb.createdAt
+                                ? new Date(fb.createdAt).toLocaleString('vi-VN')
+                                : 'Không có thông tin thời gian'}
                             </div>
                           </div>
                         ))
                       ) : (
                         <div className="text-gray-500 italic">Không có phản hồi nào.</div>
                       )}
+                      {/* Phân trang */}
+                      <div className="flex justify-between items-center mt-4">
+                        <button
+                          onClick={handleParentPrevPage}
+                          disabled={currentPage === 1}
+                          className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+                        >
+                          Trang trước
+                        </button>
+                        <span>
+                          Trang {currentPage} / {totalPages}
+                        </span>
+                        <button
+                          onClick={handleParentNextPage}
+                          disabled={currentPage === totalPages}
+                          className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+                        >
+                          Trang sau
+                        </button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
